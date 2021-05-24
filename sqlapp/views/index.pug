@@ -1,0 +1,48 @@
+extends layout
+
+block content
+  //- h1= title 
+  //- p Welcome to #{title}
+  .form-container 
+    form(action="/post", method="post")
+      h1  Job Create
+      .form-group
+      label(for="sevice") Choose Service 
+      select#service(name="service")
+        option(value="1") Shoppee  
+        option(value="2") Amazon
+       
+      //-   input#shopeeId(type="checkbox", name="shopee") 
+      //-   label(for="shopeeId") Shopee 
+      //- .form-group 
+      //-   input#amazonId(type="checkbox", name="amazon") 
+      //-   label(for="amazonId") Amazon 
+      .form-group 
+        label( for="keyword" ) Keyword
+        input(type="text" name="keyword" id="keyword" class="form-control" placeholder="keyword" )
+      .form-group 
+        label( for="page" ) Page
+        input(type="number" name="page" id="page" class="form-control" placeholder="input number" )
+      .form-group 
+        button#submitBtn(type="submit" class="btn btn-primary" ) Search 
+  br
+  .container 
+    h3 Job List
+    table(style="width:100%",class="table table-striped")
+      tr 
+        th num 
+        th Keyword 
+        th Service 
+        th Page 
+        th Status 
+        th File 
+        th Start 
+        th End 
+      each value in objectJson 
+        tr 
+          //- th #{value.id} 
+          //- th #{value.name} 
+          //- th #{value.phone}  
+          th= value.id 
+          th= value.name
+          th= value.price 
