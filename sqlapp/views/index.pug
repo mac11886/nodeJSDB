@@ -1,6 +1,7 @@
 extends layout
 
 block content
+  .container 
   //- h1= title 
   //- p Welcome to #{title}
   .form-container 
@@ -9,8 +10,9 @@ block content
       .form-group
       label(for="sevice") Choose Service 
       select#service(name="service")
-        option(value="1") Shoppee  
+        option(value="1") Shopee  
         option(value="2") Amazon
+        option(valuer="3") Pantip
        
       //-   input#shopeeId(type="checkbox", name="shopee") 
       //-   label(for="shopeeId") Shopee 

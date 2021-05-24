@@ -65,6 +65,27 @@ testdb.add = (req) => {
   });
   // return req;
 };
+testdb.addAmazon = (req) => {
+  return new Promise((resolve, reject) => {
+    mysqlConnect.query(`insert into amazon set ? `, req, (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve("add success");
+    });
+  });
+};
+testdb.addPantip = (req) => {
+  return new Promise((resolve, reject) => {
+    mysqlConnect.query(`insert into amazon set ?`, req, (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve("add success");
+    });
+  });
+};
+
 testdb.update = (req) => {
   return new Promise((resolve, reject) => {
     const params = req.body;
