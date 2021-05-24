@@ -3,8 +3,8 @@ var router = express.Router();
 const db = require("../db");
 const fs = require("fs");
 const csv = require("neat-csv");
-const raw = fs.readFileSync("shopee-search.csv", "utf8");
 const { spawn } = require("child_process");
+
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
@@ -46,7 +46,7 @@ router.post("/post", async (req, res) => {
       var dataToSend;
       // spawn new child process to call the python script
       const python = spawn("python", [
-        "C:/Users/menin/Documents/python/pythongetpostshopee-main/pythongetpostshopee-main/main.py",
+        "C:/Users/menin/Documents/python/python-ken/pythongetpostshopee/main.py",
       ]);
       //shopee
       let service = req.body.service;
@@ -71,9 +71,20 @@ router.post("/post", async (req, res) => {
       }
 
       // collect data from script
-      python.stdout.on("data", function (data) {
+      python.stdout.on("data", async function (data) {
         console.log("Pipe data from python script ...");
         dataToSend = data.toString();
+        const rawShopee = fs.readFileSync("myfile.csv", "utf8");
+
+        const header = rawShopee.split(/\r?\n/)[0].split(",");
+        header[6] = "send_from";
+        const result = await csv(rawShopee, { headers: header });
+        result.forEach(async (value) => {
+          value["price"] = value["price"].substring(1, value["price"].length);
+          const sendTosql = value;
+          delete sendTosql["num"];
+          let results = await db.add(sendTosql);
+        });
       });
       // in close event we are sure that stream from child process is closed
       python.on("exit", (code) => {
@@ -88,8 +99,7 @@ router.post("/post", async (req, res) => {
       //   objectJson: results,
       // });
       // res.json(results);
-      const header = raw.split(/\r?\n/)[0].split(",");
-      const result = await csv(raw, { headers: header });
+
       // res.send(result);
       // let results = await db.add(result);
     } catch (e) {
