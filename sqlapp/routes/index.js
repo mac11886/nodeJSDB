@@ -77,13 +77,19 @@ router.post("/post", async (req, res) => {
         const rawShopee = fs.readFileSync("myfile.csv", "utf8");
 
         const header = rawShopee.split(/\r?\n/)[0].split(",");
-        header[6] = "send_from";
+        //shopee
+        // header[6] = "send_from";
+        //amazon
+        header[1] = "product_id";
+        //pantip
+
         const result = await csv(rawShopee, { headers: header });
         result.forEach(async (value) => {
           value["price"] = value["price"].substring(1, value["price"].length);
           const sendTosql = value;
+
           delete sendTosql["num"];
-          let results = await db.add(sendTosql);
+          let results = await db.addAmazon(sendTosql);
         });
       });
       // in close event we are sure that stream from child process is closed

@@ -28,23 +28,24 @@ block content
       .form-group 
         button#submitBtn(type="submit" class="btn btn-primary" ) Search 
   br
-  .container 
-    h3 Job List
-    table(style="width:100%",class="table table-striped")
+
+  h2 maca  
+  h3 Job List
+  table(class="table table-striped")
+    tr 
+    th num 
+      th Keyword 
+      th Service 
+      th Page 
+      th Status 
+      th File 
+      th Start 
+      th End 
+    each value in objectJson 
       tr 
-        th num 
-        th Keyword 
-        th Service 
-        th Page 
-        th Status 
-        th File 
-        th Start 
-        th End 
-      each value in objectJson 
-        tr 
-          //- th #{value.id} 
+        //- th #{value.id} 
           //- th #{value.name} 
           //- th #{value.phone}  
-          th= value.id 
-          th= value.name
-          th= value.price 
+        th= value.id 
+        th= value.name
+        th= value.price 

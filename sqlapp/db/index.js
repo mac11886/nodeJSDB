@@ -16,7 +16,7 @@ mysqlConnect.connect((err) => {
 let testdb = {};
 testdb.all = () => {
   return new Promise((resolve, reject) => {
-    mysqlConnect.query(`select * from shopee`, (err, results) => {
+    mysqlConnect.query(`select * from amazon`, (err, results) => {
       if (err) {
         return reject(err);
       }
@@ -77,7 +77,7 @@ testdb.addAmazon = (req) => {
 };
 testdb.addPantip = (req) => {
   return new Promise((resolve, reject) => {
-    mysqlConnect.query(`insert into amazon set ?`, req, (err, results) => {
+    mysqlConnect.query(`insert into pantip set ?`, req, (err, results) => {
       if (err) {
         return reject(err);
       }

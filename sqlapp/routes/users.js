@@ -3,6 +3,7 @@ var router = express.Router();
 const fs = require("fs");
 const db = require("../db");
 const csv = require("neat-csv");
+const { head } = require(".");
 const rawShopee = fs.readFileSync("shopee-search.csv", "utf8");
 const raw = fs.readFileSync("myfile.csv", "utf-8");
 /* GET users listing. */
@@ -40,15 +41,30 @@ router.get("/amazon", async (req, res) => {
   });
 });
 
-router.post("/pantip", async (req, res) => {
+router.get("/pantip", async (req, res) => {
   const header = raw.split(/\r?\n/)[0].split(",");
-  header[1] = "product_id";
+  header[5] = "like_count";
+  header[6] = "emo_count";
+  header[9] = "date_time";
+  const result = await csv(raw, { headers: header });
   result.forEach(async (value) => {
     const sendTosql = value;
     delete sendTosql["num"];
-    let results = await db.addAmazon(sendTosql);
+    let results = await db.addPantip(sendTosql);
   });
   res.send("OK");
 });
+router.get("/date", (req, res) => {
+  const date = new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" });
 
+  res.send(date);
+});
+
+function convertTZ(date, tzString) {
+  return new Date(
+    (typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {
+      timeZone: tzString,
+    })
+  );
+}
 module.exports = router;
