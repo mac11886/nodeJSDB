@@ -4,7 +4,6 @@ const db = require("../db");
 const fs = require("fs");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
-
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
@@ -30,6 +29,25 @@ router.get("/", async (req, res, next) => {
   //     res.send("success");
   //   });
   results = await db.all();
+  results.forEach(el => {
+    let date = new Date(el.start_time); // Or the date you'd like converted.
+    let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+    el.start_time = isoDateTime;
+    let date2 = new Date(el.end_time); // Or the date you'd like converted.
+    let isoDateTime2 = new Date(date2.getTime() - (date2.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+    el.end_time = isoDateTime2;
+    switch (el.service){
+      case "1":
+        el.service = "shopee"
+        break;
+      case "2":
+        el.service = "amazon"
+        break;
+      case "3":
+        el.service = "pantip"
+        break;
+    }
+  })
   res.render("index", { title: "Express", name: "mac", objectJson: results });
   // res.json(results);
   // } catch (e) {
@@ -46,19 +64,30 @@ router.post("/post", async (req, res) => {
       var dataToSend;
       // spawn new child process to call the python script
       const python = spawn("python", [
-        "C:/Users/menin/Documents/python/python-ken/pythongetpostshopee/main.py",
+        "C:/Users/LENOVO/Desktop/python/pythongetpostshopee3/main.py",
       ]);
       //shopee
       let service = req.body.service;
       let keyword = req.body.keyword;
       let page = req.body.page;
+      let startTime = req.body.startTime;
+      
+      let response = await db.addJob({
+        keyword: keyword,
+        service: service,
+        page: page,
+        status: "in progress",
+        path_file: "path....",
+        start_time: startTime
+      })
+
       let url = encodeURI("https://shopee.co.th/search?keyword=" + keyword);
       let urlAma = encodeURI(
         "https://www.amazon.com/s?k=" + keyword + "&ref=nb_sb_noss"
       );
       let urlPantip = encodeURI("https://pantip.com/search?q=" + keyword);
       if (service == 2) {
-        python.stdin.write("2\n" + page + "\n" + urlAma);
+        python.stdin.write("2/n" + page + "\n" + urlAma);
         python.stdin.end();
       }
       //amazon
@@ -66,61 +95,46 @@ router.post("/post", async (req, res) => {
         python.stdin.write("1\n" + page + "\n" + url);
 
         python.stdin.end();
-      } else if (service == 3) {
+      } 
+      // pantip
+      else if (service == 3) {
         python.stdin.write("3\n" + page + "\n" + urlPantip);
       }
 
       // collect data from script
-      python.stdout.on("data", async function (data) {
+      python.stdout.on("data", function (data) {
         console.log("Pipe data from python script ...");
         dataToSend = data.toString();
-        const rawShopee = fs.readFileSync("myfile.csv", "utf8");
-
-        const header = rawShopee.split(/\r?\n/)[0].split(",");
-        //shopee
-        // header[6] = "send_from";
-        //amazon
-        header[1] = "product_id";
-        //pantip
-
-        const result = await csv(rawShopee, { headers: header });
-        result.forEach(async (value) => {
-          value["price"] = value["price"].substring(1, value["price"].length);
-          const sendTosql = value;
-
-          delete sendTosql["num"];
-          let results = await db.addAmazon(sendTosql);
-        });
       });
       // in close event we are sure that stream from child process is closed
-      python.on("exit", (code) => {
-        console.log(`child process close all stdio with code ${code}`);
-        // send data to browser
-        // res.send("success");
-      });
-      // results = await db.all();
-      // res.render("index", {
-      //   title: "Express",
-      //   name: "mac",
-      //   objectJson: results,
-      // });
-      // res.json(results);
+      python.on("exit", async (code) => {
+        const raw = fs.readFileSync("myfile.csv", "utf8");
 
-      // res.send(result);
-      // let results = await db.add(result);
+        console.log(`child process close all stdio with code ${code}`);
+        const header = raw.split(/\r?\n/)[0].split(",");
+        header[6] = "send_from";
+        const result = await csv(raw, { headers: header });
+        result.forEach(async (value) => {
+          const sendTosql = value;
+          delete sendTosql["num"];
+          await db.add(sendTosql);
+        });
+        response = await db.updateJob(response.id)
+        res.json(response);
+        // const sendTosql = result[1];
+      });
     } catch (e) {
       console.log(e);
       res.sendStatus(500);
     }
-    // res.redirect("index");
-    res.redirect("/");
   } catch (e) {
     console.log(e);
     res.sendStatus(500);
   }
+
 });
 
-router.get("/getAll", async (req, res, next) => {});
+router.get("/getAll", async (req, res, next) => { });
 router.post("/add", async (req, res) => {
   try {
     let results = await db.add(req);
