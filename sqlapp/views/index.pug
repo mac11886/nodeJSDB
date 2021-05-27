@@ -1,51 +1,97 @@
 extends layout
 
 block content
+  
   .container 
   //- h1= title 
   //- p Welcome to #{title}
   .form-container 
-    form(action="/post", method="post")
-      h1  Job Create
-      .form-group
-      label(for="sevice") Choose Service 
-      select#service(name="service")
-        option(value="1") Shopee  
-        option(value="2") Amazon
-        option(valuer="3") Pantip
-       
-      //-   input#shopeeId(type="checkbox", name="shopee") 
-      //-   label(for="shopeeId") Shopee 
-      //- .form-group 
-      //-   input#amazonId(type="checkbox", name="amazon") 
-      //-   label(for="amazonId") Amazon 
-      .form-group 
-        label( for="keyword" ) Keyword
-        input(type="text" name="keyword" id="keyword" class="form-control" placeholder="keyword" )
-      .form-group 
-        label( for="page" ) Page
-        input(type="number" name="page" id="page" class="form-control" placeholder="input number" )
-      .form-group 
-        button#submitBtn(type="submit" class="btn btn-primary" ) Search 
-  br
+    h1  Job Create
+    .form-group
+    label(for="sevice") Choose Service 
+    select#service(name="service")
+      option(value="1") Shopee  
+      option(value="2") Amazon
+      option(value="3") Pantip 
+      option(value="4") JD 
 
-  h2 maca  
-  h3 Job List
-  table(class="table table-striped")
-    tr 
-    th num 
-      th Keyword 
-      th Service 
-      th Page 
-      th Status 
-      th File 
-      th Start 
-      th End 
-    each value in objectJson 
+    .form-group 
+      label( for="keyword" ) Keyword
+      input(type="text" name="keyword" id="keyword" class="form-control" placeholder="keyword" )
+    .form-group 
+      label( for="page" ) Page
+      input(type="number" name="page" id="page" class="form-control" placeholder="input number" )
+    .form-group 
+      button(class="btn btn-primary" onclick="buttonProcessor()") Search 
+  
+  
+    h3 Job List
+    table(style="width:100%",class="table table-striped")
       tr 
-        //- th #{value.id} 
-          //- th #{value.name} 
-          //- th #{value.phone}  
-        th= value.id 
-        th= value.name
-        th= value.price 
+        th Keyword 
+        th Service 
+        th Page 
+        th Status 
+        th File 
+        th Start 
+        th End
+      tbody#infoBody
+        each object in objectJson
+          tr
+            td= object.keyword
+            td= object.service 
+            td= object.page 
+            td= object.status 
+            td= object.path_file 
+            td= object.start_time
+            td= object.end_time
+  script.
+    //- console.log(isoDateTime)
+    let tableRef = document.getElementById('infoBody');
+    //- console.log(tableRef.rows.length)
+    let i = tableRef.rows.length + 1;
+    
+    function buttonProcessor(){
+      let date = new Date(); // Or the date you'd like converted.
+      let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+      let serviceText;
+      switch ($("#service").val()){
+        case "1":
+          serviceText = "shopee"
+          break;
+        case "2":
+          serviceText = "amazon"
+          break;
+        case "3":
+          serviceText = "pantip"
+          break;
+      }
+      tableRef.insertRow().innerHTML = "<td>" 
+      + $("#keyword").val() + "</td><td>" 
+      + serviceText + "</td><td>" 
+      + $("#page").val() + `</td><td id='status${i}'>` 
+      + "in progress</td><td>" 
+      + "path....</td><td>" 
+      + isoDateTime + `</td><td id='end_time${i}'>` 
+      + " - </td></tr>";
+
+      let statusText = document.getElementById(`status${i}`)
+      let endTime = document.getElementById(`end_time${i}`)
+      
+      $.ajax({ 
+        type: "POST",
+        url: "http://localhost:3000/post",
+        data: {
+          service: $("#service").val(),
+          keyword: $("#keyword").val(),
+          page: $("#page").val(),
+          startTime: isoDateTime
+        },
+        success: function(response) {
+          statusText.innerHTML = response.status
+          endTime.innerHTML = response.time
+          //- console.log(response)
+        }
+      })
+      i++;
+    }

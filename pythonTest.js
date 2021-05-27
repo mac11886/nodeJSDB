@@ -6,7 +6,7 @@ app.get("/", (req, res) => {
   var dataToSend;
   // spawn new child process to call the python script
   const python = spawn("python", [
-    "C:/Users/menin/Documents/python/pythongetpostshopee-main/pythongetpostshopee-main/main.py",
+    "C:/Users/LENOVO/Desktop/python/pythongetpostshopee3/main.py",
   ]);
 
   python.stdin.write(
@@ -27,7 +27,6 @@ app.get("/", (req, res) => {
   });
 });
 app.listen(port, () =>
-  console.log(`Example app listening on port 
-${port}!`)
+  console.log(`Example app listening on port ${port}!`)
 );
 module.exports = app;
