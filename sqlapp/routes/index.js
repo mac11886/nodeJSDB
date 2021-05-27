@@ -102,7 +102,7 @@ router.post("/post", async (req, res) => {
         "https://www.amazon.com/s?k=" + keyword + "&ref=nb_sb_noss_2"
       );
       let urlPantip = encodeURI("https://pantip.com/search?q=" + keyword);
-      let utfKeyword = encodeURI(keyword);
+      let utfKeyword = keyword;
       //amazon
       if (service == 2) {
         python.stdin.write("2\n" + page + "\n" + utfKeyword);
@@ -137,10 +137,11 @@ router.post("/post", async (req, res) => {
         console.log("service:" + service);
         if (service == 1) {
           const header = raw.split(/\r?\n/)[0].split(",");
-          header[6] = "send_from";
+          header[7] = "send_from";
+          header[3] = "product_id";
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
-            value["price"] = value["price"].substring(1, value["price"].length);
+            // value["price"] = value["price"].substring(1, value["price"].length);
             const sendTosql = value;
             delete sendTosql["num"];
             await db.add(sendTosql);
@@ -160,6 +161,8 @@ router.post("/post", async (req, res) => {
           header[5] = "like_count";
           header[6] = "emo_count";
           header[9] = "date_time";
+          header[14] = "good_word";
+          header[15] = "bad_word";
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
             const sendTosql = value;

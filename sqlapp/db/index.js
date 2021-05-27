@@ -121,7 +121,16 @@ testdb.addJD = (req) => {
     });
   });
 };
-
+testdb.getShopee = (job_id) => {
+  return new Promise((resolve, reject) => {
+    mysqlConnect.query(`select * from shopee where ?`, (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(results);
+    });
+  });
+};
 testdb.update = (req) => {
   return new Promise((resolve, reject) => {
     const params = req.body;
