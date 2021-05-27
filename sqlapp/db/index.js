@@ -76,7 +76,8 @@ testdb.addJob = (req) => {
       }
       let data = await new Promise((resolve, reject) => {
         mysqlConnect.query(
-          `SELECT * FROM job ORDER BY ID DESC LIMIT 1`, (err, results) => {
+          `SELECT * FROM job ORDER BY ID DESC LIMIT 1`,
+          (err, results) => {
             if (err) {
               return reject(err);
             }
@@ -110,6 +111,17 @@ testdb.addPantip = (req) => {
   });
 };
 
+testdb.addJD = (req) => {
+  return new Promise((resolve, reject) => {
+    mysqlConnect.query(`insert into jd set ?`, req, (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve("add success");
+    });
+  });
+};
+
 testdb.update = (req) => {
   return new Promise((resolve, reject) => {
     const params = req.body;
@@ -127,15 +139,19 @@ testdb.update = (req) => {
 };
 testdb.updateJob = (id) => {
   let date = new Date(); // Or the date you'd like converted.
-  let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+  let isoDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
   return new Promise((resolve, reject) => {
-    mysqlConnect.query(`update job set end_time = ?, status='success' where id = ? `,
+    mysqlConnect.query(
+      `update job set end_time = ?, status='success' where id = ? `,
       [isoDateTime, id],
       (err, results) => {
         if (err) {
           return reject(err);
         }
-        return resolve({time: isoDateTime, status: "success"});
+        return resolve({ time: isoDateTime, status: "success" });
       }
     );
   });

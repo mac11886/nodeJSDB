@@ -49,14 +49,16 @@ router.get("/", async (req, res, next) => {
     el.end_time = isoDateTime2;
     switch (el.service) {
       case "1":
-        el.service = "shopee";
+        el.service = "Shopee";
         break;
       case "2":
-        el.service = "amazon";
+        el.service = "Amazon";
         break;
       case "3":
-        el.service = "pantip";
+        el.service = "Pantip";
         break;
+      case "4":
+        el.service = "JD";
     }
   });
   res.render("index", { title: "Job", name: "mac", objectJson: results });
@@ -93,12 +95,14 @@ router.post("/post", async (req, res) => {
         start_time: startTime,
       });
 
-      let url = encodeURI("https://shopee.co.th/search?keyword=" + keyword);
+      let url = encodeURI(
+        "https://shopee.co.th/search?keyword=" + utf8.encode(keyword)
+      );
       let urlAma = encodeURI(
         "https://www.amazon.com/s?k=" + keyword + "&ref=nb_sb_noss_2"
       );
       let urlPantip = encodeURI("https://pantip.com/search?q=" + keyword);
-      let utfKeyword = utf8.encode(keyword);
+      let utfKeyword = encodeURI(keyword);
       //amazon
       if (service == 2) {
         python.stdin.write("2\n" + page + "\n" + utfKeyword);
@@ -113,16 +117,22 @@ router.post("/post", async (req, res) => {
       else if (service == 3) {
         python.stdin.write("3\n" + page + "\n" + utfKeyword);
         python.stdin.end();
+      } else if (service == 4) {
+        python.stdin.write("4\n" + page + "\n" + utfKeyword);
+        python.stdin.end();
       }
-
+      console.log(utfKeyword);
       // collect data from script
-      python.stdout.on("data", function (data) {
+      python.stdout.on("data", async function (data) {
         console.log("Pipe data from python script ...");
         dataToSend = data.toString();
+        console.log(dataToSend);
+        console.log("collect data");
       });
       // in close event we are sure that stream from child process is closed
       python.on("exit", async (code) => {
         const raw = fs.readFileSync("myfile.csv", "utf8");
+        console.log("collect data on exit");
         console.log(`child process close all stdio with code ${code}`);
         console.log("service:" + service);
         if (service == 1) {
@@ -130,6 +140,7 @@ router.post("/post", async (req, res) => {
           header[6] = "send_from";
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
+            value["price"] = value["price"].substring(1, value["price"].length);
             const sendTosql = value;
             delete sendTosql["num"];
             await db.add(sendTosql);
@@ -154,6 +165,16 @@ router.post("/post", async (req, res) => {
             const sendTosql = value;
             delete sendTosql["num"];
             let results = await db.addPantip(sendTosql);
+          });
+        } else if (service == 4) {
+          const header = raw.split(/\r?\n/)[0].split(",");
+          header[3] = "product_id";
+          header[7] = "send_from";
+          const result = await csv(raw, { headers: header });
+          result.forEach(async (value) => {
+            const sendTosql = value;
+            delete sendTosql["num"];
+            let results = await db.addJD(sendTosql);
           });
         }
 
