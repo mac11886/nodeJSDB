@@ -6,6 +6,8 @@ const utf8 = require("utf8");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
 const Amazon = require("../model/Amazon");
+const shopee = require("../model/shopee");
+const Job = require("../model/job");
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
@@ -76,7 +78,7 @@ router.post("/post", async (req, res) => {
       var dataToSend;
       // spawn new child process to call the python script
       const python = await spawn("python", [
-        "C:/Users/LENOVO/Desktop/python/pythongetpostshopee/main.py",
+        "C:/Users/menin/Documents/python/python-ken/pythongetpostshopee/main.py",
       ]);
       //shopee
       let service = req.body.service;
@@ -120,7 +122,7 @@ router.post("/post", async (req, res) => {
       python.stdout.on("data", function (data) {
         console.log("Pipe data from python script ...");
         dataToSend = data.toString();
-        console.log(dataToSend)
+        console.log(dataToSend);
       });
       // in close event we are sure that stream from child process is closed
       python.on("exit", async (code) => {
@@ -130,14 +132,29 @@ router.post("/post", async (req, res) => {
         if (service == 1) {
           const header = raw.split(/\r?\n/)[0].split(",");
           header[6] = "send_from";
+          header[9] = "product_id";
           const result = await csv(raw, { headers: header });
+          // result.forEach(async (value) => {
+          //   const sendTosql = value;
+          //   delete sendTosql["num"];
+          //   await db.add(sendTosql);
+          // });
+          let shopee1 = new shopee();
+          let shop = await shopee1.getEmptyObj();
+          let shop1 = await shopee1.getLastOne();
+          let job = new Job();
+          let lastOne = await job.getLastOne();
           result.forEach(async (value) => {
-            const sendTosql = value;
-            delete sendTosql["num"];
-            await db.add(sendTosql);
+            delete value["num"];
+            // console.log(shop1);
+            await shopee1.save(value);
+            await shopee1.update({
+              id: shop1[0].id,
+              job_id: lastOne[0].id,
+            });
           });
         } else if (service == 2) {
-          const header = raw.split(/\r?\n/)[0].split(",");
+          const header = raw.split(/\rsda\n/)[0].split(",");
           header[1] = "product_id";
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
@@ -151,7 +168,7 @@ router.post("/post", async (req, res) => {
           header[5] = "like_count";
           header[6] = "emo_count";
           header[9] = "date_time";
-          console.log(header)
+          console.log(header);
 
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
@@ -175,7 +192,7 @@ router.post("/post", async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res, next) => { });
+router.get("/getAll", async (req, res, next) => {});
 router.post("/add", async (req, res) => {
   try {
     let results = await db.add(req);
@@ -192,8 +209,8 @@ router.get("/test", async (req, res) => {
   let object = {
     id: 3,
     test1: "hello",
-    test2: "worldedit"
-  }
-  res.json(await amazon.where("id=3"))
-})
+    test2: "worldedit",
+  };
+  res.json(await amazon.where("id=3"));
+});
 module.exports = router;
