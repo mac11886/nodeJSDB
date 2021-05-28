@@ -5,7 +5,7 @@ const mysqlConnect = mysql.createConnection({
   // connectionLimit: 10,
   password: "",
   user: "root",
-  database: "python_db",
+  database: "ecom_db",
   host: "localhost",
 });
 
@@ -53,6 +53,7 @@ testdb.delete = (id) => {
     );
   });
 };
+
 testdb.add = (req) => {
   // return "yes";
   return new Promise((resolve, reject) => {
@@ -101,7 +102,7 @@ testdb.addAmazon = (req) => {
 };
 testdb.addPantip = (req) => {
   return new Promise((resolve, reject) => {
-    mysqlConnect.query(`insert into amazon set ?`, req, (err, results) => {
+    mysqlConnect.query(`insert into pantip set ?`, req, (err, results) => {
       if (err) {
         return reject(err);
       }

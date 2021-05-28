@@ -5,6 +5,7 @@ const fs = require("fs");
 const utf8 = require("utf8");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
+const Amazon = require("../model/Amazon");
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
@@ -75,7 +76,7 @@ router.post("/post", async (req, res) => {
       var dataToSend;
       // spawn new child process to call the python script
       const python = await spawn("python", [
-        "C:/Users/menin/Documents/python/python-ken/pythongetpostshopee/main.py",
+        "C:/Users/LENOVO/Desktop/python/pythongetpostshopee/main.py",
       ]);
       //shopee
       let service = req.body.service;
@@ -98,7 +99,7 @@ router.post("/post", async (req, res) => {
         "https://www.amazon.com/s?k=" + keyword + "&ref=nb_sb_noss_2"
       );
       let urlPantip = encodeURI("https://pantip.com/search?q=" + keyword);
-      let utfKeyword = utf8.encode(keyword);
+      let utfKeyword = encodeURI(keyword);
       //amazon
       if (service == 2) {
         python.stdin.write("2\n" + page + "\n" + utfKeyword);
@@ -119,6 +120,7 @@ router.post("/post", async (req, res) => {
       python.stdout.on("data", function (data) {
         console.log("Pipe data from python script ...");
         dataToSend = data.toString();
+        console.log(dataToSend)
       });
       // in close event we are sure that stream from child process is closed
       python.on("exit", async (code) => {
@@ -149,6 +151,8 @@ router.post("/post", async (req, res) => {
           header[5] = "like_count";
           header[6] = "emo_count";
           header[9] = "date_time";
+          console.log(header)
+
           const result = await csv(raw, { headers: header });
           result.forEach(async (value) => {
             const sendTosql = value;
@@ -171,7 +175,7 @@ router.post("/post", async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res, next) => {});
+router.get("/getAll", async (req, res, next) => { });
 router.post("/add", async (req, res) => {
   try {
     let results = await db.add(req);
@@ -181,4 +185,15 @@ router.post("/add", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+router.get("/test", async (req, res) => {
+  let amazon = new Amazon();
+  // console.log(data)
+  let object = {
+    id: 3,
+    test1: "hello",
+    test2: "worldedit"
+  }
+  res.json(await amazon.where("id=3"))
+})
 module.exports = router;
