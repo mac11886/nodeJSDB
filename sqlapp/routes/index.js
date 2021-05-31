@@ -10,6 +10,7 @@ const Shopee = require("../model/Shopee");
 const Job = require("../model/Job");
 const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
+const Facebook = require("../model/Facebook");
 // const Facebook = require("../model/Facebook");
 let results = {};
 /* GET home page. */
@@ -66,6 +67,8 @@ router.get("/", async (req, res, next) => {
       case "4":
         el.service = "jd";
         break;
+      case "5":
+        el.service = "facebook"
     }
   });
   res.render("index", { title: "Job", name: "mac", objectJson: results });
@@ -202,10 +205,26 @@ router.post("/post", async (req, res) => {
               console.log("ooooo");
               await jdObj.save(value);
             }
-            i++
+            i++;
           });
-          
+
           jdObj.updateJobId(lastOne[0].id);
+        } else if (service == 5) {
+          let facebookObj = new Facebook();
+          const header = raw.split(/\r?\n/)[0].split(",");
+          header[11] = "good_word";
+          header[12] = "bad_word";
+          let lastOne = await job.getLastOne();
+          const result = await csv(raw, { headers: header });
+          result.forEach(async (value) => {
+            delete value["num"];
+            if (i >= 1) {
+              // console.log(value);
+              await facebookObj.save(value)
+            }
+            i++;
+          });
+          facebookObj.updateJobId(lastOne[0].id);
         }
 
         response = await db.updateJob(response.id);
