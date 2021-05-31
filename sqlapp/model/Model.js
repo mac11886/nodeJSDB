@@ -1,6 +1,21 @@
 const mysql = require("mysql");
 
 class Model {
+  updateJobId(jobId) {
+    return new Promise((resolve, reject) => {
+      this.mysqlConnect.query(
+        `update ${this.table} set job_id=${jobId} where job_id=0 `,
+
+        (err, results) => {
+          if (err) {
+            return reject(null);
+          }
+          return resolve(results);
+        }
+      );
+    });
+  }
+
   constructor(table) {
     this.table = table;
     this.mysqlConnect = mysql.createConnection({
@@ -58,23 +73,36 @@ class Model {
       );
     });
   }
-
+  getZero() {
+    return new Promise((resolve, reject) => {
+      this.mysqlConnect.query(
+        `select * from ` + this.table + "order by job_id =0" + " DESC  ",
+        (err, results) => {
+          if (err) {
+            return reject(null);
+          }
+          return resolve(results);
+        }
+      );
+    });
+  }
   save(objectParam) {
     return new Promise((resolve, reject) => {
       let query = "";
       let object = objectParam;
       Object.keys(object).forEach(function (key) {
         if (key != "id") {
-          query += `${key}='${object[key]}',`;
+          query += `${key}="${object[key]}",`;
+          
         }
       });
       query = query.substring(0, query.length - 1);
       // console.log(`insert into ${this.table} set ${query}`)
       this.mysqlConnect.query(
-        `insert into ${this.table} set ${query}`,
+        `insert into ${this.table} set ?`,objectParam,
         (err, results) => {
           if (err) {
-            return reject(null);
+            return reject(err);
           }
           return resolve("add success");
         }
@@ -91,6 +119,7 @@ class Model {
           query += `${key}='${object[key]}',`;
         }
       });
+      console.log(object);
       query = query.substring(0, query.length - 1);
       // console.log(`update ${this.table} set ${query} where id=${object["id"]}`)
       this.mysqlConnect.query(

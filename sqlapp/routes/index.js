@@ -6,8 +6,11 @@ const utf8 = require("utf8");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
 const Amazon = require("../model/Amazon");
-const shopee = require("../model/shopee");
-const Job = require("../model/job");
+const Shopee = require("../model/Shopee");
+const Job = require("../model/Job");
+const Pantip = require("../model/Pantip");
+const Jd = require("../model/Jd");
+// const Facebook = require("../model/Facebook");
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
@@ -92,32 +95,14 @@ router.post("/post", async (req, res) => {
         service: service,
         page: page,
         status: "in progress",
-        path_file: "path....",
         start_time: startTime,
       });
 
-      let url = encodeURI("https://shopee.co.th/search?keyword=" + keyword);
-      let urlAma = encodeURI(
-        "https://www.amazon.com/s?k=" + keyword + "&ref=nb_sb_noss_2"
-      );
-      let urlPantip = encodeURI("https://pantip.com/search?q=" + keyword);
       let utfKeyword = encodeURI(keyword);
       //amazon
-      if (service == 2) {
-        python.stdin.write("2\n" + page + "\n" + utfKeyword);
-        python.stdin.end();
-      }
-      //shopee
-      else if (service == 1) {
-        python.stdin.write("1\n" + page + "\n" + utfKeyword);
-        python.stdin.end();
-      }
-      // pantip
-      else if (service == 3) {
-        python.stdin.write("3\n" + page + "\n" + utfKeyword);
-        python.stdin.end();
-      }
+      python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
 
+      python.stdin.end();
       // collect data from script
       python.stdout.on("data", function (data) {
         console.log("Pipe data from python script ...");
@@ -129,53 +114,87 @@ router.post("/post", async (req, res) => {
         const raw = fs.readFileSync("myfile.csv", "utf8");
         console.log(`child process close all stdio with code ${code}`);
         console.log("service:" + service);
+
+        let i = 0;
+        let job = new Job();
+
+        //shopee
         if (service == 1) {
+          //edit header
           const header = raw.split(/\r?\n/)[0].split(",");
           header[6] = "send_from";
           header[9] = "product_id";
           const result = await csv(raw, { headers: header });
-          // result.forEach(async (value) => {
-          //   const sendTosql = value;
-          //   delete sendTosql["num"];
-          //   await db.add(sendTosql);
-          // });
-          let shopee1 = new shopee();
-          let shop = await shopee1.getEmptyObj();
-          let shop1 = await shopee1.getLastOne();
-          let job = new Job();
+          let shopeeObj = new Shopee();
           let lastOne = await job.getLastOne();
+          console.log("outside loop");
+          console.log(result);
           result.forEach(async (value) => {
+            console.log("loop");
             delete value["num"];
-            // console.log(shop1);
-            await shopee1.save(value);
-            await shopee1.update({
-              id: shop1[0].id,
-              job_id: lastOne[0].id,
-            });
+            value["price"] = value["price"].substring(1, value["price"].length);
+            if (i >= 1) {
+              //save to database
+              await shopeeObj.save(value);
+            }
+            i++;
           });
+          //update job_id in table
+          console.log("outside loop");
+          shopeeObj.updateJobId(lastOne[0].id);
+          //amazon
         } else if (service == 2) {
           const header = raw.split(/\rsda\n/)[0].split(",");
           header[1] = "product_id";
+          header[8] = "rank";
           const result = await csv(raw, { headers: header });
+          let amazonObj = new Amazon();
+          let lastOne = await job.getLastOne();
           result.forEach(async (value) => {
-            value["price"] = value["price"].substring(1, value["price"].length);
-            const sendTosql = value;
-            delete sendTosql["num"];
-            await db.addAmazon(sendTosql);
+            // value["price"] = value["price"].substring(1, value["price"].length);
+            delete value["num"];
+            if (i >= 1) {
+              await amazonObj.save(value);
+            }
+            i++;
           });
+          amazonObj.updateJobId(lastOne[0].id);
+          //pantip
         } else if (service == 3) {
+          let pantipObj = new Pantip();
           const header = raw.split(/\r?\n/)[0].split(",");
           header[5] = "like_count";
           header[6] = "emo_count";
           header[9] = "date_time";
-          console.log(header);
-
+          header[14] = "good_word";
+          header[15] = "bad_word";
           const result = await csv(raw, { headers: header });
+          let lastOne = await job.getLastOne();
           result.forEach(async (value) => {
-            const sendTosql = value;
-            delete sendTosql["num"];
-            let results = await db.addPantip(sendTosql);
+            delete value["num"];
+            if (i >= 1) {
+              // console.log(value);
+              await pantipObj.save(value);
+            }
+            i++;
           });
+          pantipObj.updateJobId(lastOne[0].id);
+        } else if (service == 4) {
+          let jdObj = new Jd();
+          const header = raw.split(/\r?\n/)[0].split(",");
+          header[3] = "product_id";
+          header[7] = "send_from";
+          const result = await csv(raw, { headers: header });
+          let lastOne = await job.getLastOne();
+
+          result.forEach(async (value) => {
+            delete value["num"];
+            if (i >= 1) {
+              await jdObj.save(value);
+              console.log(value);
+            }
+          });
+          jdObj.updateJobId(lastOne[0].id);
         }
 
         response = await db.updateJob(response.id);

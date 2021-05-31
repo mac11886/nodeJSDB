@@ -13,6 +13,8 @@ block content
       option(value="1") Shopee  
       option(value="2") Amazon
       option(value="3") Pantip 
+      option(value="4") JD 
+      option(value="5") Facebook
 
     .form-group 
       label( for="keyword" ) Keyword
@@ -31,7 +33,7 @@ block content
         th Service 
         th Page 
         th Status 
-        th File 
+         
         th Start 
         th End
       tbody#infoBody
@@ -41,7 +43,6 @@ block content
             td= object.service 
             td= object.page 
             td= object.status 
-            td= object.path_file 
             td= object.start_time
             td= object.end_time
   script.
