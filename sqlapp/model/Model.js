@@ -27,8 +27,16 @@ class Model {
         });
     }
     getLastOne(){
-        
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 " , (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+                return resolve(results);
+            });
+        });   
     }
+
     first() {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " limit 1", (err, results) => {
@@ -80,7 +88,16 @@ class Model {
             });
         });
     }
-
+    updateJobId(jobId){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id=0`, (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(results);
+            });
+        }); 
+    }
     delete(id) {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`delete from ${this.table} where id=${id}`, (err, results) => {

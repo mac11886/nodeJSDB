@@ -63,6 +63,9 @@ router.get("/", async (req, res, next) => {
       case "3":
         el.service = "pantip";
         break;
+      case "4":
+        el.service = "jd";
+        break;
     }
   });
   res.render("index", { title: "Job", name: "mac", objectJson: results });
@@ -185,15 +188,23 @@ router.post("/post", async (req, res) => {
           header[3] = "product_id";
           header[7] = "send_from";
           const result = await csv(raw, { headers: header });
+          console.log(result);
+          console.log(
+            "-------------------------------------------------------result"
+          );
           let lastOne = await job.getLastOne();
-
+          console.log(lastOne);
+          console.log("out loop");
           result.forEach(async (value) => {
+            console.log("lopp");
             delete value["num"];
             if (i >= 1) {
+              console.log("ooooo");
               await jdObj.save(value);
-              console.log(value);
             }
+            i++
           });
+          
           jdObj.updateJobId(lastOne[0].id);
         }
 
