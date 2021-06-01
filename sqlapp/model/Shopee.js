@@ -1,8 +1,8 @@
 const Model = require("./model");
 
-class Service extends Model {
+class Shopee extends Model {
     constructor(){
-        super("service")
+        super("shopee")
     }
     getEmptyObj(){
         return {
@@ -21,4 +21,4 @@ class Service extends Model {
     }
 }
 
-module.exports = Service
+module.exports = Shopee

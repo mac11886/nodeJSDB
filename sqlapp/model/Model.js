@@ -26,6 +26,16 @@ class Model {
             });
         });
     }
+    getLastOne(){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 " , (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+                return resolve(results);
+            });
+        });   
+    }
 
     first() {
         return new Promise((resolve, reject) => {
@@ -40,18 +50,19 @@ class Model {
 
     save(objectParam) {
         return new Promise((resolve, reject) => {
-            let query = ""
-            let object = objectParam
-            Object.keys(object).forEach(function (key) {
-                if (key != "id") {
-                    query += `${key}='${object[key]}',`
-                }
-            })
-            query = query.substring(0, query.length - 1);
+            console.log(objectParam)
+            // let query = ""
+            // let object = objectParam
+            // Object.keys(object).forEach(function (key) {
+            //     if (key != "id" ) {
+            //         query += `${key}="${object[key].trim()}",`
+            //     }
+            // })
+            // query = query.substring(0, query.length - 1);
             // console.log(`insert into ${this.table} set ${query}`)
-            this.mysqlConnect.query(`insert into ${this.table} set ${query}`, (err, results) => {
+            this.mysqlConnect.query(`insert into ${this.table} set ?`, objectParam, (err, results) => {
                 if (err) {
-                    return reject(null);
+                    return reject(err);
                 }
                 return resolve("add success");
             });
@@ -77,7 +88,16 @@ class Model {
             });
         });
     }
-
+    updateJobId(jobId){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id=0`, (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(results);
+            });
+        }); 
+    }
     delete(id) {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`delete from ${this.table} where id=${id}`, (err, results) => {
