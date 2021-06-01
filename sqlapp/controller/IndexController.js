@@ -10,6 +10,7 @@ const Job = require("../model/Job");
 const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
+const Keyword = require("../model/Keyword");
 
 IndexController.get = async (req, res) => {
     // try {
@@ -85,11 +86,10 @@ IndexController.post = async (req, res) => {
           var dataToSend;
           // spawn new child process to call the python script
           const python = await spawn("python", [
-            "C:/Users/menin/Documents/python/python-ken/pythongetpostshopee/main.py",
+            "C:/Users/LENOVO/Desktop/python/pythongetpostshopee/main.py",
           ]);
           //shopee
           let service = req.body.service;
-    
           let keyword = req.body.keyword;
           let page = req.body.page;
           let startTime = req.body.startTime;
@@ -116,8 +116,8 @@ IndexController.post = async (req, res) => {
           // in close event we are sure that stream from child process is closed
           python.on("exit", async (code) => {
             const raw = fs.readFileSync("myfile.csv", "utf8");
-            console.log(`child process close all stdio with code ${code}`);
-            console.log("service:" + service);
+            // console.log(`child process close all stdio with code ${code}`);
+            // console.log("service:" + service);
     
             let i = 0;
             let job = new Job();
@@ -132,19 +132,19 @@ IndexController.post = async (req, res) => {
               let shopeeObj = new Shopee();
               let lastOne = await job.getLastOne();
               console.log("outside loop");
-              console.log(result);
+              // console.log(result);
               result.forEach(async (value) => {
-                console.log("loop");
+                // console.log("loop");
                 delete value["num"];
                 value["price"] = value["price"].substring(1, value["price"].length);
                 if (i >= 1) {
                   //save to database
-                  await shopeeObj.save(value);
+                  await shopeeObj.saveEcom(value, keyword);
                 }
                 i++;
               });
               //update job_id in table
-              console.log("outside loop");
+              // console.log("outside loop");
               shopeeObj.updateJobId(lastOne[0].id);
               //amazon
             } else if (service == 2) {
@@ -189,12 +189,12 @@ IndexController.post = async (req, res) => {
               header[3] = "product_id";
               header[7] = "send_from";
               const result = await csv(raw, { headers: header });
-              console.log(result);
-              console.log(
-                "-------------------------------------------------------result"
-              );
+              // console.log(result);
+              // console.log(
+              //   "-------------------------------------------------------result"
+              // );
               let lastOne = await job.getLastOne();
-              console.log(lastOne);
+              // console.log(lastOne);
               console.log("out loop");
               result.forEach(async (value) => {
                 console.log("lopp");
@@ -224,7 +224,8 @@ IndexController.post = async (req, res) => {
               });
               facebookObj.updateJobId(lastOne[0].id);
             }
-    
+            const keywordDB = new Keyword()
+            keywordDB.save({"word": keyword})
             response = await db.updateJob(response.id);
             res.json(response);
             // const sendTosql = result[1];
