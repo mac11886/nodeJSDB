@@ -3,19 +3,16 @@ extends layout
 block content
   
   .container 
-  //- h1= title 
-  //- p Welcome to #{title}
+  //- h1= title
+
   .form-container 
     h1  Job Create
     .form-group
     label(for="sevice") Choose Service 
-    select#service(name="service")
-      option(value="1") Shopee  
-      option(value="2") Amazon
-      option(value="3") Pantip 
-      option(value="4") JD 
-      option(value="5") Facebook
-
+    select =service (name="service")
+      each data in service
+        option(value= data.id) #{data.name}   
+    
     .form-group 
       label( for="keyword" ) Keyword
       input(type="text" name="keyword" id="keyword" class="form-control" placeholder="keyword" )

@@ -26,6 +26,7 @@ class Model {
             });
         });
     }
+    
     getLastOne(){
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 " , (err, results) => {

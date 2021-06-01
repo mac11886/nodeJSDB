@@ -11,31 +11,15 @@ const Job = require("../model/Job");
 const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
+const Service = require("../model/Service");
+const Keyword = require("../model/Keyword");
 // const Facebook = require("../model/Facebook");
 let results = {};
 /* GET home page. */
 router.get("/", async (req, res, next) => {
-  // try {
-  //   var dataToSend;
-  //   // spawn new child process to call the python script
-  //   const python = spawn("python", [
-  //     "C:/Users/menin/Documents/python/pythongetpostshopee-main/pythongetpostshopee-main/main.py",
-  //   ]);
-
-  //   python.stdin.write("2\n1\nhttps://www.amazon.com/s?k=car&ref=nb_sb_noss_2");
-  //   python.stdin.end();
-
-  //   // collect data from script
-  //   python.stdout.on("data", function (data) {
-  //     console.log("Pipe data from python script ...");
-  //     dataToSend = data.toString();
-  //   });
-  //   // in close event we are sure that stream from child process is closed
-  //   python.on("exit", (code) => {
-  //     console.log(`child process close all stdio with code ${code}`);
-  //     // send data to browser
-  //     res.send("success");
-  //   });
+  let service = new Service();
+  let getData =  await service.get();
+  // console.log(getData[1].name);
   results = await db.all();
   results.forEach((el) => {
     let date = new Date(el.start_time); // Or the date you'd like converted.
@@ -68,10 +52,10 @@ router.get("/", async (req, res, next) => {
         el.service = "jd";
         break;
       case "5":
-        el.service = "facebook"
+        el.service = "facebook";
     }
   });
-  res.render("index", { title: "Job", name: "mac", objectJson: results });
+  res.render("index", { title: "Job", name: "mac", objectJson: results ,service:getData});
   // res.json(results);
   // } catch (e) {
   //   console.log(e);
@@ -202,7 +186,6 @@ router.post("/post", async (req, res) => {
             console.log("lopp");
             delete value["num"];
             if (i >= 1) {
-              console.log("ooooo");
               await jdObj.save(value);
             }
             i++;
@@ -220,7 +203,7 @@ router.post("/post", async (req, res) => {
             delete value["num"];
             if (i >= 1) {
               // console.log(value);
-              await facebookObj.save(value)
+              await facebookObj.save(value);
             }
             i++;
           });

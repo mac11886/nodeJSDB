@@ -7,7 +7,7 @@ class Service extends Model {
     getEmptyObj(){
         return {
             id : null,
-            service : null
+            name : null
         }
     }
 }
