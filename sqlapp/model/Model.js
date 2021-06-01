@@ -125,7 +125,7 @@ class Model {
                 });
             });
             new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`update e_service join shopee on e_service.e_id = 0 set e_service.e_id = shopee.id ORDER BY shopee.id desc`, objectParam, (err, results) => {
+                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id = 0 set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
                     }
