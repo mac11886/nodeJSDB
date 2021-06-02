@@ -7,10 +7,10 @@ class Model {
         this.serviceId = serviceId
         this.mysqlConnect = mysql.createConnection({
             // connectionLimit: 10,
-            password: "",
-            user: "root",
+            password: "cococo1234*",
+            user: "admin",
             database: "ecom_db",
-            host: "localhost",
+            host: "dev.cmqggubc8ai1.ap-southeast-1.rds.amazonaws.com",
         });
         this.mysqlConnect.connect((err) => {
             if (!err) console.log("DB connection success");

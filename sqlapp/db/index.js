@@ -3,10 +3,10 @@ const mysql = require("mysql");
 
 const mysqlConnect = mysql.createConnection({
   // connectionLimit: 10,
-  password: "",
-  user: "root",
+  password: "cococo1234*",
+  user: "admin",
   database: "ecom_db",
-  host: "localhost",
+  host: "dev.cmqggubc8ai1.ap-southeast-1.rds.amazonaws.com",
 });
 
 mysqlConnect.connect((err) => {
