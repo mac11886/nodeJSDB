@@ -1,17 +1,17 @@
 const { response } = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 
 const mysqlConnect = mysql.createConnection({
   // connectionLimit: 10,
   password: "",
   user: "root",
   database: "ecom_db",
-  host: "localhost",
+  host: "127.0.0.1",
 });
 
 mysqlConnect.connect((err) => {
   if (!err) console.log("DB connection success");
-  else console.log("DB connect fail");
+  else console.log("DB connect fail", err);
 });
 
 let testdb = {};
@@ -25,7 +25,7 @@ testdb.all = () => {
     });
   });
 };
-testdb.one = (id) => {
+testdb.one = (id) => {          
   return new Promise((resolve, reject) => {
     mysqlConnect.query(
       `select * from data where id = ?`,

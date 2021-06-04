@@ -11,6 +11,8 @@ const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
 const Keyword = require("../model/Keyword");
+const { resolve } = require("path");
+const { rejects } = require("assert");
 
 IndexController.get = async (req, res) => {
     // try {
@@ -85,9 +87,10 @@ IndexController.post = async (req, res) => {
         try {
           var dataToSend;
           // spawn new child process to call the python script
-          const python = await spawn("python", [
-            "C:/Users/LENOVO/Desktop/python/pythongetpostshopee/main.py",
+          const python = spawn("/usr/local/bin/python3.8", [
+            "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
           ]);
+
           //shopee
           let service = req.body.service;
           let keyword = req.body.keyword;
@@ -103,27 +106,38 @@ IndexController.post = async (req, res) => {
           });
     
           let utfKeyword = encodeURI(keyword);
+
+      
           //amazon
           python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     
           python.stdin.end();
-          // collect data from script
+          
+          
+
+            
+            
+
           python.stdout.on("data", function (data) {
             console.log("Pipe data from python script ...");
             dataToSend = data.toString();
             console.log(dataToSend);
           });
+
+          
           // in close event we are sure that stream from child process is closed
           python.on("exit", async (code) => {
+            console.log('on exit')
             const raw = fs.readFileSync("myfile.csv", "utf8");
-            // console.log(`child process close all stdio with code ${code}`);
-            // console.log("service:" + service);
+            console.log(`child process close all stdio with code ${code}`);
+            console.log("service:" + service);
     
             let i = 0;
             let job = new Job();
     
             //shopee
             if (service == 1) {
+              // console.log("service = 1")
               //edit header
               const header = raw.split(/\r?\n/)[0].split(",");
               header[6] = "send_from";
@@ -133,36 +147,84 @@ IndexController.post = async (req, res) => {
               let lastOne = await job.getLastOne();
               console.log("outside loop");
               // console.log(result);
-              result.forEach(async (value) => {
+
+              for (const value of result) {
+              // result.forEach(async (value) => {
                 // console.log("loop");
                 delete value["num"];
-                value["price"] = value["price"].substring(1, value["price"].length);
+                // value["price"] = value["price"].substring(1, value["price"].length);
                 if (i >= 1) {
                   //save to database
-                  await shopeeObj.saveEcom(value, keyword);
+                  try {
+                   await shopeeObj.saveEcom(value, keyword);
+                    
+                  } catch (err) {
+                    console.log(err.message, 'error ', value, keyword)
+                  }
+                  
                 }
                 i++;
-              });
+              // });
+              }
               //update job_id in table
               // console.log("outside loop");
-              shopeeObj.updateJobId(lastOne[0].id);
+              try {
+                shopeeObj.updateJobId(lastOne[0].id);
+
+              } catch(err) {
+                console.log('error update job')
+              }
               //amazon
             } else if (service == 2) {
               const header = raw.split(/\rsda\n/)[0].split(",");
               header[1] = "product_id";
               header[8] = "rank";
-              const result = await csv(raw, { headers: header });
+              let result;
+              try {
+                 result = await csv(raw, { headers: header });
+              } catch(err) {
+                console.log(err, 'error result')
+                return;
+              }
               let amazonObj = new Amazon();
-              let lastOne = await job.getLastOne();
-              result.forEach(async (value) => {
+
+              let lastOne;
+              try {
+                 lastOne = await job.getLastOne();
+
+              } catch(err) {
+                console.log(err, 'error lastOne')
+                return;
+              }
+              const promiseAll = [];
+              console.log('array promise')
+              result.forEach( (value) => {
                 // value["price"] = value["price"].substring(1, value["price"].length);
                 delete value["num"];
                 if (i >= 1) {
-                  await amazonObj.save(value);
+                  const promise = new Promise(async (resolve, reject) => {
+
+                    try {
+                      await amazonObj.save(value);
+                    } catch(error) {
+                      reject(error)
+                    }
+                    resolve(true)
+                  })
+                
+                  promiseAll.push(promise)
+
+                 
                 }
                 i++;
               });
-              amazonObj.updateJobId(lastOne[0].id);
+              console.log('begin promise')
+              Promise.all(promiseAll).then(response =>{
+                amazonObj.updateJobId(lastOne[0].id)
+              }).catch(error => {
+                console.log(error.message)
+              })
+              console.log('end promise')
               //pantip
             } else if (service == 3) {
               let pantipObj = new Pantip();
@@ -230,6 +292,11 @@ IndexController.post = async (req, res) => {
             res.json(response);
             // const sendTosql = result[1];
           });
+          
+          
+
+          // collect data from script
+          
         } catch (e) {
           console.log(e);
           res.sendStatus(500);
@@ -238,6 +305,7 @@ IndexController.post = async (req, res) => {
         console.log(e);
         res.sendStatus(500);
       }
+
 }
 
 module.exports = IndexController

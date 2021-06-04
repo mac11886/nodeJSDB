@@ -6,7 +6,7 @@ class Shopee extends Model {
     }
     getEmptyObj(){
         return {
-            id: null,
+            // id: null,
             job_id: null,
             product_id: null,
             name: null,
