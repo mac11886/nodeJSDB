@@ -20,5 +20,5 @@ router.post("/post", (req, res) => IndexController.post(req, res));
 //   }
 // });
 
-router.get("/test", (req, res) => TestController.test(req, res));
+router.get("/status", (req, res) => TestController.test(req, res));
 module.exports = router;
