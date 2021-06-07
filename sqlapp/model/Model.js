@@ -72,8 +72,6 @@ class Model {
     }
     async saveEcom(objectParam, word) {
         //save keyword 
-        console.log("saving data to DB")
-        console.log(word)
 
         let keywords = await new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from keyword where word='${word}'`, (err, results) => {
@@ -83,8 +81,6 @@ class Model {
                 return resolve(results);
             });
         });
-
-        console.log(keywords.length+"-------------------------------")
  
         if (keywords.length == 0) {
             try{
@@ -102,12 +98,10 @@ class Model {
         }
 
         const joinData = await new Promise((resolve, reject) => {
-            console.log("begin")
             this.mysqlConnect.query(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log("end")
                 return resolve(results);
             });
         });
@@ -141,10 +135,10 @@ class Model {
         }catch(error){
             console.log(error,"query service")
         }
-
+        
         try{
             await new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id = 0 set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
+                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id IS NULL set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
                     }
@@ -231,9 +225,7 @@ class Model {
     updateJobId(jobId) {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id IS NULL`, (err, results) => {
-                console.log("updating job id")
-                if (err) {
-                    console.log("job id err")
+                if (err) {                    
                     return reject(err);
                     
                 }

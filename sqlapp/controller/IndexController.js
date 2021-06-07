@@ -71,7 +71,7 @@ IndexController.get = async (req, res) => {
         el.service = "facebook"
     }
   });
-  res.render("index", { title: "Job", name: "mac", objectJson: results });
+  res.render("index.pug", { title: "Job", name: "mac", objectJson: results });
   // res.json(results);
   // } catch (e) {
   //   console.log(e);

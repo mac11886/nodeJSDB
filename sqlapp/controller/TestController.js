@@ -20,7 +20,7 @@ TestController.test = async (req, res) => {
     // await shopee.saveEcom(object, "jjj")
     // await shopee.saveEcom(object, "jjj")
     // res.json(object)
-    res.render("status", { objectJson: object });
+    res.render("status.ejs", { objectJson: object });
 }
 
 module.exports = TestController
