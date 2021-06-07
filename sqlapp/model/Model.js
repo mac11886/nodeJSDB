@@ -10,7 +10,7 @@ class Model {
             password: "",
             user: "root",
             database: "ecom_db",
-            host: "docker_test_db_1",
+            host: "127.0.0.1",
         });
         this.mysqlConnect.connect((err) => {
             if (!err) console.log("DB connection success");
@@ -73,6 +73,7 @@ class Model {
     async saveEcom(objectParam, word) {
         //save keyword 
         console.log("saving data to DB")
+        // console.log(objectParam)                
         console.log(word)
 
         let keywords = await new Promise((resolve, reject) => {

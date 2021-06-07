@@ -16,10 +16,10 @@ TestController.test = async (req, res) => {
         url: 'https://shopee.co.th//Study-Notes-เคมี-ม.ปลาย-สไตล์-Cornell-2-i.55217237.4361443615',
         product_id: '3361443615'
       }
-    const shopee = new Shopee();
-    await shopee.saveEcom(object, "jjj")
-    await shopee.saveEcom(object, "jjj")
-    res.json("yes")
+    // const shopee = new Shopee();
+    // await shopee.saveEcom(object, "jjj")
+    // await shopee.saveEcom(object, "jjj")
+    res.render("status.ejs", { title: "Job", name: "mac", objectJson: object });
 }
 
 module.exports = TestController

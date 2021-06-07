@@ -71,7 +71,7 @@ IndexController.get = async (req, res) => {
         el.service = "facebook"
     }
   });
-  res.render("index", { title: "Job", name: "mac", objectJson: results });
+  res.render("index.pug", { title: "Job", name: "mac", objectJson: results });
   // res.json(results);
   // } catch (e) {
   //   console.log(e);
@@ -87,11 +87,11 @@ IndexController.post = async (req, res) => {
         try {
           var dataToSend;
           // spawn new child process to call the python script
-          const python = spawn("/usr/local/bin/python3.8", [
-            "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
+          const python = spawn("python", [
+            "C:/Users/Bell/intern/nodeJSDB/pythongetpostshopee1/main.py",
           ]);
 
-          //shopee
+          
           let service = req.body.service;
           let keyword = req.body.keyword;
           let page = req.body.page;
