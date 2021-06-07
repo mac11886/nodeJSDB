@@ -1,4 +1,4 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 
 class Model {
     constructor(table, pk, serviceId) {
@@ -7,10 +7,10 @@ class Model {
         this.serviceId = serviceId
         this.mysqlConnect = mysql.createConnection({
             // connectionLimit: 10,
-            password: "cococo1234*",
-            user: "admin",
+            password: "",
+            user: "root",
             database: "ecom_db",
-            host: "dev.cmqggubc8ai1.ap-southeast-1.rds.amazonaws.com",
+            host: "docker_test_db_1",
         });
         this.mysqlConnect.connect((err) => {
             if (!err) console.log("DB connection success");
@@ -32,7 +32,7 @@ class Model {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 ", (err, results) => {
                 if (err) {
-                    return reject(null);
+                    return reject(err.message);
                 }
                 return resolve(results);
             });
@@ -71,7 +71,10 @@ class Model {
         });
     }
     async saveEcom(objectParam, word) {
-        // console.log(object)
+        //save keyword 
+        console.log("saving data to DB")
+        console.log(word)
+
         let keywords = await new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from keyword where word='${word}'`, (err, results) => {
                 if (err) {
@@ -80,27 +83,40 @@ class Model {
                 return resolve(results);
             });
         });
+
+        console.log(keywords.length+"-------------------------------")
+ 
         if (keywords.length == 0) {
+            try{
             await new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`insert into keyword set ?`, [{"word": word}], (err, results) => {
+                this.mysqlConnect.query(`insert into keyword set ?`, [{ "word": word }], (err, results) => {
                     if (err) {
                         return reject(err);
                     }
                     return resolve("yes");
                 });
             });
+        }catch(error){
+            console.log(error,"errorn select keyword")
         }
-        
+        }
+
         const joinData = await new Promise((resolve, reject) => {
+            console.log("begin")
             this.mysqlConnect.query(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
+                console.log("end")
                 return resolve(results);
             });
         });
-        if (joinData.length == 0){
-            new Promise((resolve, reject) => {
+
+
+        if (joinData.length == 0) {
+            try{
+            await new Promise((resolve, reject) => {
+                // console.log(objectParam)
                 this.mysqlConnect.query(`insert into ${this.table} set ?`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
@@ -108,23 +124,26 @@ class Model {
                     return resolve("yes");
                 });
             });
-            // const dataEcom = new Promise((resolve, reject) => {
-            //     this.mysqlConnect.query(`select * from ${this.table} order by id desc limit 1`, (err, results) => {
-            //         if (err) {
-            //             return reject(err);
-            //         }
-            //         return resolve(results);
-            //     });
-            // });
-            new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`insert into e_service set ?`, [{"service_id":this.serviceId}], (err, results) => {
+        }catch(error){
+            console.log(error,"error joindata")
+        }
+
+
+        try{
+            await new Promise((resolve, reject) => {
+                this.mysqlConnect.query(`insert into e_service set ?`, [{ "service_id": this.serviceId }], (err, results) => {
                     if (err) {
                         return reject(err);
                     }
                     return resolve(results);
                 });
             });
-            new Promise((resolve, reject) => {
+        }catch(error){
+            console.log(error,"query service")
+        }
+
+        try{
+            await new Promise((resolve, reject) => {
                 this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id = 0 set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
@@ -132,6 +151,9 @@ class Model {
                     return resolve("yes");
                 });
             });
+        }catch(error){
+            console.log(error,"error update e_service")
+        }
             // const dataEService = new Promise((resolve, reject) => {
             //     this.mysqlConnect.query(`select * from e_service order by id desc limit 1`, (err, results) => {
             //         if (err) {
@@ -140,17 +162,23 @@ class Model {
             //         return resolve(results);
             //     });
             // });
-            new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`insert into main set ?`, [{"e_service_id":0, "key_id": 0 }], (err, results) => {
+        try{
+            await new Promise((resolve, reject) => {
+                this.mysqlConnect.query(`insert into main set ?`, [{ "e_service_id": 0, "key_id": 0 }], (err, results) => {
                     if (err) {
                         return reject(err);
                     }
                     return resolve("yes");
                 });
             });
-            const updateKeyId =`update main join keyword on main.key_id = 0 AND keyword.word="${word}" set main.key_id = keyword.id`;
+        }catch(error){
+            console.log(error,"error insert into main")
+        }
+            const updateKeyId = `update main join keyword on main.key_id = 0 AND keyword.word="${word}" set main.key_id = keyword.id`;
             const updateServiceId = "update main join e_service on main.e_service_id = 0 set main.e_service_id = e_service.id ORDER BY e_service.id desc";
-            new Promise((resolve, reject) => {
+
+            try{
+            await new Promise((resolve, reject) => {
                 this.mysqlConnect.query(updateKeyId, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
@@ -158,7 +186,12 @@ class Model {
                     return resolve("yes");
                 });
             });
-            new Promise((resolve, reject) => {
+        }catch(error){
+            console.log(error,"update keyword id")
+        }
+
+        try{
+            await new Promise((resolve, reject) => {
                 this.mysqlConnect.query(updateServiceId, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
@@ -166,6 +199,9 @@ class Model {
                     return resolve("yes");
                 });
             });
+        }catch(error){
+            console.log(error,"error updater service id")
+        }
             // console.log(status)
         }
         // return new Promise((resolve, reject) => {
@@ -194,10 +230,14 @@ class Model {
     }
     updateJobId(jobId) {
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id=0`, (err, results) => {
+            this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id IS NULL`, (err, results) => {
+                console.log("updating job id")
                 if (err) {
+                    console.log("job id err")
                     return reject(err);
+                    
                 }
+                console.log("jobid done")
                 return resolve(results);
             });
         });
