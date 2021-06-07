@@ -142,89 +142,81 @@ IndexController.post = async (req, res) => {
               const header = raw.split(/\r?\n/)[0].split(",");
               header[6] = "send_from";
               header[9] = "product_id";
-              const result = await csv(raw, { headers: header });
+              try{
+                result = await csv(raw, { headers: header });
+              }
+              catch (err){
+                console.log(err,"error result")
+                return;
+              }
               let shopeeObj = new Shopee();
-              let lastOne = await job.getLastOne();
-              console.log("outside loop");
-              // console.log(result);
-
+              try{
+              lastOne = await job.getLastOne();
+              }catch(err) {
+                console.log(err, 'error lastOne')
+                return;
+              }
+      
               for (const value of result) {
-              // result.forEach(async (value) => {
-                // console.log("loop");
                 delete value["num"];
-                // value["price"] = value["price"].substring(1, value["price"].length);
                 if (i >= 1) {
                   //save to database
                   try {
                    await shopeeObj.saveEcom(value, keyword);
                     
-                  } catch (err) {
-                    console.log(err.message, 'error ', value, keyword)
+                  } catch (error) {
+                    console.log(error.message, 'error ', value, keyword)
                   }
                   
                 }
                 i++;
-              // });
               }
-              //update job_id in table
-              // console.log("outside loop");
               try {
                 shopeeObj.updateJobId(lastOne[0].id);
 
               } catch(err) {
                 console.log('error update job')
               }
+
+
               //amazon
             } else if (service == 2) {
               const header = raw.split(/\rsda\n/)[0].split(",");
               header[1] = "product_id";
               header[8] = "rank";
-              let result;
               try {
                  result = await csv(raw, { headers: header });
-              } catch(err) {
-                console.log(err, 'error result')
+              } catch(error) {
+                console.log(error, 'error result')
                 return;
               }
               let amazonObj = new Amazon();
-
-              let lastOne;
               try {
                  lastOne = await job.getLastOne();
 
-              } catch(err) {
-                console.log(err, 'error lastOne')
+              } catch(error) {
+                console.log(error, 'error lastOne')
                 return;
               }
-              const promiseAll = [];
-              console.log('array promise')
-              result.forEach( (value) => {
-                // value["price"] = value["price"].substring(1, value["price"].length);
+
+              for (const value of result) {  
                 delete value["num"];
                 if (i >= 1) {
-                  const promise = new Promise(async (resolve, reject) => {
-
                     try {
-                      await amazonObj.save(value);
-                    } catch(error) {
-                      reject(error)
-                    }
-                    resolve(true)
-                  })
-                
-                  promiseAll.push(promise)
-
-                 
+                      await amazonObj.saveEcom(value, keyword);
+                    } 
+                    catch(error) {
+                      console.log(error.message, 'error ', value, keyword)
+                    }       
                 }
                 i++;
-              });
-              console.log('begin promise')
-              Promise.all(promiseAll).then(response =>{
+              }
+              try{ 
                 amazonObj.updateJobId(lastOne[0].id)
-              }).catch(error => {
-                console.log(error.message)
-              })
-              console.log('end promise')
+              }catch(error) {
+                console.log(error,'error update job')
+              }
+
               //pantip
             } else if (service == 3) {
               let pantipObj = new Pantip();
@@ -234,60 +226,116 @@ IndexController.post = async (req, res) => {
               header[9] = "date_time";
               header[14] = "good_word";
               header[15] = "bad_word";
-              const result = await csv(raw, { headers: header });
-              let lastOne = await job.getLastOne();
-              result.forEach(async (value) => {
+              try{
+                result = await csv(raw, { headers: header });
+              }catch(error){
+                console.log(error, 'error result')
+                return;
+              }
+
+              try{
+                lastOne = await job.getLastOne();
+              }catch(error){
+                console.log(error, 'error lastOne')
+                return;
+              }
+
+              for(const value of result){
+                // console.log(result)
                 delete value["num"];
                 if (i >= 1) {
-                  // console.log(value);
-                  await pantipObj.save(value);
+                  try{
+                    await pantipObj.saveEcom(value,keyword);
+                  }catch(error){
+                    console.log(error.message, 'error ', value, keyword)
+                  }
                 }
                 i++;
-              });
-              pantipObj.updateJobId(lastOne[0].id);
-            } else if (service == 4) {
+              }
+              try{
+                pantipObj.updateJobId(lastOne[0].id);
+              }catch(error){
+                console.log(error,'error update job')
+              }
+            } 
+
+            //JD
+            else if (service == 4) {
               let jdObj = new Jd();
               const header = raw.split(/\r?\n/)[0].split(",");
-              header[3] = "product_id";
+              header[2] = "product_id";
               header[7] = "send_from";
-              const result = await csv(raw, { headers: header });
-              // console.log(result);
-              // console.log(
-              //   "-------------------------------------------------------result"
-              // );
-              let lastOne = await job.getLastOne();
+              try{
+                result = await csv(raw, { headers: header });
+              }catch(error){
+                console.log(error,'error result')
+                return;
+              }
+              try{
+                lastOne = await job.getLastOne();
+              }catch(error){
+                console.log(error, 'error lastOne')
+                return;
+              }
               // console.log(lastOne);
-              console.log("out loop");
-              result.forEach(async (value) => {
-                console.log("lopp");
+              for (const value of result) {
                 delete value["num"];
                 if (i >= 1) {
-                  console.log("ooooo");
-                  await jdObj.save(value);
+                  try{
+                    await jdObj.saveEcom(value,keyword);
+                  }
+                  catch(error){
+                    console.log(error.message, 'error ', value, keyword)
+                  }
                 }
                 i++;
-              });
-    
-              jdObj.updateJobId(lastOne[0].id);
+              }
+              try{
+                jdObj.updateJobId(lastOne[0].id);
+              }catch(error){
+                console.log(error,'error update job')
+                
+              }
+
+            //facebook
             } else if (service == 5) {
               let facebookObj = new Facebook();
               const header = raw.split(/\r?\n/)[0].split(",");
               header[11] = "good_word";
               header[12] = "bad_word";
-              let lastOne = await job.getLastOne();
-              const result = await csv(raw, { headers: header });
-              result.forEach(async (value) => {
+              
+              try{
+                lastOne = await job.getLastOne();
+              }catch(error){
+                console.log(error, 'error lastOne')
+                return;
+              }
+
+              try{
+                result = await csv(raw, { headers: header });
+              }catch(error){
+                console.log(error, 'error lastOne')
+                return;
+              }
+              for(const value of result){
                 delete value["num"];
                 if (i >= 1) {
-                  // console.log(value);
-                  await facebookObj.save(value)
+                  try{
+                    await facebookObj.saveEcom(value,keyword)
+                  }catch(error){
+                    console.log(error.message, 'error ', value, keyword)
+                  }
                 }
                 i++;
-              });
-              facebookObj.updateJobId(lastOne[0].id);
+              }
+              try{
+                facebookObj.updateJobId(lastOne[0].id);
+              }catch(error){
+                console.log(error,'error update job')
+              }
             }
             const keywordDB = new Keyword()
-            keywordDB.save({"word": keyword})
+            // keywordDB.save({"word": keyword})
             response = await db.updateJob(response.id);
             res.json(response);
             // const sendTosql = result[1];
