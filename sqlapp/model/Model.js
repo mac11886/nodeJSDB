@@ -51,9 +51,9 @@ class Model {
     }
     
 
-    getcount(key_id){
+    getcount(){
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select count(*) from `+ this.table + ` where key_id = ${key_id} ` , (err, results) => {
+            this.mysqlConnect.query(`select count(*) from `+ this.table , (err, results) => {
                 if(err){
                     return reject(err.message);
                 }
@@ -61,6 +61,19 @@ class Model {
             });
         });
     }
+
+    getkeywordcount(service_id,key_id){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
+                if(err){
+                    return reject(err.message);
+                }
+                return resolve(Object.values(results[0])[0]);
+            });
+        });
+    }
+
+    
 
     save(objectParam) {
         return new Promise((resolve, reject) => {

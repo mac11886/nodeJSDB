@@ -7,7 +7,7 @@ block content
   //- p Welcome to #{title}
   .form-container 
     h1  Job Create
-    a(href="/status" class="btn btn-primary btn-lg active" role="button" aria-pressed="true") go
+    
     .form-group
     label(for="sevice") Choose Service 
     select#service(name="service")
@@ -28,6 +28,7 @@ block content
   
   
     h3 Job List
+    a(href="/status" class="btn btn-primary btn-lg active" role="button" aria-pressed="true") keyword count
     table(style="width:100%",class="table table-striped")
       tr 
         th Keyword 
