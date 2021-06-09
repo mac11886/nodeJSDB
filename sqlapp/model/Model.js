@@ -49,6 +49,18 @@ class Model {
             });
         });
     }
+    
+
+    getcount(key_id){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select count(*) from `+ this.table + ` where key_id = ${key_id} ` , (err, results) => {
+                if(err){
+                    return reject(err.message);
+                }
+                return resolve(Object.values(results[0])[0]);
+            });
+        });
+    }
 
     save(objectParam) {
         return new Promise((resolve, reject) => {
