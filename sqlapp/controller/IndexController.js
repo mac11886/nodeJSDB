@@ -15,27 +15,7 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 
 IndexController.get = async (req, res) => {
-    // try {
-  //   var dataToSend;
-  //   // spawn new child process to call the python script
-  //   const python = spawn("python", [
-  //     "C:/Users/menin/Documents/python/pythongetpostshopee-main/pythongetpostshopee-main/main.py",
-  //   ]);
-
-  //   python.stdin.write("2\n1\nhttps://www.amazon.com/s?k=car&ref=nb_sb_noss_2");
-  //   python.stdin.end();
-
-  //   // collect data from script
-  //   python.stdout.on("data", function (data) {
-  //     console.log("Pipe data from python script ...");
-  //     dataToSend = data.toString();
-  //   });
-  //   // in close event we are sure that stream from child process is closed
-  //   python.on("exit", (code) => {
-  //     console.log(`child process close all stdio with code ${code}`);
-  //     // send data to browser
-  //     res.send("success");
-  //   });
+ 
   results = await db.all();
   results.forEach((el) => {
     let date = new Date(el.start_time); // Or the date you'd like converted.
@@ -71,31 +51,30 @@ IndexController.get = async (req, res) => {
         el.service = "facebook"
     }
   });
-  res.render("index.pug", { title: "Job", name: "mac", objectJson: results });
-  // res.json(results);
-  // } catch (e) {
-  //   console.log(e);
-  //   res.sendStatus(500);
-  // }
-  // res.redirect("index");
+  // res.render("index.pug", { objectJson: results });
+  // res.render({  results });
+  // return results;
+  res.json( results );
+
 }
 
 IndexController.post = async (req, res) => {
     try {
-        // let results = await db.add(req);
-        // res.json(results);
+      
         try {
           var dataToSend;
           // spawn new child process to call the python script
-          const python = spawn("/usr/local/bin/python3.8", [
-            "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
+          const python = spawn("python", [
+            "C:/Users/Bell/intern/nodeJSDB/pythongetpostshopee1/main.py",
           ]);
 
-          //shopee
+          
           let service = req.body.service;
           let keyword = req.body.keyword;
           let page = req.body.page;
-          let startTime = req.body.startTime;
+          // let startTime = req.body.startTime;
+          let date = new Date(); // Or the date you'd like converted.
+          let startTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
     
           let response = await db.addJob({
             keyword: keyword,
@@ -113,11 +92,6 @@ IndexController.post = async (req, res) => {
     
           python.stdin.end();
           
-          
-
-            
-            
-
           python.stdout.on("data", function (data) {
             console.log("Pipe data from python script ...");
             dataToSend = data.toString();
@@ -339,9 +313,7 @@ IndexController.post = async (req, res) => {
             response = await db.updateJob(response.id);
             res.json(response);
             // const sendTosql = result[1];
-          });
-          
-          
+          }); 
 
           // collect data from script
           

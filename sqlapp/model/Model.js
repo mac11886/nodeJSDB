@@ -17,14 +17,37 @@ class Model {
             else console.log("DB connect fail");
         });
     }
-    get(sortType) {
-        // return (`select * from ` + [this.table])
+    
+    get(sortType) { 
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id " + (sortType ? sortType : ""), (err, results) => {
                 if (err) {
                     return reject(null);
                 }
                 return resolve(results);
+            });
+        });
+    }
+    getCount() { 
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select count(key_id) from ` + this.table , (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+                // res.json(results);
+                console.log(Object.values(results[0])[0])
+                // console.log(results)
+                return resolve(Object.values(results[0])[0]);
+            });
+        });
+    }
+    getKeywordCount(service_id,key_id){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
+                if(err){
+                    return reject(err.message);
+                }
+                return resolve(Object.values(results[0])[0]);
             });
         });
     }
@@ -78,15 +101,7 @@ class Model {
     save(objectParam) {
         return new Promise((resolve, reject) => {
             console.log(objectParam)
-            // let query = ""
-            // let object = objectParam
-            // Object.keys(object).forEach(function (key) {
-            //     if (key != "id" ) {
-            //         query += `${key}="${object[key].trim()}",`
-            //     }
-            // })
-            // query = query.substring(0, query.length - 1);
-            // console.log(`insert into ${this.table} set ${query}`)
+          
             this.mysqlConnect.query(`insert into ${this.table} set ?`, objectParam, (err, results) => {
                 if (err) {
                     return reject(err);
@@ -97,6 +112,9 @@ class Model {
     }
     async saveEcom(objectParam, word) {
         //save keyword 
+        console.log("saving data to DB")
+        // console.log(objectParam)                
+        console.log(word)
 
         let keywords = await new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from keyword where word='${word}'`, (err, results) => {
@@ -163,7 +181,7 @@ class Model {
         
         try{
             await new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id IS NULL set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
+                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id IS NULL  set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
                     }
@@ -223,9 +241,7 @@ class Model {
         }
             // console.log(status)
         }
-        // return new Promise((resolve, reject) => {
-        //     const service = this.where("name=${}")
-        // });
+
     }
 
     update(objectParam) {
@@ -238,7 +254,7 @@ class Model {
                 }
             })
             query = query.substring(0, query.length - 1);
-            // console.log(`update ${this.table} set ${query} where id=${object["id"]}`)
+           
             this.mysqlConnect.query(`update ${this.table} set ${query} where id=${object["id"]}`, (err, results) => {
                 if (err) {
                     return reject(null);
@@ -283,4 +299,4 @@ class Model {
 
 }
 
-module.exports = Model
+module.exports = Model;

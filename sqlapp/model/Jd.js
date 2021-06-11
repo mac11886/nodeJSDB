@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class JD extends Model {
     constructor(){
-        super("jd", "product_id", 4)
+        super("jd")
     }
     getEmptyObj(){
         return {

@@ -1,6 +1,7 @@
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
+var cors = require("cors");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const { spawn } = require("child_process");
@@ -10,17 +11,19 @@ var usersRouter = require("./routes/users");
 var app = express();
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
-app.set("view engine", "ejs");
-
+// app.set("views", path.join(__dirname, "views"));
+// app.set("view engine", "pug");
+// app.set("view engine", "ejs");
 
 app.use(logger("dev"));
 app.use(express.json());
+app.use(cors());
 // send data to backend
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use('public/javascripts', express.static(path.join(__dirname, 'public/javascripts')));
+
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -29,6 +32,8 @@ app.use("/users", usersRouter);
 app.use(function (req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function (err, req, res, next) {

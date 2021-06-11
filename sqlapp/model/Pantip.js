@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class Pantip extends Model {
     constructor(){
-        super("pantip", "post_id", 3)
+        super("pantip")
     }
     getEmptyObj(){
         return {
