@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class Facebook extends Model {
     constructor(){
-        super("facebook","post_id",5)
+        super("facebook")
     }
     getEmptyObj(){
         return {

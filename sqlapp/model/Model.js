@@ -24,8 +24,6 @@ class Model {
                 if (err) {
                     return reject(null);
                 }
-                
-                console.log(results)
                 return resolve(results);
             });
         });
@@ -39,6 +37,16 @@ class Model {
                 // res.json(results);
                 console.log(Object.values(results[0])[0])
                 // console.log(results)
+                return resolve(Object.values(results[0])[0]);
+            });
+        });
+    }
+    getKeywordCount(service_id,key_id){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
+                if(err){
+                    return reject(err.message);
+                }
                 return resolve(Object.values(results[0])[0]);
             });
         });

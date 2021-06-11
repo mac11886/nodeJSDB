@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class Shopee extends Model {
     constructor(){
-        super("shopee", "product_id", 1)
+        super("shopee")
     }
     getEmptyObj(){
         return {

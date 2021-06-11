@@ -51,7 +51,10 @@ IndexController.get = async (req, res) => {
         el.service = "facebook"
     }
   });
-  res.render("index.pug", { title: "Job", name: "mac", objectJson: results });
+  // res.render("index.pug", { objectJson: results });
+  // res.render({  results });
+  // return results;
+  res.json( results );
 
 }
 
@@ -69,7 +72,9 @@ IndexController.post = async (req, res) => {
           let service = req.body.service;
           let keyword = req.body.keyword;
           let page = req.body.page;
-          let startTime = req.body.startTime;
+          // let startTime = req.body.startTime;
+          let date = new Date(); // Or the date you'd like converted.
+          let startTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
     
           let response = await db.addJob({
             keyword: keyword,
@@ -87,11 +92,6 @@ IndexController.post = async (req, res) => {
     
           python.stdin.end();
           
-          
-
-            
-            
-
           python.stdout.on("data", function (data) {
             console.log("Pipe data from python script ...");
             dataToSend = data.toString();
@@ -313,9 +313,7 @@ IndexController.post = async (req, res) => {
             response = await db.updateJob(response.id);
             res.json(response);
             // const sendTosql = result[1];
-          });
-          
-          
+          }); 
 
           // collect data from script
           

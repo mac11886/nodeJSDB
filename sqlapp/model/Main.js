@@ -12,6 +12,8 @@ class Main extends Model {
             page : null,
         }
     }
+
+    
 }
 
 module.exports = Main

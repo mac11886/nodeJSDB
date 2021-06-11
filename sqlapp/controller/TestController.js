@@ -1,39 +1,48 @@
-const db = require("../db");
-const fs = require("fs");
-const utf8 = require("utf8");
-const Amazon = require("../model/Amazon");
-const Shopee = require("../model/Shopee");
-const Job = require("../model/Job");
-const Pantip = require("../model/Pantip");
-const Jd = require("../model/Jd");
-const Facebook = require("../model/Facebook");
-const Keyword = require("../model/Keyword");
-const Model = require("../model/Model")
-const { resolve } = require("path");
-const { rejects } = require("assert");
+const Model = require("../model/Model");
+const Keyword = require("../model/Keyword")
+var l = require('lodash');
+const Service = require("../model/Service");
+const Main = require("../model/Main");
 
 TestController = {}
 
 TestController.test = async (req, res) => {
-  main = new Model("main");
-  result = await main.getCount();
-  // console.log(result['id'])
-    // const object = {
-    //     name: 'Study Notes เคมี ม.ปลาย สไตล์ Cornell 2',
-    //     price: '247',
-    //     type: 'general',
-    //     star: '0.0',
-    //     sold: 'no sold',
-    //     send_from: 'จังหวัดกรุงเทพมหานคร',
-    //     img_src: 'https://cf.shopee.co.th/file/be2b5e0f54cbea4228be9429d013378f_tn',
-    //     url: 'https://shopee.co.th//Study-Notes-เคมี-ม.ปลาย-สไตล์-Cornell-2-i.55217237.4361443615',
-    //     product_id: '3361443615'
-    //   }
+  try{
+    var maincount = []
+    keywords = await new Keyword().get();
+    // console.log(keywords);
+    services = await new Service().get();
     
-    // const shopee = new Shopee();
-    // await shopee.saveEcom(object, "jjj")
-    // await shopee.saveEcom(object, "jjj")
-    res.render("status.ejs", { title: "Job", name: "mac", object: result });
+
+    for(const key of keywords){
+      for(const service of services){
+        try{
+          data = await new Main().getKeywordCount(service.id ,key.id);
+          // console.log(data);
+        if (data > 0){        
+          obj = {service: service.name , keyword:key.word , count: data}
+          // console.log(obj);
+          // console.log(service.id + "service")
+          // console.log(data)
+          maincount.push(obj);
+        }
+      }catch(error){
+        console.log(error,"error count")
+      }
+      }
+    }
+    // console.log(maincount)
+    // console.log(maincount[1])
+    const shopee =maincount.filter(service => service.service === "Shopee")
+    // console.log(shopee)
+
+    const lodash = l.groupBy(maincount,"service")
+    // console.log(lodash)
+
+    res.render("status.ejs", { lodash });
+  }catch(error){
+    console.log(error,"error count")
+  }
 }
 
-module.exports = TestController
+module.exports = TestController;
