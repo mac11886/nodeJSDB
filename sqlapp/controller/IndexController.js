@@ -11,6 +11,7 @@ const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
 const Keyword = require("../model/Keyword");
+const Service = require("../model/Service");
 const { resolve } = require("path");
 const { rejects } = require("assert");
 
@@ -51,16 +52,15 @@ IndexController.get = async (req, res) => {
         el.service = "facebook"
     }
   });
-  // res.render("index.pug", { objectJson: results });
-  // res.render({  results });
-  // return results;
-  res.json( results );
-
+  let services = await new Service().get();
+  let keywords = await new Keyword().get();
+  
+  res.json( { results , services , keywords } );
+ 
 }
 
 IndexController.post = async (req, res) => {
     try {
-      
         try {
           var dataToSend;
           // spawn new child process to call the python script
@@ -85,7 +85,6 @@ IndexController.post = async (req, res) => {
           });
     
           let utfKeyword = encodeURI(keyword);
-
       
           //amazon
           python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
@@ -97,21 +96,18 @@ IndexController.post = async (req, res) => {
             dataToSend = data.toString();
             console.log(dataToSend);
           });
-
           
           // in close event we are sure that stream from child process is closed
           python.on("exit", async (code) => {
             console.log('on exit')
             const raw = fs.readFileSync("myfile.csv", "utf8");
             console.log(`child process close all stdio with code ${code}`);
-            console.log("service:" + service);
     
             let i = 0;
             let job = new Job();
     
             //shopee
             if (service == 1) {
-              // console.log("service = 1")
               //edit header
               const header = raw.split(/\r?\n/)[0].split(",");
               header[6] = "send_from";
@@ -125,7 +121,7 @@ IndexController.post = async (req, res) => {
               }
               let shopeeObj = new Shopee();
               try{
-              lastOne = await job.getLastOne();
+                lastOne = await job.getLastOne();
               }catch(err) {
                 console.log(err, 'error lastOne')
                 return;
@@ -137,7 +133,6 @@ IndexController.post = async (req, res) => {
                   //save to database
                   try {
                    await shopeeObj.saveEcom(value, keyword);
-                    
                   } catch (error) {
                     console.log(error.message, 'error ', value, keyword)
                   }
@@ -151,7 +146,6 @@ IndexController.post = async (req, res) => {
               } catch(err) {
                 console.log('error update job')
               }
-
 
               //amazon
             } else if (service == 2) {
@@ -270,9 +264,10 @@ IndexController.post = async (req, res) => {
                 console.log(error,'error update job')
                 
               }
+            } 
 
-            //facebook
-            } else if (service == 5) {
+            //Facebook
+            else if (service == 5) {
               let facebookObj = new Facebook();
               const header = raw.split(/\r?\n/)[0].split(",");
               header[11] = "good_word";
@@ -315,8 +310,6 @@ IndexController.post = async (req, res) => {
             // const sendTosql = result[1];
           }); 
 
-          // collect data from script
-          
         } catch (e) {
           console.log(e);
           res.sendStatus(500);

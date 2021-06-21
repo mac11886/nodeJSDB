@@ -1,29 +1,26 @@
-const Model = require("../model/Model");
-const Keyword = require("../model/Keyword")
+const Keyword = require("../model/Keyword");
 var l = require('lodash');
 const Service = require("../model/Service");
 const Main = require("../model/Main");
+const E_service = require("../model/E_service");
 
 TestController = {}
 
 TestController.test = async (req, res) => {
   try{
-    var maincount = []
+    let maincount = []
     keywords = await new Keyword().get();
-    // console.log(keywords);
     services = await new Service().get();
-    
+    e_services = await new E_service().get();
+    mains = await new Main().get();
 
+    
     for(const key of keywords){
       for(const service of services){
         try{
           data = await new Main().getKeywordCount(service.id ,key.id);
-          // console.log(data);
         if (data > 0){        
           obj = {service: service.name , keyword:key.word , count: data}
-          // console.log(obj);
-          // console.log(service.id + "service")
-          // console.log(data)
           maincount.push(obj);
         }
       }catch(error){
@@ -31,17 +28,13 @@ TestController.test = async (req, res) => {
       }
       }
     }
-    // console.log(maincount)
-    // console.log(maincount[1])
-    const shopee =maincount.filter(service => service.service === "Shopee")
-    // console.log(shopee)
-
+    
+    // const shopee =maincount.filter(service => service.service === "Shopee")
     const lodash = l.groupBy(maincount,"service")
-    // console.log(lodash)
+    res.json( {lodash , keywords } );
 
-    res.render("status.ejs", { lodash });
   }catch(error){
-    console.log(error,"error count")
+    console.log(error,"error")
   }
 }
 

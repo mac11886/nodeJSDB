@@ -26,6 +26,7 @@ class Model {
                 }
                 return resolve(results);
             });
+            this.mysqlConnect.end()
         });
     }
     getCount() { 
@@ -39,6 +40,7 @@ class Model {
                 // console.log(results)
                 return resolve(Object.values(results[0])[0]);
             });
+            this.mysqlConnect.end()
         });
     }
     getKeywordCount(service_id,key_id){
@@ -49,6 +51,7 @@ class Model {
                 }
                 return resolve(Object.values(results[0])[0]);
             });
+            this.mysqlConnect.end()
         });
     }
     getLastOne() {
@@ -59,6 +62,7 @@ class Model {
                 }
                 return resolve(results);
             });
+            this.mysqlConnect.end()
         });
     }
 
@@ -70,6 +74,7 @@ class Model {
                 }
                 return resolve(results);
             });
+            this.mysqlConnect.end()
         });
     }
 
@@ -83,13 +88,10 @@ class Model {
                 }
                 return resolve("add success");
             });
+            this.mysqlConnect.end()
         });
     }
     async saveEcom(objectParam, word) {
-        //save keyword 
-        console.log("saving data to DB")
-        // console.log(objectParam)                
-        console.log(word)
 
         let keywords = await new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from keyword where word='${word}'`, (err, results) => {
@@ -98,9 +100,10 @@ class Model {
                 }
                 return resolve(results);
             });
+            
         });
 
-        console.log(keywords.length+"-------------------------------")
+        // console.log(keywords.length+"-------------------------------")
  
         if (keywords.length == 0) {
             try{
@@ -160,7 +163,7 @@ class Model {
 
         try{
             await new Promise((resolve, reject) => {
-                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id IS NULL  set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
+                this.mysqlConnect.query(`update e_service join ${this.table} on e_service.e_id IS NULL set e_service.e_id = ${this.table}.id ORDER BY ${this.table}.id desc`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
                     }
@@ -170,14 +173,6 @@ class Model {
         }catch(error){
             console.log(error,"error update e_service")
         }
-            // const dataEService = new Promise((resolve, reject) => {
-            //     this.mysqlConnect.query(`select * from e_service order by id desc limit 1`, (err, results) => {
-            //         if (err) {
-            //             return reject(err);
-            //         }
-            //         return resolve(results);
-            //     });
-            // });
         try{
             await new Promise((resolve, reject) => {
                 this.mysqlConnect.query(`insert into main set ?`, [{ "e_service_id": 0, "key_id": 0 }], (err, results) => {
@@ -218,7 +213,6 @@ class Model {
         }catch(error){
             console.log(error,"error updater service id")
         }
-            // console.log(status)
         }
 
     }
@@ -240,6 +234,7 @@ class Model {
                 }
                 return resolve("edit success");
             });
+            this.mysqlConnect.end()
         });
     }
     updateJobId(jobId) {
@@ -251,9 +246,9 @@ class Model {
                     return reject(err);
                     
                 }
-                console.log("jobid done")
                 return resolve(results);
             });
+            this.mysqlConnect.end()
         });
     }
     delete(id) {
@@ -264,6 +259,7 @@ class Model {
                 }
                 return resolve("delete success");
             });
+            this.mysqlConnect.end()
         });
     }
     where(condition) {
@@ -276,6 +272,7 @@ class Model {
                 return resolve(results);
             });
         });
+        this.mysqlConnect.end()
     }
 
 }

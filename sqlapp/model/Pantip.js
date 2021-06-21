@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class Pantip extends Model {
     constructor(){
-        super("pantip")
+        super("pantip","product_id", 3)
     }
     getEmptyObj(){
         return {
