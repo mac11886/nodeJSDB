@@ -61,6 +61,19 @@ class Model {
             this.mysqlConnect.end() 
         });
     }
+    getproductbykeyword(service,id){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT * FROM ${service} INNER JOIN e_service ON ${service}.id = e_service.e_id INNER JOIN main ON e_service.id = main.e_service_id WHERE main.key_id = ${id}`, (err, results) => {
+                if(err){
+                    return reject(err.message);
+                }
+                console.log(results)
+                return resolve(results);
+            });
+            
+            this.mysqlConnect.end() 
+        });
+    }
     getLastOne() {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 ", (err, results) => {
