@@ -2,7 +2,7 @@ const Model = require("./model");
 
 class Amazon extends Model {
     constructor(){
-        super("amazon")
+        super("amazon","product_id",2)
     }
     getEmptyObj(){
         return {

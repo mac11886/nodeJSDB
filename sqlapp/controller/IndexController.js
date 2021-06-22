@@ -13,6 +13,7 @@ const Facebook = require("../model/Facebook");
 const Keyword = require("../model/Keyword");
 const { resolve } = require("path");
 const { rejects } = require("assert");
+const Service =require("../model/Service");
 
 IndexController.get = async (req, res) => {
  
@@ -54,7 +55,9 @@ IndexController.get = async (req, res) => {
   // res.render("index.pug", { objectJson: results });
   // res.render({  results });
   // return results;
-  res.json( results );
+  let keywords = await new Keyword().get()
+  let services = await new Service().get()
+  res.json( {results,keywords,services} );
 
 }
 
@@ -64,8 +67,8 @@ IndexController.post = async (req, res) => {
         try {
           var dataToSend;
           // spawn new child process to call the python script
-          const python = spawn("python", [
-            "C:/Users/Bell/intern/nodeJSDB/pythongetpostshopee1/main.py",
+          const python = spawn("/usr/local/bin/python3.8", [
+            "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
           ]);
 
           
