@@ -12,6 +12,7 @@ const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
 const Keyword = require("../model/Keyword");
 const Service = require("../model/Service");
+const Facebook_page = require("../model/Facebook_page");
 const { resolve } = require("path");
 const { rejects } = require("assert");
 
@@ -54,8 +55,9 @@ IndexController.get = async (req, res) => {
   });
   let services = await new Service().get();
   let keywords = await new Keyword().get();
+  let facebook_pages = await new Facebook_page().get();
   
-  res.json( { results , services , keywords } );
+  res.json( { results , services , keywords , facebook_pages } );
  
 }
 

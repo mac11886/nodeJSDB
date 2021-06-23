@@ -22,6 +22,17 @@ class Facebook extends Model {
             bad_word: null	
         }
     }
+
+    searchKeywordCount(keyword){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT COUNT(*) FROM facebook WHERE post_text LIKE '%${keyword}%'`, (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+                return resolve(Object.values(results[0])[0]);
+            });
+        });
+    }
 }
 
 module.exports = Facebook

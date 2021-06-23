@@ -1,5 +1,5 @@
 const Keyword = require("../model/Keyword");
-var l = require('lodash');
+const l = require('lodash');
 const Service = require("../model/Service");
 const Main = require("../model/Main");
 const E_service = require("../model/E_service");
