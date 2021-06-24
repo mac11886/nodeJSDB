@@ -8,57 +8,120 @@ const Facebook = require("../model/Facebook");
 KeywordController = {}
 
 KeywordController.get = async (req, res) => {
-    
+    try{
     let keywords = await new Keyword().get();
     res.json( { keywords } );
+    }catch(error){
+        res.json();
+    }
 }
 
-KeywordController.fillter = async (req,res) => {
-    services = await new Service().get()
-    let id = req.query.id
-    let result = await new Keyword().where("keyword.id = " + id);
-    let keyword = Object.values(JSON.parse(JSON.stringify(result)))
-    let maincount = []
+KeywordController.fillter = (req,res) => {
+    
 
-    for (const service of services){
+    let values = new Promise(async(resolve,reject) => {
+        const  id = req.query.id
+        let where = await new Keyword().where("id = " + id);
+        const keyword = Object.values(JSON.parse(JSON.stringify(where)))[0]
+        
+        let get = await new Service().get()
+        let services = Object.values(JSON.parse(JSON.stringify(get)))
+
+        resolve({keyword:keyword,id:id,services:services})
+    })
+    values.then(async(resolve)=>{
+        console.log("ffff",(resolve.id))
+        let maincount = service_loop(resolve.keyword,resolve.id,resolve.services)
+
+        maincount.then(async(maincount) =>{
+            const lodash = l.groupBy(maincount,"service")
+            res.json({lodash}) 
+        })
+    })
+   
+
+
+    // for (let service of services){
+    //     try {
+    //         if(service.id === 5){
+    //             data = await new Facebook().searchKeywordCount(keyword[0].thai_word)  
+            
+                
+    //         }else{
+    //             data = await new Main().getKeywordCount(service.id,id)
+                
+    //         }
+
+    //     let obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
+    //     maincount.push(obj) 
+
+    //     }catch(error){
+    //         console.log(error,"error count inner")
+    //       }
+
+    // }
+    // const lodash = l.groupBy(maincount,"service")
+    // res.json({lodash})
+}
+
+function service_loop (keyword,id,services){
+    return new Promise(async(resolve,reject) => {
+        
+        let maincount = []
+        let data =0
+        console.log(keyword)
+        for (let service of services){
+            console.log(service.id)
         try {
             if(service.id === 5){
-                data = await new Facebook().searchKeywordCount(keyword[0].thai_word).then(() => {
-                    console.log(data)
-                  if (data > 0){        
-                    obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
-                    maincount.push(obj)
-                    }  
-                })
+                data = await new Facebook().searchKeywordCount(keyword.thai_word,keyword.eng_word)  
+            
                 
             }else{
-                data = await new Main().getKeywordCount(service.id,id).then(() => {
-                   if (data > 0){        
-                    obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
-                    maincount.push(obj);
-                    } 
-                })
+                data = await new Main().getKeywordCount(service.id,id)
                 
             }
+
+        let obj = {service: service.name , thai_word:keyword.thai_word ,eng_word:keyword.eng_word , count: data}
+        console.log("objjj",obj)
+        maincount.push(obj) 
 
         }catch(error){
             console.log(error,"error count inner")
           }
 
-    }
-    const lodash = l.groupBy(maincount,"service")
-    res.json({lodash})
+        }
+        resolve(maincount)
+    })
+    
 }
 
+
+
+
+
 KeywordController.getKeywordByService = async(req,res) => {
-    let service = req.query.service
-    let id = req.query.id
-    try{
-    let data = await new Model().getproductbykeyword(service,id)
-        res.json({data})
-    }catch(error){
-        res.json()
-        console.log("getKeywordByService",error)
+    const service = req.query.service
+    const id = req.query.id
+    const words = await new Keyword().where("id = "+id)
+    const thai_word = words[0].thai_word
+    const eng_word = words[0].eng_word
+ 
+    if(service === "facebook"){
+        try{
+            let data = await new Facebook().searchKeywordAll(thai_word,eng_word)
+                res.json({data})
+            }catch(error){
+                res.json()
+            }
+
+    }else{
+        try{
+        let data = await new Model().getproductbykeyword(service,id)
+            res.json({data})
+        }catch(error){
+            res.json()
+        }
     }
 
         

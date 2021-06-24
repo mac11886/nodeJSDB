@@ -1,3 +1,4 @@
+const { reject } = require("lodash");
 const Model = require("../model/Model")
 
 class Facebook extends Model {
@@ -23,16 +24,25 @@ class Facebook extends Model {
         }
     }
 
-    searchKeywordCount(keyword){
-        console.log("search",keyword)
-        return new Promise(function(resolve, reject){
-            this.mysqlConnect.query(`SELECT COUNT(*) FROM facebook WHERE post_text LIKE '%${keyword}%'`, (err, results) => {
-                console.log(Object.values(results[0])[0])
+    searchKeywordCount(thai_word,eng_word){
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`SELECT COUNT(*) FROM facebook WHERE post_text LIKE '%${thai_word}%' OR '%${eng_word}%'`, (err, results) => {
                 if (err) {
                     reject(null);
                 }
                 resolve(Object.values(results[0])[0]);
             });
+        });
+    }
+
+    searchKeywordAll(thai_word,eng_word){
+        return new Promise((resolve,reject) =>{
+            this.mysqlConnect.query(`SELECT * FROM facebook WHERE post_text LIKE '%${thai_word}%' OR '%${eng_word}%'`,(err,results) =>{
+                if(err){
+                    reject(null);
+                }
+                resolve(results)
+            })
         });
     }
 }
