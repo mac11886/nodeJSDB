@@ -3,6 +3,7 @@ const Main = require("../model/Main");
 const Service = require("../model/Service");
 const Model = require("../model/Model");
 const l = require('lodash');
+const Facebook = require("../model/Facebook");
 
 KeywordController = {}
 
@@ -21,13 +22,24 @@ KeywordController.fillter = async (req,res) => {
 
     for (const service of services){
         try {
-            data = await new Main().getKeywordCount(service.id,id);
-            if (data > 0){        
-                obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
-                // console.log(service.id + "service")
-                // console.log(data)
-                maincount.push(obj);
-              }
+            if(service.id === 5){
+                data = await new Facebook().searchKeywordCount(keyword[0].thai_word).then(() => {
+                    console.log(data)
+                  if (data > 0){        
+                    obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
+                    maincount.push(obj)
+                    }  
+                })
+                
+            }else{
+                data = await new Main().getKeywordCount(service.id,id).then(() => {
+                   if (data > 0){        
+                    obj = {service: service.name , thai_word:keyword[0].thai_word ,eng_word:keyword[0].eng_word , count: data}
+                    maincount.push(obj);
+                    } 
+                })
+                
+            }
 
         }catch(error){
             console.log(error,"error count inner")
@@ -45,19 +57,23 @@ KeywordController.getKeywordByService = async(req,res) => {
     let data = await new Model().getproductbykeyword(service,id)
         res.json({data})
     }catch(error){
+        res.json()
         console.log("getKeywordByService",error)
     }
+
         
     
 };
 
 KeywordController.post = async (req, res) => {
+    let model = new Model();
     let thai_word = req.body.thai_word
     let eng_word = req.body.eng_word
     console.log("thai",thai_word)
     try{
     await new Keyword().check(thai_word,eng_word);
     }catch(error){console.log("keyword.post",error)}
+    model.close();
 
 
 }

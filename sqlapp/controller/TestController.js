@@ -4,11 +4,13 @@ const l = require('lodash');
 const Service = require("../model/Service");
 const Main = require("../model/Main");
 
+
 TestController = {}
 
 TestController.test = async (req, res) => {
   try{
     var maincount = []
+    
     keywords = await new Keyword().get();
     // console.log(keywords);
     services = await new Service().get();

@@ -1,8 +1,8 @@
-const Model = require("./model");
+const Model = require("../model/Model")
 
 class Facebook extends Model {
     constructor(){
-        super("facebook","post_id",5)
+        super("facebook","post_id", 5)
     }
     getEmptyObj(){
         return {
@@ -21,6 +21,19 @@ class Facebook extends Model {
             good_word: null,	
             bad_word: null	
         }
+    }
+
+    searchKeywordCount(keyword){
+        console.log("search",keyword)
+        return new Promise(function(resolve, reject){
+            this.mysqlConnect.query(`SELECT COUNT(*) FROM facebook WHERE post_text LIKE '%${keyword}%'`, (err, results) => {
+                console.log(Object.values(results[0])[0])
+                if (err) {
+                    reject(null);
+                }
+                resolve(Object.values(results[0])[0]);
+            });
+        });
     }
 }
 

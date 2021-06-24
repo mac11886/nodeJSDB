@@ -18,12 +18,6 @@ class Model {
             else console.log("DB connect fail");
         });
     }
-
-    // createKeyword(){
-    //     return new Promise((resolve,reject) => {
-    //         this.mysqlConnect.query(`INSERT INTO `keyword`(`id`, `thai_word`, `eng_word`) VALUES ('[value-1]','[value-2]','[value-3]')`)
-    //     })
-    // }
     
     get(sortType) { 
         return new Promise((resolve, reject) => {
@@ -42,9 +36,6 @@ class Model {
                 if (err) {
                     return reject(null);
                 }
-                // res.json(results);
-                console.log(Object.values(results[0])[0])
-                // console.log(results)
                 return resolve(Object.values(results[0])[0]);
             });
             this.mysqlConnect.end() 
@@ -67,7 +58,6 @@ class Model {
                 if(err){
                     return reject(err.message);
                 }
-                console.log(results)
                 return resolve(results);
             });
             
@@ -171,37 +161,12 @@ class Model {
                 }
                 return resolve("add success");
             });
+            this.mysqlConnect.end() 
         });
     }
     async saveEcom(objectParam, word) {
         //save keyword 
         console.log("saving data to DB")
-        // console.log(objectParam)                
-        // console.log(word)
-
-        // let keywords = await new Promise((resolve, reject) => {
-        //     this.mysqlConnect.query(`select * from keyword where thai_word='${word.thai_word}'`, (err, results) => {
-        //         if (err) {
-        //             return reject(err);
-        //         }
-        //         return resolve(results);
-        //     });
-        // });
- 
-        // if (keywords.length == 0) {
-        //     try{
-        //     await new Promise((resolve, reject) => {
-        //         this.mysqlConnect.query(`insert into keyword`, [{ "word": word }], (err, results) => {
-        //             if (err) {
-        //                 return reject(err);
-        //             }
-        //             return resolve("yes");
-        //         });
-        //     });
-        // }catch(error){
-        //     console.log(error,"errorn select keyword")
-        // }
-        // }
 
         const joinData = await new Promise((resolve, reject) => {
             this.mysqlConnect.query(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, (err, results) => {
@@ -209,14 +174,13 @@ class Model {
                     return reject(err);
                 }
                 return resolve(results);
-            });
+            }); 
         });
 
 
         if (joinData.length == 0) {
             try{
             await new Promise((resolve, reject) => {
-                // console.log(objectParam)
                 this.mysqlConnect.query(`insert into ${this.table} set ?`, objectParam, (err, results) => {
                     if (err) {
                         return reject(err);
@@ -237,7 +201,7 @@ class Model {
                         return reject(err);
                     }
                     return resolve(results);
-                });
+                }); 
             });
         }catch(error){
             console.log(error,"query service")
@@ -363,6 +327,9 @@ class Model {
             });
             this.mysqlConnect.end() 
         });
+    }
+    close(){
+        this.mysqlConnect.end();
     }
 
 }
