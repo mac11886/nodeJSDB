@@ -21,6 +21,7 @@ testdb.all = () => {
       if (err) {
         return reject(err);
       }
+
       return resolve(results);
     });
   });

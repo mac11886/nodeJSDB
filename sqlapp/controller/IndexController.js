@@ -24,7 +24,7 @@ function  getData (service,keyword,page){
     python = spawn("/usr/local/bin/python3.8", [
       "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
     ]);
-          //amazon
+       
           python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     
           python.stdin.end();
@@ -71,18 +71,24 @@ function  getData (service,keyword,page){
       
               for (const value of result) {
                 delete value["num"];
+              try {  
                 if (i >= 1) {
-                  //save to database
-                  try {
-                   await shopeeObj.saveEcom(value, keyword);
-                    
-                  } catch (error) {
-                    console.log(error.message, 'error ', value, keyword)
+                  let check = await shopeeObj.check_product(value["product_id"],"product_id" );
+                  console.log("found =",check)
+                  if (check > 0){
+                    await shopeeObj.update_product(value,"product_id")
+                    model.close()
+                  } else{
+                    await shopeeObj.saveEcom(value, keyword);
+                    model.close()
                   }
-                  
+                  //save to database
+                  } 
+                }catch (error) {
+                    console.log(error.message, 'error ', value, keyword)
                 }
+                  
                 i++;
-              }
               model.close()
               console.log("done")
               try {
@@ -91,7 +97,7 @@ function  getData (service,keyword,page){
               } catch(err) {
                 console.log('error update job')
               }
-
+            }
 
               //amazon
             } else if (service == 2) {
@@ -116,14 +122,22 @@ function  getData (service,keyword,page){
 
               for (const value of result) {  
                 delete value["num"];
-                if (i >= 1) {
-                    try {
+                try {  
+                  if (i >= 1) {
+                    let check = await amazonObj.check_product(value["product_id"],"product_id" );
+                    console.log("found =",check)
+                    if (check > 0){
+                      await amazonObj.update_product(value,"product_id")
+                      model.close()
+                    } else{
                       await amazonObj.saveEcom(value, keyword);
+                      model.close()
+                    }
+                    //save to database
                     } 
-                    catch(error) {
+                  }catch (error) {
                       console.log(error.message, 'error ', value, keyword)
-                    }       
-                }
+                  }
                 i++;
               }
               model.close()
@@ -161,13 +175,22 @@ function  getData (service,keyword,page){
               for(const value of result){
                 // console.log(result)
                 delete value["num"];
+                try{
                 if (i >= 1) {
-                  try{
-                    await pantipObj.saveEcom(value,keyword);
-                  }catch(error){
-                    console.log(error.message, 'error ', value, keyword)
+                  let check = await pantipObj.check_product(value["post_id"],"post_id" );
+                    console.log("found =",check)
+                    if (check > 0){
+                      await pantipObj.update_product(value,"post_id")
+                      model.close()
+                    } else{
+                      await pantipObj.saveEcom(value, keyword);
+                      model.close()
+                    }
+                    //save to database
+                    } 
+                  }catch (error) {
+                      console.log(error.message, 'error ', value, keyword)
                   }
-                }
                 i++;
               }
               model.close()
@@ -201,14 +224,22 @@ function  getData (service,keyword,page){
               // console.log(lastOne);
               for (const value of result) {
                 delete value["num"];
+                try{
                 if (i >= 1) {
-                  try{
-                    await jdObj.saveEcom(value,keyword);
+                  let check = await jdObj.check_product(value["product_id"],"product_id" );
+                    console.log("found =",check)
+                    if (check > 0){
+                      await jdObj.update_product(value,"product_id")
+                      model.close()
+                    } else{
+                      await jdObj.saveEcom(value, keyword);
+                      model.close()
+                    }
+                    //save to database
+                    } 
+                  }catch (error) {
+                      console.log(error.message, 'error ', value, keyword)
                   }
-                  catch(error){
-                    console.log(error.message, 'error ', value, keyword)
-                  }
-                }
                 i++;
               }
               model.close()
@@ -243,13 +274,22 @@ function  getData (service,keyword,page){
               }
               for(const value of result){
                 delete value["num"];
+                try{
                 if (i >= 1) {
-                  try{
-                    await facebookObj.saveEcom(value,keyword)
-                  }catch(error){
-                    console.log(error.message, 'error ', value, keyword)
+                  let check = await facebookObj.check_product(value["post_id"],"post_id");
+                    console.log("found =",check)
+                    if (check > 0){
+                      await facebookObj.update_product(value,"post_id")
+                      model.close()
+                    } else{
+                      await facebookObj.saveEcom(value, keyword);
+                      model.close()
+                    }
+                    //save to database
+                    } 
+                  }catch (error) {
+                      console.log(error.message, 'error ', value, keyword)
                   }
-                }
                 i++;
               }
               model.close()
@@ -326,6 +366,9 @@ IndexController.post = async (req, res) => {
           
           let service = req.body.service;
           let keyword = req.body.keyword;
+          console.log("keywootrrrrr",keyword)
+          // let thai_word = keyword[0];
+          // let eng_word = keyword[1];
           let page = req.body.page;
           // let startTime = req.body.startTime;
           let date = new Date(); // Or the date you'd like converted.
@@ -356,8 +399,7 @@ IndexController.post = async (req, res) => {
               res.json(response);
               });
           }
-
-          
+ 
         } catch (e) {
           console.log(e);
           res.sendStatus(500);

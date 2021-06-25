@@ -17,7 +17,6 @@ KeywordController.get = async (req, res) => {
 }
 
 KeywordController.fillter = (req,res) => {
-    
 
     let values = new Promise(async(resolve,reject) => {
         const  id = req.query.id
@@ -30,7 +29,6 @@ KeywordController.fillter = (req,res) => {
         resolve({keyword:keyword,id:id,services:services})
     })
     values.then(async(resolve)=>{
-        console.log("ffff",(resolve.id))
         let maincount = service_loop(resolve.keyword,resolve.id,resolve.services)
 
         maincount.then(async(maincount) =>{
@@ -101,7 +99,9 @@ function service_loop (keyword,id,services){
 
 
 KeywordController.getKeywordByService = async(req,res) => {
+
     const service = req.query.service
+    const service_id = req.query.service_id
     const id = req.query.id
     const words = await new Keyword().where("id = "+id)
     const thai_word = words[0].thai_word
@@ -117,7 +117,7 @@ KeywordController.getKeywordByService = async(req,res) => {
 
     }else{
         try{
-        let data = await new Model().getproductbykeyword(service,id)
+        let data = await new Model().getproductbykeyword(service,id,service_id)
             res.json({data})
         }catch(error){
             res.json()

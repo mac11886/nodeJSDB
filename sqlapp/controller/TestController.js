@@ -15,9 +15,6 @@ TestController.test = async (req, res) => {
     // console.log(keywords);
     services = await new Service().get();
 
-
-    
-
     for(const key of keywords){
       for(const service of services){
         try{
