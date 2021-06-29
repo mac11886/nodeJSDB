@@ -33,6 +33,17 @@ class Facebook extends Model {
             });
         });
     }
+
+    searchKeywordAll(thai_word,eng_word){
+        return new Promise((resolve,reject) =>{
+            this.mysqlConnect.query(`SELECT * FROM facebook WHERE post_text LIKE '%${thai_word}%' OR '%${eng_word}%'`,(err,results) =>{
+                if(err){
+                    reject(null);
+                }
+                resolve(results)
+            })
+        });
+    }
 }
 
 module.exports = Facebook
