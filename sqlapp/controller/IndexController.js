@@ -69,19 +69,29 @@ function  getData (service,keyword,page){
                 return;
               }
       
-              for (const value of result) {
+              for await(const value of result) {
                 delete value["num"];
               try {  
                 if (i >= 1) {
-                  let check = await shopeeObj.check_product(value["product_id"],"product_id" );
+                  shopeeObj.check_product(value["product_id"],"product_id" )
+                  
+                  .then(async(check) => {
                   console.log("found =",check)
                   if (check > 0){
-                    await shopeeObj.update_product(value,"product_id")
+                    console.log("if")
+                    await shopeeObj.update_product(value,"product_id").then(() => {
+                      shopeeObj.updateJobId(lastOne[0].id);
+                    })
+                    
                     model.close()
                   } else{
-                    await shopeeObj.saveEcom(value, keyword);
+                    console.log("else")
+                    // await shopeeObj.saveEcom(value, keyword).then(() => {
+                    //   shopeeObj.updateJobId(lastOne[0].id);
+                    // })
                     model.close()
                   }
+                });
                   //save to database
                   } 
                 }catch (error) {
@@ -89,14 +99,11 @@ function  getData (service,keyword,page){
                 }
                   
                 i++;
-              model.close()
-              console.log("done")
-              try {
-                shopeeObj.updateJobId(lastOne[0].id);
 
-              } catch(err) {
-                console.log('error update job')
-              }
+                // console.log("lastOne",lastOne[0].id,keyword)
+                // shopeeObj.updateJobId(lastOne[0].id);
+
+
             }
 
               //amazon
@@ -124,14 +131,15 @@ function  getData (service,keyword,page){
                 delete value["num"];
                 try {  
                   if (i >= 1) {
-                    let check = await amazonObj.check_product(value["product_id"],"product_id" );
-                    console.log("found =",check)
-                    if (check > 0){
-                      await amazonObj.update_product(value,"product_id")
-                      model.close()
-                    } else{
-                      await amazonObj.saveEcom(value, keyword);
-                      model.close()
+                    
+                      let check = await amazonObj.check_product(value["product_id"],"product_id" );
+                      console.log("found =",check)
+                      if (check > 0){
+                        await amazonObj.update_product(value,"product_id")
+                        model.close()
+                      } else{
+                        await amazonObj.saveEcom(value, keyword);
+                        model.close()
                     }
                     //save to database
                     } 
@@ -272,7 +280,7 @@ function  getData (service,keyword,page){
                 console.log(error, 'error lastOne')
                 return;
               }
-              for(const value of result){
+              for await(const value of result){
                 delete value["num"];
                 try{
                 if (i >= 1) {
@@ -310,7 +318,8 @@ function  getData (service,keyword,page){
 }
 
 IndexController.get = async (req, res) => {
- 
+  const model1 = new Model()
+  model1.testForModel()
   results = await db.all();
   results.forEach((el) => {
     let date = new Date(el.start_time); // Or the date you'd like converted.
