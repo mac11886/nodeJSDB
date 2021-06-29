@@ -86,9 +86,9 @@ function  getData (service,keyword,page){
                     model.close()
                   } else{
                     console.log("else")
-                    // await shopeeObj.saveEcom(value, keyword).then(() => {
-                    //   shopeeObj.updateJobId(lastOne[0].id);
-                    // })
+                    await shopeeObj.saveEcom(value, keyword).then(() => {
+                      shopeeObj.updateJobId(lastOne[0].id);
+                    })
                     model.close()
                   }
                 });
@@ -319,7 +319,7 @@ function  getData (service,keyword,page){
 
 IndexController.get = async (req, res) => {
   const model1 = new Model()
-  model1.testForModel()
+  // model1.testForModel()
   results = await db.all();
   results.forEach((el) => {
     let date = new Date(el.start_time); // Or the date you'd like converted.
