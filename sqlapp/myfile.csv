@@ -1,16 +1,89 @@
-num,name,price,type,star,sold,from,img_src,url,id
-1,ซุปไก่เกาหลีปรุงสำเร็จรูป original dongwon yangban chicken soup 460g,99.0,ร้านแนะนำ,4.75,7.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/177c74b3453a3337106b3d81dc7ba1c0_tn,https://shopee.co.th//ซุปไก่เกาหลีปรุงสำเร็จรูป-original-dongwon-yangban-chicken-soup-460g-i.211550487.11703088274,11703088274
-2,iLiKE : Chicken Chip อกไก่อบกรอบ เนื้อไก่ล้วน 100% (โปร 10 แถม 2),390.0,general,4.8182,111.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/11f38bb0698639b26ebf3b45dbab8abc_tn,https://shopee.co.th//iLiKE-Chicken-Chip-อกไก่อบกรอบ-เนื้อไก่ล้วน-100-(โปร-10-แถม-2)-i.50101587.4145682778,4145682778
-3,เปปเปอร์ ชิกเก้น - Pepper Chicken,140.0,general,4.9574,343.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/e74313296736421d50996c174baac2fd_tn,https://shopee.co.th//เปปเปอร์-ชิกเก้น-Pepper-Chicken-i.239829500.7623981880,7623981880
-4,กลิ่นผสมอาหารเข้มข้นชนิดผง Sweet Creations สำหรับผสมในเบเกอรี่ ขนาด 100G.,160.0,ร้านแนะนำ,4.7308,97.0,จังหวัดนนทบุรี,https://cf.shopee.co.th/file/e08594a5ed3e8cc950e045628cad6734_tn,https://shopee.co.th//กลิ่นผสมอาหารเข้มข้นชนิดผง-Sweet-Creations-สำหรับผสมในเบเกอรี่-ขนาด-100G.-i.286077136.7969839875,7969839875
-5,อาหารบาร์ฟ - BARF สูตรไก่ล้วนแบบเริ่มต้น l 500g - (Starter) FREE-RUN CHICKEN,65.0,general,5.0,568.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/a9063877603d33c8ae52120920724b9e_tn,https://shopee.co.th//อาหารบาร์ฟ-BARF-สูตรไก่ล้วนแบบเริ่มต้น-l-500g-(Starter)-FREE-RUN-CHICKEN-i.131403598.5771372396,5771372396
-6,BOONE Chicken Stock Himmed Plus ซุปไก่ ฮิมเมด พลัส 30 เม็ด วิตามินบำรุงร่างกาย  83914,150.0,ร้านแนะนำ,5.0,18.0,จังหวัดนครสวรรค์,https://cf.shopee.co.th/file/5533be812fca65987f29d0676ac9ac03_tn,https://shopee.co.th//BOONE-Chicken-Stock-Himmed-Plus-ซุปไก่-ฮิมเมด-พลัส-30-เม็ด-วิตามินบำรุงร่างกาย-83914-i.140758906.9935448957,9935448957
-7,ล็อตใหม่ หมดอายุปีหน้า!! Samyang Buldak Hot Chicken Sauce ซัมยัง ซอสไก่เผ็ด ซอสเกาหลี ซอสเผ็ดเกาหลี ซอสพริกไก่เผ็ดเกาหลี,125.0,ร้านแนะนำ,4.8776,8000.0,จังหวัดสมุทรปราการ,https://cf.shopee.co.th/file/c0c26355ea030086c8132b68759f24b4_tn,https://shopee.co.th//ล็อตใหม่-หมดอายุปีหน้า!!-Samyang-Buldak-Hot-Chicken-Sauce-ซัมยัง-ซอสไก่เผ็ด-ซอสเกาหลี-ซอสเผ็ดเกาหลี-ซอสพริกไก่เผ็ดเกาหลี-i.37433026.4938445193,4938445193
-8,1KG/PACK ชิ้นส่วนเนื้อไก่ออร์แกนิค เกรดพรีเมียม PREMIUM ORGANIC CHICKEN FILLET,75.0,general,4.9565,147.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/d6541d8eeea8ad2e4b6765e884bf17b4_tn,https://shopee.co.th//1KG-PACK-ชิ้นส่วนเนื้อไก่ออร์แกนิค-เกรดพรีเมียม-PREMIUM-ORGANIC-CHICKEN-FILLET-i.180403010.6671444247,6671444247
-9,Shan Butter Chicken 50 gms.,38.0,ร้านแนะนำ,5.0,15.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/b77947e12f7d6a63fe2c31b391534119_tn,https://shopee.co.th//Shan-Butter-Chicken-50-gms.-i.241383702.10702698581,10702698581
-10,chicken shop2020[ขายดี] เสื้อแฟชั่นผู้หญิง แขนสั้น สไตล์เกาหลี สวมใส่สบาย [พร้อมส่ง][เก็บเงินปลายทาง] รุ่น A-104,79.0,general,4.6667,30.0,จังหวัดกรุงเทพมหานคร,https://cf.shopee.co.th/file/5151e157df5df855f29c3e2f2a100e38_tn,https://shopee.co.th//chicken-shop2020-ขายดี-เสื้อแฟชั่นผู้หญิง-แขนสั้น-สไตล์เกาหลี-สวมใส่สบาย-พร้อมส่ง-เก็บเงินปลายทาง-รุ่น-A-104-i.139536922.3939474544,3939474544
-11,ซื้อ 1 แถม 1 VITALIFE CHICKEN TENDER สันในไก่อบแห้ง เกรดพรีเมี่ยม ขนาด 227 กรัม,168.0,ร้านแนะนำ,4.95,186.0,จังหวัดกรุงเทพมหานคร,no image,https://shopee.co.th//ซื้อ-1-แถม-1-VITALIFE-CHICKEN-TENDER-สันในไก่อบแห้ง-เกรดพรีเมี่ยม-ขนาด-227-กรัม-i.369297500.9245836133,9245836133
-12,อาหารแมว NEEZ+ Chicken Grain Free อาหารแมวเกรด Holistic ขนาด 300 กรัม [Neezถุงเล็ก],109.0,ร้านแนะนำ,4.9459,88.0,จังหวัดนนทบุรี,no image,https://shopee.co.th//อาหารแมว-NEEZ-Chicken-Grain-Free-อาหารแมวเกรด-Holistic-ขนาด-300-กรัม-Neezถุงเล็ก--i.50654.5537243881,5537243881
-13,อาหารเปียกแมวระดับพรีเมี่ยม 6 ดาว Feline Natural Chicken & Lamb Feast Grain-Free ขนาด 85 กรัม,195.0,ร้านแนะนำ,5.0,48.0,จังหวัดกรุงเทพมหานคร,no image,https://shopee.co.th//อาหารเปียกแมวระดับพรีเมี่ยม-6-ดาว-Feline-Natural-Chicken-Lamb-Feast-Grain-Free-ขนาด-85-กรัม-i.8384347.1361996239,1361996239
-14,ซุปไก่เกาหลีปรุงสำเร็จรูป original dongwon yangban chicken soup 460g,99.0,ร้านแนะนำ,4.75,7.0,จังหวัดกรุงเทพมหานคร,no image,https://shopee.co.th//ซุปไก่เกาหลีปรุงสำเร็จรูป-original-dongwon-yangban-chicken-soup-460g-i.211550487.11703088274,11703088274
-15,Maggi Chicken Stock 20g x 24 cube ++ แม็กกี้ สต็อกไก่ ขนาด 20g x 24 ก้อน,260.0,general,5.0,42.0,จังหวัดกรุงเทพมหานคร,no image,https://shopee.co.th//Maggi-Chicken-Stock-20g-x-24-cube-แม็กกี้-สต็อกไก่-ขนาด-20g-x-24-ก้อน-i.238807015.6822350328,6822350328
+num,user_name,comment,date,image_h,image_l,reaction,post_url,post_id,post_text,meaning,goodWords,badWords
+1,Heartrocker,1579,2020-12-28 13:12:06,https://stickershop.line-scdn.net/stickershop/v1/product/14044316/LINEStorePC/main.png;compress=true,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQFFHivYm1ZHZZdh&w=112&h=112&url=https%3A%2F%2Fstickershop.line-scdn.net%2Fstickershop%2Fv1%2Fproduct%2F14044316%2FLINEStorePC%2Fmain.png%3Bcompress%3Dtrue&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQEsS1LXnH8gsbaj,51653,https://facebook.com/MightyCaster/posts/3415199901912478,3415199901912478,"ด่วนนน! สติ๊กเกอร์ไลน์เวอร์ชั่นใหม่มาแล้วคร๊าบบบบบ จับจองกันได้แล้ววันนี้เด้อ แสดงความรู้สึกได้ครบจบสำหรับสายเกมเมอร์และสายตวงตีง คลิกที่ลิ้งค์หรือเสิร์ชคำว่า HRK ในร้านสติ๊กเกอร์ไลน์ได้เลยยยย!
+ขอบคุณมากฮ๊ะ!
+https://line.me/S/sticker/14044316
+
+ด่วนนน! สติ๊กเกอร์ไลน์เวอร์ชั่นใหม่มาแล้วคร๊าบบบบบ จับจองกันได้แล้ววันนี้เด้อ แสดงความรู้สึกได้ครบจบสำหรับสายเกมเมอร์และสายตวงตีง คลิกที่ลิ้งค์หรือเสิร์ชคำว่า HRK ในร้านสติ๊กเกอร์ไลน์ได้เลยยยย!
+ขอบคุณมากฮ๊ะ!
+https://line.me/S/sticker/14044316
+
+STORE.LINE.ME
+HRK: Stickers For Fun! – LINE stickers | LINE STORE
+Fun is Everything. Everything is Fun.",neutral,"['ขอบคุณ', 'ขอบคุณ']","['ตี', 'ตี']"
+2,Heartrocker,171,2021-06-29 20:29:38,https://i.ytimg.com/vi/evKywupG7vw/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQEj_4rsCmttgb-G&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FevKywupG7vw%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQH17N17bC__0mXQ,16354,https://facebook.com/MightyCaster/posts/3909312855834511,3909312855834511,"ดังป้าด
+
+ดังป้าด
+
+YOUTUBE.COM
+LIVE - ตบดังป้าด - Dead By Daylight 2021 #9
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ตบ', 'ลืม', 'อ้วน']"
+3,Heartrocker,262,2021-06-28 19:40:06,https://i.ytimg.com/vi/hoMvoMImCb4/maxresdefault.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FhoMvoMImCb4%2Fmaxresdefault.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQHLnGUTERCeyppW,25325,https://facebook.com/MightyCaster/posts/3906525049446625,3906525049446625,"ตอนสองมาแล้วครับเร็วมาก
+
+ตอนสองมาแล้วครับเร็วมาก
+
+YOUTUBE.COM
+รายการยังไม่มีชื่อเลย EP.2 - มิสเตอร์ตึ๋ง VS เจมส์คะนอ
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",positive,"['เร็ว', 'เร็ว', 'มีชื่อ']","['ลืม', 'อ้วน']"
+4,Heartrocker,140,2021-06-27 20:39:58,https://i.ytimg.com/vi/BU2VnTo9y0w/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQGbBYhX1HtEH9Po&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FBU2VnTo9y0w%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQFTfVI-7MfVatr4,14792,https://facebook.com/MightyCaster/posts/3904118826353914,3904118826353914,"ได้
+
+ได้
+
+YOUTUBE.COM
+มีคนแบก - LIVE - Apex Legends New Season #2
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+5,Heartrocker,262,2021-06-26 21:09:02,https://i.ytimg.com/vi/mX-mf1ggvfg/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQG_SAEjPEL1MkLI&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FmX-mf1ggvfg%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQGPtCHSL6AhkGNJ,20017,https://facebook.com/MightyCaster/posts/3901613199937810,3901613199937810,"เรือมา
+
+เรือมา
+
+YOUTUBE.COM
+ซีออฟซ่อมเรือ - LIVE - Sea of Thieves
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+6,Heartrocker,201,2021-06-25 18:12:38,https://i.ytimg.com/vi/NNjXsOGEmFQ/maxresdefault.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQHNRUJJdHzCX4CM&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FNNjXsOGEmFQ%2Fmaxresdefault.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQHwyzQ2T_KulVn9,21524,https://facebook.com/MightyCaster/posts/3898602803572183,3898602803572183,"อ้าวมีคลิปใหม่ ว้าวววววว
+
+อ้าวมีคลิปใหม่ ว้าวววววว
+
+YOUTUBE.COM
+ศึกล้างแค้น แงะทัพพี - Among Us Highlight #18
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+7,Heartrocker,187,2021-06-24 21:26:49,https://i.ytimg.com/vi/csuqMV60eyc/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQHGf67SfGPwqp-5&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FcsuqMV60eyc%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQEq56LUnjY9ZV7H,17450,https://facebook.com/MightyCaster/posts/3896261803806283,3896261803806283,"กี่คิลว่ามา
+
+กี่คิลว่ามา
+
+YOUTUBE.COM
+ต้องการเล่นอะไรที่มันเร้าใจ - LIVE - Bloodborne New Game #1
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,['เล่น'],"['ลืม', 'อ้วน']"
+8,Heartrocker,125,2021-06-22 20:56:42,https://i.ytimg.com/vi/uTshNpNO-v0/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQEGCjJtECTAF6xU&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FuTshNpNO-v0%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQGBVhupAatuwThW,14067,https://facebook.com/MightyCaster/posts/3890809834351480,3890809834351480,"เอเปกซ์ นิวซีซั่นมาถึงแล้ว
+
+เอเปกซ์ นิวซีซั่นมาถึงแล้ว
+
+YOUTUBE.COM
+อันนี้ก็นับเป็นนิวซีซั่นละกัน - LIVE - Apex Legends New Season #1
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+9,Heartrocker,290,2021-06-20 19:42:21,https://i.ytimg.com/vi/XG5nbk3yqHY/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQHnpdQwbtwpSwfV&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FXG5nbk3yqHY%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQHF_G1SX8RqCeCh,22452,https://facebook.com/MightyCaster/posts/3885569654875498,3885569654875498,"เปิดเปรียบได้ก่อน
+
+เปิดเปรียบได้ก่อน
+
+YOUTUBE.COM
+15 คนโฉดโคตรไม่วุ่นวายเท่าไหร่ - LIVE - Among Us New Season #1
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['วุ่นวาย', 'ลืม', 'อ้วน']"
+10,Heartrocker,146,2021-06-19 21:08:26,https://i.ytimg.com/vi/39bXaNge3BI/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQGJfeuZDzdOXcmR&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2F39bXaNge3BI%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQHnVco5dlHsDafF,21205,https://facebook.com/MightyCaster/posts/3883313125101151,3883313125101151,"หงำเหงือก
+
+หงำเหงือก
+
+YOUTUBE.COM
+LIVE - ขอจูกโคม ๆ - Dead By Daylight 2021 #8
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+11,Heartrocker,131,2021-06-18 20:25:00,https://i.ytimg.com/vi/AZRkgkglX8c/maxresdefault_live.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQEaEZfF1DjcIXXz&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FAZRkgkglX8c%2Fmaxresdefault_live.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQGU6TepHxjh7WV2,14074,https://facebook.com/MightyCaster/posts/3880736368692160,3880736368692160,"นักตดปลามือฉมังมาแล้ว
+
+นักตดปลามือฉมังมาแล้ว
+
+YOUTUBE.COM
+LIVE - วันนี้มีเครื่องจักรสังหรณ์ - Overwatch 2021 #2
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
+12,Heartrocker,282,2021-06-18 01:40:10,https://i.ytimg.com/vi/H0fgC7P63jk/maxresdefault.jpg,https://external.fbkk12-4.fna.fbcdn.net/safe_image.php?d=AQG7uWlDhzx9ris-&w=476&h=249&url=https%3A%2F%2Fi.ytimg.com%2Fvi%2FH0fgC7P63jk%2Fmaxresdefault.jpg&cfs=1&jq=75&ext=jpg&ccb=3-5&_nc_hash=AQFp5ThKIErIWXiH,19610,https://facebook.com/MightyCaster/posts/3878873188878478,3878873188878478,"คลิปแบบเหล่ท่อมักจะมากลางดึกแบบนี้
+
+คลิปแบบเหล่ท่อมักจะมากลางดึกแบบนี้
+
+YOUTUBE.COM
+PATHFINDER GAMEPLAY By HRK | Apex Legends
+อย่าลืมกดติดตามและกดกระดิ่งไว้ด้วยนะครับ เดี๋ยวพลาดคลิปใหม่ๆ นะรับนกอ้วนไปเลี้ยง : https://www.youtube.com/channel/UC4plRabXFGdAE6HP-tBQKdQ/join...",negative,[],"['ลืม', 'อ้วน']"
