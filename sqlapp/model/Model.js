@@ -2,22 +2,7 @@ const { reject, range } = require("lodash");
 const mysql = require("mysql2");
 
 class Model {
-    // constructor(table, pk, serviceId) {
-    //     this.table = table
-    //     this.pk = pk
-    //     this.serviceId = serviceId
-    //     this.mysqlConnect = mysql.createConnection({
-    //         connectionLimit: 10,
-    //         password: "",
-    //         user: "root",
-    //         database: "ecom_db",
-    //         host: "127.0.0.1",
-    //     });
-    //     this.mysqlConnect.connect((err) => {
-    //         if (!err) console.log("DB connection success");
-    //         else console.log("DB connect fail");
-    //     });
-    // }
+
     constructor(table, pk, serviceId) {
         this.table = table
         this.pk = pk
@@ -34,9 +19,17 @@ class Model {
         //     else console.log("DB connect fail");
         // });
     }
+    connect = () => new Promise((resolve) => {
+        this.mysqlConnect.connect((err) => {
+            if (!err) console.log("DB connection success");
+            else console.log("DB connect fail",err);
+        });
+    })
     
     get(sortType) { 
-        return new Promise((resolve, reject) => {
+        this.connect()
+        return new Promise(async(resolve, reject) => {
+            
             this.mysqlConnect.query(`select * from ` + this.table + " order by id " + (sortType ? sortType : ""), (err, results) => {
                 if (err) {
                     return reject(null);
@@ -47,6 +40,7 @@ class Model {
         });
     }
     getCount() { 
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select count(key_id) from ` + this.table , (err, results) => {
                 if (err) {
@@ -58,6 +52,7 @@ class Model {
         });
     }
     getKeywordCount(service_id,key_id){
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
                 if(err){
@@ -81,6 +76,7 @@ class Model {
         });
     }
     getLastOne() {
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 ", (err, results) => {
                 if (err) {
@@ -93,6 +89,7 @@ class Model {
     }
 
     first() {
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " limit 1", (err, results) => {
                 if (err) {
@@ -106,6 +103,7 @@ class Model {
     
 
     getcount(){
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select count(*) from `+ this.table , (err, results) => {
                 if(err){
@@ -118,6 +116,7 @@ class Model {
     }
 
     getkeywordcount(service_id,key_id){
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
                 if(err){
@@ -130,6 +129,7 @@ class Model {
     }
 
     keywordfiller(id){
+        this.connect()
         return new Promise((resolve,reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE keyword.id = '${id}'`,(err,results) => {
             if(err){
@@ -182,22 +182,17 @@ class Model {
 
     async update_product(objectParam,type_id) {
         return new Promise((resolve, reject) => {
-    
-            this.mysqlConnect.connect();
             console.log("update..")
             this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${type_id} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log(results)
                 resolve("add success");
             });
         });
     }
-    async saveEcom(objectParam, word) {
-
+    saveEcom(objectParam, word) {
         return new Promise (async(resolve) =>{
-        this.mysqlConnect.connect();
         console.log("saving data to DB")
     try{
         const found = await this.joinData(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`,objectParam)
@@ -212,9 +207,13 @@ class Model {
             
           resolve()  
         }
-
+        // this.mysqlConnect.end()
     }catch(err){
-        console.log(err)
+        if(err.code == "PROTOCOL_CONNECTION_LOST" ){
+            this.connect()
+        }else{
+        console.log("save ecom",err)
+        }
     }
     }
         )}
@@ -264,6 +263,7 @@ class Model {
 
     update(objectParam) {
         return new Promise((resolve, reject) => {
+            this.mysqlConnect.connect();
             let object = objectParam
             let query = ""
             Object.keys(object).forEach(function (key) {
@@ -295,20 +295,9 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
-    testForModel(){
-        [1,2,3,4,5].forEach((el) => {
-            this.mysqlConnect.query(`insert into e_service set e_id = 1`, (err, result) => {
-                console.log("pass1")
-            })
-            this.mysqlConnect.query(`insert into e_service set e_id = 1`, (err, result) => {
-                console.log("pass2")
-            })
-            this.mysqlConnect.query(`insert into e_service set e_id = 1`, (err, result) => {
-                console.log("pass3")
-            })
-        })
-    }
+    
     delete(id) {
+        this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`delete from ${this.table} where id=${id}`, (err, results) => {
                 if (err) {
@@ -321,6 +310,7 @@ class Model {
         });
     }
 where(condition) {
+    this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ${this.table} where ${condition}`, (err, results) => {
                 if (err) {
@@ -332,9 +322,69 @@ where(condition) {
             this.mysqlConnect.end() 
         });
     }
-    close(){
-        // this.mysqlConnect.end()
-    }
+
+    close = () => new Promise((resolve,reject) =>{
+        this.mysqlConnect.end()
+        console.log("disconnect db")
+    });
+       
+            
+           
+        
+
+    addJob = (req) => {
+        return new Promise((resolve, reject) => {
+        this.mysqlConnect.connect();
+          this.mysqlConnect.query(`insert into job set ?`, req, async (err, results) => {
+            if (err) {
+              return reject(err);
+            }
+            let data = await new Promise((resolve, reject) => {
+              this.mysqlConnect.query(
+                `SELECT * FROM job ORDER BY ID DESC LIMIT 1`, (err, results) => {
+                  if (err) {
+                    return reject(err);
+                  }
+                  return resolve(results);
+                }
+              );
+            });
+            // this.mysqlConnect.end();
+            resolve(data[0]);
+          });
+        });
+      };
+
+      updateJob = (id) => {
+        return new Promise(async(resolve, reject) => {
+            let date = new Date(); // Or the date you'd like converted.
+            let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+            console.log("updating job")
+          this.mysqlConnect.query(`update job set end_time = ?, status='success' where id = ? `,
+            [isoDateTime, id],
+            (err, results) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve({time: isoDateTime, status: "success"});
+            }
+          );
+        });
+      };
+
+      all = () => {
+        return new Promise((resolve, reject) => {
+        this.mysqlConnect.connect();
+          this.mysqlConnect.query(`select * from job`, (err, results) => {
+            if (err) {
+              return reject(err);
+            }
+      
+            return resolve(results);
+          });
+          this.mysqlConnect.end()
+        });
+      };
 
 }
 

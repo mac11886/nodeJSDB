@@ -13,7 +13,7 @@ class Job extends Model {
             status : null,
             path_file : null,
             start_time : null,
-            end_time : null,
+            end_stime : null,
         }
     }
 }
