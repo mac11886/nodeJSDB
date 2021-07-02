@@ -1,4 +1,5 @@
 const mysql = require("mysql2");
+const db = require("../db")
 
 class Model {
     constructor(table, pk, serviceId) {

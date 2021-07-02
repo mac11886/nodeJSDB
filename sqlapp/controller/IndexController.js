@@ -15,13 +15,15 @@ const Facebook_page = require("../model/Facebook_page");
 const Model = require("../model/Model");
 const { resolve } = require("path");
 const { rejects } = require("assert");
+const dotenv = require("dotenv")
+dotenv.config()
 
 IndexController = {}
 function getData(service, keyword, page) {
   return new Promise(function (resolve, reject) {
     let utfKeyword = encodeURI(keyword);
     python = spawn("python", [
-      "C:/Users/Bell/intern/nodeJSDB/pythongetpostshopee1/main.py",
+      process.env.PYTHON_PATH,
     ]);
 
     python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
@@ -316,7 +318,6 @@ function getData(service, keyword, page) {
 }
 
 IndexController.get = async (req, res) => {
-
   results = await db.all();
   results.forEach((el) => {
     let date = new Date(el.start_time); // Or the date you'd like converted.

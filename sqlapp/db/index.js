@@ -25,7 +25,7 @@ testdb.all = () => {
     });
   });
 };
-testdb.one = (id) => {          
+testdb.one = (id) => {          
   return new Promise((resolve, reject) => {
     mysqlConnect.query(
       `select * from data where id = ?`,
