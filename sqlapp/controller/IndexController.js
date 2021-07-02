@@ -17,6 +17,7 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 const dotenv = require("dotenv")
 dotenv.config()
+console.log(process.env.PYTHON_PATH);
 
 IndexController = {}
 function getData(service, keyword, page) {
