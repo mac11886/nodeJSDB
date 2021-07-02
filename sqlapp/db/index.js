@@ -1,3 +1,27 @@
+const mysql = require("mysql2");
+let mysqlConnect
+
+const createPool = () => {
+    mysqlConnect = mysql.createPool({
+        // connectionLimit: 500,
+        password: process.env.DATABASE_PASSWORD,
+        user: process.env.DATABASE_USER,
+        database: process.env.DATABASE_NAME,
+        host: process.env.DATABASE_HOST,
+    });
+    mysqlConnect.getConnection((err) => {
+        if (!err) console.log("DB connection success");
+        else console.log("DB connect fail", err);
+
+    });
+}
+
+const getMysqlConnect = () => mysqlConnect
+
+module.exports = {
+    createPool,
+    getMysqlConnect
+}
 // const { response } = require("express");
 // const mysql = require("mysql2");
 
