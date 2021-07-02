@@ -92,7 +92,7 @@ async function  getData (service,keyword,page){
                     console.log(error.message, 'error ', value, keyword)
                 }  
                 i++;
-            }
+            }resolve()
 
               //amazon
             } else if (service == 2) {
@@ -182,6 +182,7 @@ async function  getData (service,keyword,page){
               }catch(error){
                 console.log(error,'error update job')
               }
+              resolve()
             } 
 
             //JD
@@ -225,7 +226,7 @@ async function  getData (service,keyword,page){
                 jdObj.updateJobId(lastOne[0].id);
               }catch(error){
                 console.log(error,'error update job')
-              }
+              }resolve()
             //facebook
             } else if (service == 5) {
               let facebookObj = new Facebook();
@@ -268,9 +269,9 @@ async function  getData (service,keyword,page){
               }catch(error){
                 console.log(error,'error update job')
               }
+              resolve()
             }
-            
-            resolve()
+            // resolve()
           });
   }catch(err){
     if(err.code == "PROTOCOL_CONNECTION_LOST"){

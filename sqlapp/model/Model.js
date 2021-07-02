@@ -1,33 +1,34 @@
 const { reject, range } = require("lodash");
 const mysql = require("mysql2");
 
+
 class Model {
 
     constructor(table, pk, serviceId) {
         this.table = table
         this.pk = pk
         this.serviceId = serviceId
-        this.mysqlConnect = mysql.createConnection({
+        this.mysqlConnect = mysql.createPool({
             // connectionLimit: 10,
             password: "",
             user: "root",
             database: "ecom_db",
             host: "127.0.0.1",
         });
-        // this.mysqlConnect.connect((err) => {
-        //     if (!err) console.log("DB connection success");
-        //     else console.log("DB connect fail");
-        // });
+        this.mysqlConnect.getConnection((err) => {
+            if (!err) console.log("DB connection success");
+            else console.log("DB connect fail");
+        });
     }
     connect = () => new Promise((resolve) => {
-        this.mysqlConnect.connect((err) => {
-            if (!err) console.log("DB connection success");
-            else console.log("DB connect fail",err);
-        });
+        // this.mysqlConnect.getConnection((err) => {
+        //     if (!err) console.log("DB connection success");
+        //     else console.log("DB connect fail",err);
+        // });
     })
     
     get(sortType) { 
-        this.connect()
+        // this.connect()
         return new Promise(async(resolve, reject) => {
             
             this.mysqlConnect.query(`select * from ` + this.table + " order by id " + (sortType ? sortType : ""), (err, results) => {
@@ -36,11 +37,10 @@ class Model {
                 }
                 return resolve(results);
             });
-        this.mysqlConnect.end()
         });
     }
     getCount() { 
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select count(key_id) from ` + this.table , (err, results) => {
                 if (err) {
@@ -48,11 +48,10 @@ class Model {
                 }
                 return resolve(Object.values(results[0])[0]);
             });
-            this.mysqlConnect.end() 
         });
     }
     getKeywordCount(service_id,key_id){
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
                 if(err){
@@ -60,7 +59,6 @@ class Model {
                 }
                 resolve(Object.values(results[0])[0]);
             });
-            this.mysqlConnect.end() 
         });
     }
     getproductbykeyword(service,id,service_id){
@@ -71,12 +69,10 @@ class Model {
                 }
                 return resolve(results);
             });
-            
-            this.mysqlConnect.end() 
         });
     }
     getLastOne() {
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " order by id DESC limit 1 ", (err, results) => {
                 if (err) {
@@ -84,12 +80,12 @@ class Model {
                 } 
                 return resolve(results);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
 
     first() {
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ` + this.table + " limit 1", (err, results) => {
                 if (err) {
@@ -97,13 +93,13 @@ class Model {
                 }
                 return resolve(results);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
     
 
     getcount(){
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select count(*) from `+ this.table , (err, results) => {
                 if(err){
@@ -111,12 +107,12 @@ class Model {
                 }
                 return resolve(Object.values(results[0])[0]);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
 
     getkeywordcount(service_id,key_id){
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE e_service.service_id = ${service_id} AND keyword.id = ${key_id}`, (err, results) => {
                 if(err){
@@ -124,12 +120,12 @@ class Model {
                 }
                 return resolve(Object.values(results[0])[0]);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
 
     keywordfiller(id){
-        this.connect()
+        // this.connect()
         return new Promise((resolve,reject) => {
             this.mysqlConnect.query(`SELECT count(*) FROM keyword INNER JOIN main ON keyword.id = main.key_id INNER JOIN e_service ON e_service.id = main.e_service_id WHERE keyword.id = '${id}'`,(err,results) => {
             if(err){
@@ -137,7 +133,7 @@ class Model {
             }
             return resolve(results);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
     async check_product(id,type_id){
@@ -263,7 +259,7 @@ class Model {
 
     update(objectParam) {
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.connect();
+            // this.mysqlConnect.connect();
             let object = objectParam
             let query = ""
             Object.keys(object).forEach(function (key) {
@@ -297,7 +293,7 @@ class Model {
     }
     
     delete(id) {
-        this.connect()
+        // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`delete from ${this.table} where id=${id}`, (err, results) => {
                 if (err) {
@@ -306,11 +302,11 @@ class Model {
 
                 return resolve("delete success");
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
 where(condition) {
-    this.connect()
+    // this.connect()
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ${this.table} where ${condition}`, (err, results) => {
                 if (err) {
@@ -319,13 +315,13 @@ where(condition) {
             
                 return resolve(results);
             });
-            this.mysqlConnect.end() 
+            // this.mysqlConnect.end() 
         });
     }
 
     close = () => new Promise((resolve,reject) =>{
-        this.mysqlConnect.end()
-        console.log("disconnect db")
+        // this.mysqlConnect.end()
+        // console.log("disconnect db")
     });
        
             
@@ -334,7 +330,7 @@ where(condition) {
 
     addJob = (req) => {
         return new Promise((resolve, reject) => {
-        this.mysqlConnect.connect();
+        // this.mysqlConnect.connect();
           this.mysqlConnect.query(`insert into job set ?`, req, async (err, results) => {
             if (err) {
               return reject(err);
@@ -374,7 +370,7 @@ where(condition) {
 
       all = () => {
         return new Promise((resolve, reject) => {
-        this.mysqlConnect.connect();
+        // this.mysqlConnect.connect();
           this.mysqlConnect.query(`select * from job`, (err, results) => {
             if (err) {
               return reject(err);
@@ -382,7 +378,7 @@ where(condition) {
       
             return resolve(results);
           });
-          this.mysqlConnect.end()
+        //   this.mysqlConnect.end()
         });
       };
 
