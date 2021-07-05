@@ -20,10 +20,11 @@ const Model = require("../model/Model");
 async function  getData (service,keyword,page){
   return new Promise(function(resolve,reject){
   try{
+
   
   let utfKeyword = encodeURI(keyword);
-    python = spawn("/usr/local/bin/python3.8", [
-      "/Users/mcmxcix/nodeJSDB/pythongetpostshopee1/main.py",
+    python = spawn("python", [
+      "C:\\Users\\Administrator\\Desktop\\pythongetpostshopee\\main.py",
     ]);
        
           python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
@@ -339,7 +340,7 @@ IndexController.post = async (req, res) => {
           let model = new Model()
           let service = req.body.service;
           let keyword = req.body.keyword;
-          console.log("keywootrrrrr",keyword)
+          console.log("keywootrrrrr",req.body)
           let page = req.body.page;
           let date = new Date(); // Or the date you'd like converted.
           let startTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');

@@ -9,11 +9,10 @@ class Model {
         this.pk = pk
         this.serviceId = serviceId
         this.mysqlConnect = mysql.createPool({
-            // connectionLimit: 10,
-            password: "",
+            password: "1234",
             user: "root",
             database: "ecom_db",
-            host: "127.0.0.1",
+            host: "localhost",
         });
         this.mysqlConnect.getConnection((err) => {
             if (!err) console.log("DB connection success");
