@@ -16,9 +16,6 @@ const Service =require("../model/Service");
 const Facebook_page = require("../model/Facebook_page");
 const Model = require("../model/Model");
 
-async function checkAndSave  (){
-
-}
 
 async function  getData (service,keyword,page){
   return new Promise(function(resolve,reject){
