@@ -5,6 +5,8 @@ const IndexController = require("../controller/IndexController");
 const TestController = require("../controller/TestController");
 const KeywordController = require("../controller/KeywordController");
 const FacebookPageController = require("../controller/FacebookPageController");
+const JobController = require("../controller/JobController");
+
 let results = {};
 /* GET home page. */
 
@@ -20,6 +22,10 @@ router.post("/deletekeyword", (req,res) => KeywordController.delete(req,res));
 router.get("/facebook_page", (req,res) => FacebookPageController.get(req,res));
 router.post("/facebook_page/post", (req,res) => FacebookPageController.post(req,res));
 router.post("/facebook_page/delete", (req,res) => FacebookPageController.delete(req,res));
+
+router.post("/job/run", (req,res) => JobController.run(req,res));
+router.post("/job/create", (req,res) => JobController.create(req,res));
+
 
 
 

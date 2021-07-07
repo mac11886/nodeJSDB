@@ -15,6 +15,7 @@ const { rejects } = require("assert");
 const Service = require("../model/Service");
 const Facebook_page = require("../model/Facebook_page");
 const Model = require("../model/Model");
+const dotenv = require("dotenv")
 
 
 
@@ -177,50 +178,23 @@ async function getData(service, keyword, page) {
               }catch (error) {
                   console.log(error.message, 'error ', value, keyword)
               }
-            i++;
-          }
-          try{
-            await pantipObj.updateJobId(lastOne[0].id);
-          }catch(error){
-            console.log(error,'error update job')
-          }
-          resolve()
-        } 
-
-        //JD
-        else if (service == 4) {
-          let jdObj = new Jd();
-          const header = raw.split(/\r?\n/)[0].split(",");
-          header[2] = "product_id";
-          header[7] = "send_from";
-          try{
-            result = await csv(raw, { headers: header });
-          }catch(error){
-            console.log(error,'error result')
-            return;
-          }
-          try{
-            lastOne = await job.getLastOne();
-          }catch(error){
-            console.log(error, 'error lastOne')
-            return;
-          }
-          // console.log(lastOne);
-          for (const value of result) {
-            delete value["num"];
-            try{
-            if (i >= 1) {
-              let check = await jdObj.check_product(value["product_id"],"product_id" );
-                console.log("found =",check)
-                if (check > 0){
-                  await jdObj.update_product(value)
-                } else{
-                  await jdObj.saveEcom(value, keyword);
-                }
-                //save to database
-                } 
-              }catch (error) {
-                  console.log(error.message, 'error ', value, keyword)
+              for await(const value of result){
+                delete value["num"];
+                try{
+                if (i >= 1) {
+                  let check = await facebookObj.check_product(value["post_id"],"post_id");
+                    console.log("found =",check)
+                    if (check > 0){
+                      await facebookObj.update_product(value)
+                    } else{
+                      await facebookObj.saveEcom(value, keyword);
+                    }
+                    //save to database
+                    } 
+                  }catch (error) {
+                      console.log(error.message, 'error ', value, keyword)
+                  }
+                i++;
               }
             i++;
           }
@@ -346,42 +320,35 @@ try {
       let date = new Date(); // Or the date you'd like converted.
       let startTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
 
-      let response = await model.addJob({
-        keyword: keyword.toString(),
-        service: service,
-        page: page,
-        status: "in progress",
-        start_time: startTime,
-      });
-
-      if(typeof(keyword) == "object"){
-        let resolve = getData(service,keyword[0],page);
-        resolve.then(() => {
-          let result = getData(service,keyword[1],page);
-        result.then(async() => {
-          // model.connect()
-          response =  await model.updateJob(response.id);
-          res.json(response);
-          console.log("-----------DONE--------------")
-          });
-        });
-      }else{
-        let resolve = getData(service,keyword,page);
-        resolve.then(async() => {
-          response =  await model.updateJob(response.id);
-          res.json(response);
-          console.log("-----------DONE--------------")
-          });
+          if(typeof(keyword) == "object"){
+            
+            let resolve = getData(service,keyword[0],page);
+            resolve.then(() => {
+              let result = getData(service,keyword[1],page);
+            result.then(async() => {
+              // model.connect()
+              response =  await model.updateJob(response.id);
+              res.json(response);
+              console.log("-----------DONE--------------")
+              });
+            });
+          }else{
+            let resolve = getData(service,keyword,page);
+            resolve.then(async() => {
+              response =  await model.updateJob(response.id);
+              res.json(response);
+              console.log("-----------DONE--------------")
+              });
+          }
+          
+        } catch (e) {
+          console.log(e);
+          res.sendStatus(500);
+        }
+      } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
       }
-      
-    } catch (e) {
-      console.log(e);
-      res.sendStatus(500);
-    }
-  } catch (e) {
-    console.log(e);
-    res.sendStatus(500);
-  }
 
 }
 

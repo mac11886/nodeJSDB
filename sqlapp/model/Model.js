@@ -37,7 +37,7 @@ class Model {
                 if (err) {
                     return reject(null);
                 }
-                return resolve(results);
+                resolve(results);
             });
         });
     }
@@ -358,20 +358,31 @@ class Model {
         });
     };
 
-    updateJob = (id) => {
-        return new Promise(async (resolve, reject) => {
+      updateJob = (id,status) => {
+        return new Promise(async(resolve, reject) => {
             let date = new Date(); // Or the date you'd like converted.
             let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
             console.log("updating job")
-            this.mysqlConnect.query(`update job set end_time = ?, status='success' where id = ? `,
-                [isoDateTime, id],
-                (err, results) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve({ time: isoDateTime, status: "success" });
-                }
-            );
+        if(status === "success"){
+          this.mysqlConnect.query(`update job set end_time = ?, status="${status}" where id = ? `,
+            [isoDateTime, id],
+            (err, results) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            });
+        }else{
+            this.mysqlConnect.query(`update job set start_time = ?, status="${status}" where id = ?`,
+            [isoDateTime,id],
+            (err, results) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            });
+        }
+
         });
     };
 

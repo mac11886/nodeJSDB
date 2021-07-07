@@ -3,7 +3,6 @@ const Facebook_page = require("../model/Facebook_page");
 FacebookPageController = {}
 
 FacebookPageController.get = async (req, res) => {
-
     let facebook_pages = await new Facebook_page().get();
     res.json( { facebook_pages } );
 }
