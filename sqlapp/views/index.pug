@@ -7,6 +7,7 @@ block content
   //- p Welcome to #{title}
   .form-container 
     h1  Job Create
+    
     .form-group
     label(for="sevice") Choose Service 
     select#service(name="service")
@@ -14,6 +15,7 @@ block content
       option(value="2") Amazon
       option(value="3") Pantip 
       option(value="4") JD 
+      option(value="5") Facebook
 
     .form-group 
       label( for="keyword" ) Keyword
@@ -26,13 +28,13 @@ block content
   
   
     h3 Job List
+    a(href="/status" class="btn btn-primary btn-lg active" role="button" aria-pressed="true") keyword count
     table(style="width:100%",class="table table-striped")
       tr 
         th Keyword 
         th Service 
         th Page 
         th Status 
-        th File 
         th Start 
         th End
       tbody#infoBody
@@ -42,7 +44,6 @@ block content
             td= object.service 
             td= object.page 
             td= object.status 
-            td= object.path_file 
             td= object.start_time
             td= object.end_time
   script.
@@ -65,13 +66,17 @@ block content
         case "3":
           serviceText = "pantip"
           break;
+        case "4":
+        serviceText = "jd"
+        case "5":
+        serviceText = "facebook"
+        break;
       }
       tableRef.insertRow().innerHTML = "<td>" 
       + $("#keyword").val() + "</td><td>" 
       + serviceText + "</td><td>" 
       + $("#page").val() + `</td><td id='status${i}'>` 
       + "in progress</td><td>" 
-      + "path....</td><td>" 
       + isoDateTime + `</td><td id='end_time${i}'>` 
       + " - </td></tr>";
 
