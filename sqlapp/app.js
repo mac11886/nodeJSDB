@@ -7,8 +7,13 @@ var logger = require("morgan");
 const { spawn } = require("child_process");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+const dotenv = require("dotenv");
+const { createPool } = require("./db");
+dotenv.config()
 
 var app = express();
+
+createPool()
 
 // view engine setup
 // app.set("views", path.join(__dirname, "views"));
