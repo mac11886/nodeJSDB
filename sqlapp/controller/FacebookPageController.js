@@ -19,6 +19,7 @@ FacebookPageController.delete = async (req, res) => {
     // console.log(id);
     let facebook_page = await new Facebook_page().delete(id);
     // console.log(facebook_page);
+    res.json("del succ")
 }
 
 

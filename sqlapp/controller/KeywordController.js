@@ -4,6 +4,7 @@ const Service = require("../model/Service");
 const Model = require("../model/Model");
 const l = require('lodash');
 const Facebook = require("../model/Facebook");
+const { response } = require("express");
 
 KeywordController = {}
 
@@ -137,6 +138,7 @@ KeywordController.post = async (req, res) => {
     await new Keyword().check(thai_word,eng_word);
     }catch(error){console.log("keyword.post",error)}
     model.close();
+    res.json("success")
 
 
 }
@@ -149,6 +151,8 @@ KeywordController.delete = async (req, res) => {
     }catch(error){
         console.log("error delete",error)
     }
+    console.log("del keyword succ")
+    res.json("del suc keyword")
 
 }
 
