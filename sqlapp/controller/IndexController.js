@@ -16,6 +16,9 @@ const Service =require("../model/Service");
 const Facebook_page = require("../model/Facebook_page");
 const Model = require("../model/Model");
 
+async function checkAndSave  (){
+
+}
 
 async function  getData (service,keyword,page){
   return new Promise(function(resolve,reject){
@@ -73,29 +76,28 @@ async function  getData (service,keyword,page){
                 delete value["num"];
               try {  
                 if (i >= 1) {
-                  shopeeObj.check_product(value["product_id"],"product_id" )
-                  .then(async(check) => {
+                  let check = await shopeeObj.check_product(value["product_id"] );
                   console.log("found =",check)
-
                   if (check > 0){
-                    await shopeeObj.update_product(value,"product_id").then(() => {
-                      shopeeObj.updateJobId(lastOne[0].id);
-                    })
+                    await shopeeObj.update_product(value)
                   } else{
-                    await shopeeObj.saveEcom(value, keyword).then(() => {
-                      shopeeObj.updateJobId(lastOne[0].id);
-                    })
+                    await shopeeObj.saveEcom(value, keyword)
                   }
-                });
-                  } 
-                }catch (error) {
-                    console.log(error.message, 'error ', value, keyword)
-                }  
+                } 
+              }catch (error) {
+                console.log(error.message, 'error ', value, keyword)
+              }  
                 i++;
-            }resolve()
-
+            }
+            try{
+              await shopeeObj.updateJobId(lastOne[0].id)
+            }catch(error){
+              console.log(error,"error update job")
+            }
+            resolve()
+          }
               //amazon
-            } else if (service == 2) {
+             else if (service == 2) {
               const header = raw.split(/\rsda\n/)[0].split(",");
               header[1] = "product_id";
               header[8] = "rank";
@@ -121,9 +123,9 @@ async function  getData (service,keyword,page){
                       let check = await amazonObj.check_product(value["product_id"],"product_id" );
                       console.log("found =",check)
                       if (check > 0){
-                        await amazonObj.update_product(value,"product_id")
+                        await amazonObj.update_product(value)
                       } else{
-                        await amazonObj.saveEcom(value, keyword);
+                        await amazonObj.saveEcom(value, keyword)
                     }
                     } 
                   }catch (error) {
@@ -131,13 +133,13 @@ async function  getData (service,keyword,page){
                   }
                 i++;
               }
-              try{ 
-                amazonObj.updateJobId(lastOne[0].id)
-              }catch(error) {
-                console.log(error,'error update job')
+              try{
+                await amazonObj.updateJobId(lastOne[0].id);
+              }catch(error){
+                console.log(error,"error update job")
               }
-
-
+              resolve()
+       
               //pantip
             } else if (service == 3) {
               let pantipObj = new Pantip();
@@ -167,7 +169,7 @@ async function  getData (service,keyword,page){
                   let check = await pantipObj.check_product(value["post_id"],"post_id" );
                     console.log("found =",check)
                     if (check > 0){
-                      await pantipObj.update_product(value,"post_id")
+                      await pantipObj.update_product(value)
                     } else{
                       await pantipObj.saveEcom(value, keyword);
                     }
@@ -211,7 +213,7 @@ async function  getData (service,keyword,page){
                   let check = await jdObj.check_product(value["product_id"],"product_id" );
                     console.log("found =",check)
                     if (check > 0){
-                      await jdObj.update_product(value,"product_id")
+                      await jdObj.update_product(value)
                     } else{
                       await jdObj.saveEcom(value, keyword);
                     }
@@ -253,7 +255,7 @@ async function  getData (service,keyword,page){
                   let check = await facebookObj.check_product(value["post_id"],"post_id");
                     console.log("found =",check)
                     if (check > 0){
-                      await facebookObj.update_product(value,"post_id")
+                      await facebookObj.update_product(value)
                     } else{
                       await facebookObj.saveEcom(value, keyword);
                     }
@@ -353,6 +355,7 @@ IndexController.post = async (req, res) => {
           });
 
           if(typeof(keyword) == "object"){
+            
             let resolve = getData(service,keyword[0],page);
             resolve.then(() => {
               let result = getData(service,keyword[1],page);

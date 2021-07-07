@@ -4,6 +4,7 @@ const Service = require("../model/Service");
 const Model = require("../model/Model");
 const l = require('lodash');
 const Facebook = require("../model/Facebook");
+const { indexOf } = require("lodash");
 
 KeywordController = {}
 
@@ -95,9 +96,6 @@ function service_loop (keyword,id,services){
 }
 
 
-
-
-
 KeywordController.getKeywordByService = async(req,res) => {
 
     const service = req.query.service
@@ -134,12 +132,12 @@ KeywordController.post = async (req, res) => {
     let eng_word = req.body.eng_word
     console.log("thai",thai_word)
     try{
-    await new Keyword().check(thai_word,eng_word);
+        await new Keyword().check(thai_word,eng_word); // check keyword in db and insert to db if not
     }catch(error){console.log("keyword.post",error)}
     model.close();
 
-
 }
+
 
 KeywordController.delete = async (req, res) => {
     try{

@@ -35,7 +35,7 @@ class Model {
                 if (err) {
                     return reject(null);
                 }
-                return resolve(results);
+                resolve(results);
             });
         });
     }
@@ -136,9 +136,9 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
-    async check_product(id,type_id){
+    async check_product(id){
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select * from ${this.table} where ${type_id} = '${id}' `, (err, results) => {
+            this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
@@ -174,12 +174,13 @@ class Model {
                     console.log(error,"erron select keyword")
                 }
     }
+
 }
 
     async update_product(objectParam,type_id) {
         return new Promise((resolve, reject) => {
             console.log("update..")
-            this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${type_id} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
+            this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${this.pk} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
