@@ -14,9 +14,24 @@ const Facebook = require("../model/Facebook");
 const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
-
+var cron = require('node-cron');
 
 JobController = {}
+
+var task = cron.schedule('* * * * * *', () => {
+   console.log('Running a job');
+ });
+
+
+JobController.start = async(req,res) => {
+ task.start();
+ res.json("started")
+}
+
+JobController.stop = async(req,res) =>{
+  task.stop();
+  res.json("stoped")
+}
 
 JobController.run = async(req,res) => {
   try{
@@ -30,18 +45,17 @@ JobController.run = async(req,res) => {
       await model.updateJob(job.id,"success")
     }
     console.log("doneeeeeeeeeeeeee")
-    res.json("run succ")
+    // res.json("run succ")
   }catch(error){
     await model.updateJob(job.id,"error")
-    res.json("error")
+    // res.json("error")
   }
-    
-
-    
+ 
 };
 
 JobController.create = async(req,res) => {
   try{
+    console.log("creating")
     let all_keyword = Object.values(JSON.parse(JSON.stringify(await new Keyword().get())));
     let all_facebook_page = Object.values(JSON.parse(JSON.stringify(await new Facebook_page().get())));
     console.log(all_facebook_page)
@@ -53,11 +67,10 @@ JobController.create = async(req,res) => {
     }
 
     await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
-
-    res.json("succc")
+    // res.json("succc")
   }catch(error){
     console.log(error,"create job")
-    res.json(error)
+    // res.json(error)
   }
 
 };
@@ -82,7 +95,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
         resolve()    
       }catch(error){
         console.log(error,"matching keyword")
-        res.json(error)
+        // res.json(error)
       }
     })
 }
@@ -98,7 +111,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
     resolve()
   }catch(error){
     console.log(error,"matching keyword")
-    res.json(error)
+    // res.json(error)
   }
   })
 }
@@ -204,9 +217,5 @@ return new Promise(function (resolve, reject) {
 });
 
 }
-
-
-
-
 
 module.exports = JobController ;
