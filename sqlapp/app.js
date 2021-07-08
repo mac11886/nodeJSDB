@@ -10,6 +10,9 @@ var usersRouter = require("./routes/users");
 var dataRouter = require("./routes/data");
 const dotenv = require("dotenv");
 const { createPool } = require("./db");
+const cron = require('node-cron');
+const shell = require("shelljs")
+const JobController = require("./controller/JobController.js")
 dotenv.config()
 
 var app = express();
@@ -53,5 +56,31 @@ app.use(function (err, req, res, next) {
 });
 app.listen(3000, () => {
   console.log(`Server is running on port: ${process.env.PORT || `3000`}`);
+  
 });
+
+//time schedule
+
+// cron.schedule('*/1 * * * *', () => {
+//   console.log("node-cron-create-job")
+//   JobController.create()
+// });
+
+// cron.schedule('*/2 * * * *', () => {
+//   console.log("node-cron-run-job")
+//   // JobController.run()
+
+// });
+
+
+// cron.schedule('* * * 8 * *', () => {
+//   console.log("node-cron-create-job")
+//   // JobController.create()
+// });
+
+// cron.schedule('* * 11 8 * *', () => {
+//   console.log("node-cron-run-job")
+//   // JobController.run()
+// });
+
 module.exports = app;
