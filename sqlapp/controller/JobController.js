@@ -33,6 +33,71 @@ JobController.stop = async(req,res) =>{
   res.json("stoped")
 }
 
+JobController.get = async (req, res) => {
+  try {
+      let jobs = await new Job().get();
+      jobs.forEach((job) => {
+          // Convert Created time
+          let created_time = new Date(job.created_time);
+          let iso_created_time = new Date(
+              created_time.getTime() - created_time.getTimezoneOffset() * 60000
+          ).toISOString().slice(0, 19).replace("T", " ");
+          job.created_time = iso_created_time;
+
+          // Convert Start time
+          if (job.start_time == null) {
+              job.start_time = "not started yet";
+          } else {
+              let start_time = new Date(job.start_time); // Or the date you'd like converted.
+              let iso_start_time = new Date(
+                  start_time.getTime() - start_time.getTimezoneOffset() * 60000
+              ).toISOString().slice(0, 19).replace("T", " ");
+              job.start_time = iso_start_time;
+          }
+
+          // Convert End time
+          if (job.end_time == null) {
+              if (job.start_time != "not started yet") {
+                  job.end_time = "not done yet";
+              } else {
+                  job.end_time = "not started yet";
+              }
+          } else {
+              let end_time = new Date(job.end_time); // Or the date you'd like converted.
+              let iso_end_time = new Date(
+                  end_time.getTime() - end_time.getTimezoneOffset() * 60000
+              ).toISOString().slice(0, 19).replace("T", " ");
+              job.end_time = iso_end_time;
+          }
+
+          // Convert Service
+          switch (job.service) {
+              case "1":
+                  job.service = "shopee";
+                  break;
+              case "2":
+                  job.service = "amazon";
+                  break;
+              case "3":
+                  job.service = "pantip";
+                  break;
+              case "4":
+                  job.service = "jd";
+                  break;
+              case "5":
+                  job.service = "facebook"
+          }
+      });
+
+      res.json({ jobs })
+
+  }
+  catch (err) {
+      console.log(error)
+  }
+}
+
+
 JobController.run = async(req,res) => {
   try{
     let model = new Model();

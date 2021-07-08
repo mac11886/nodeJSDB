@@ -59,28 +59,5 @@ app.listen(3000, () => {
   
 });
 
-//time schedule
-
-// cron.schedule('*/1 * * * *', () => {
-//   console.log("node-cron-create-job")
-//   JobController.create()
-// });
-
-// cron.schedule('*/2 * * * *', () => {
-//   console.log("node-cron-run-job")
-//   // JobController.run()
-
-// });
-
-
-// cron.schedule('* * * 8 * *', () => {
-//   console.log("node-cron-create-job")
-//   // JobController.create()
-// });
-
-// cron.schedule('* * 11 8 * *', () => {
-//   console.log("node-cron-run-job")
-//   // JobController.run()
-// });
 
 module.exports = app;
