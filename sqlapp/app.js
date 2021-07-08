@@ -9,9 +9,6 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 const dotenv = require("dotenv");
 const { createPool } = require("./db");
-const cron = require('node-cron');
-const shell = require("shelljs")
-const JobController = require("./controller/JobController.js")
 dotenv.config()
 
 var app = express();

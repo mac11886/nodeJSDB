@@ -25,8 +25,8 @@ router.post("/facebook_page/delete", (req,res) => FacebookPageController.delete(
 
 router.post("/job/run", (req,res) => JobController.run(req,res));
 router.post("/job/create", (req,res) => JobController.create(req,res));
-router.get("/job/start", (req,res) => JobController.start(req,res));
-router.get("/job/stop", (req,res) => JobController.stop(req,res));
+router.post("/job/start", (req,res) => JobController.start(req,res));
+router.post("/job/stop", (req,res) => JobController.stop(req,res));
 
 
 
