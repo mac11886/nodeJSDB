@@ -7,6 +7,7 @@ var logger = require("morgan");
 const { spawn } = require("child_process");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var dataRouter = require("./routes/data");
 const dotenv = require("dotenv");
 const { createPool } = require("./db");
 dotenv.config()
@@ -32,7 +33,7 @@ app.use('public/javascripts', express.static(path.join(__dirname, 'public/javasc
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-
+app.use("/data", dataRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -55,28 +56,5 @@ app.listen(3000, () => {
   
 });
 
-//time schedule
-
-// cron.schedule('*/1 * * * *', () => {
-//   console.log("node-cron-create-job")
-//   JobController.create()
-// });
-
-// cron.schedule('*/2 * * * *', () => {
-//   console.log("node-cron-run-job")
-//   // JobController.run()
-
-// });
-
-
-// cron.schedule('* * * 8 * *', () => {
-//   console.log("node-cron-create-job")
-//   // JobController.create()
-// });
-
-// cron.schedule('* * 11 8 * *', () => {
-//   console.log("node-cron-run-job")
-//   // JobController.run()
-// });
 
 module.exports = app;

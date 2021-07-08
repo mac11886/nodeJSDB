@@ -23,11 +23,11 @@ router.get("/facebook_page", (req,res) => FacebookPageController.get(req,res));
 router.post("/facebook_page/post", (req,res) => FacebookPageController.post(req,res));
 router.post("/facebook_page/delete", (req,res) => FacebookPageController.delete(req,res));
 
+router.get("/job", (req, res) => JobController.get(req, res));
 router.post("/job/run", (req,res) => JobController.run(req,res));
 router.post("/job/create", (req,res) => JobController.create(req,res));
 router.post("/job/start", (req,res) => JobController.start(req,res));
 router.post("/job/stop", (req,res) => JobController.stop(req,res));
-
 
 
 
