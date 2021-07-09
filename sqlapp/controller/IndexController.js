@@ -77,12 +77,12 @@ async function getData(service, keyword, page) {
             delete value["num"];
             try {
               if (i >= 1) {
-                shopeeObj.check_product(value["product_id"], "product_id")
+                shopeeObj.check_product(value["product_id"])
                   .then(async (check) => {
                     console.log("found =", check)
 
                     if (check > 0) {
-                      await shopeeObj.update_product(value, "product_id").then(() => {
+                      await shopeeObj.update_product(value).then(() => {
                         shopeeObj.updateJobId(lastOne[0].id);
                       })
                     } else {

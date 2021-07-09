@@ -41,17 +41,16 @@ class Model {
             });
         });
     }
-    getCount() {
-        // this.connect()
-        return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select count(key_id) from ` + this.table, (err, results) => {
-                if (err) {
-                    return reject(null);
-                }
-                return resolve(Object.values(results[0])[0]);
-            });
-        });
-    }
+    // getCount() {
+    //     return new Promise((resolve, reject) => {
+    //         this.mysqlConnect.query(`select count(key_id) from ` + this.table, (err, results) => {
+    //             if (err) {
+    //                 return reject(null);
+    //             }
+    //             return resolve(Object.values(results[0])[0]);
+    //         });
+    //     });
+    // }
     getKeywordCount(service_id, key_id) {
         // this.connect()
         return new Promise((resolve, reject) => {
@@ -178,7 +177,7 @@ class Model {
         }
     }
 
-    async update_product(objectParam, type_id) {
+    async update_product(objectParam) {
         return new Promise((resolve, reject) => {
             console.log("update..")
             this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${this.pk} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
@@ -321,15 +320,24 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
+    wherecount(condition) {
+        // this.connect()
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select count(*) from ${this.table} where ${condition}`, (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+
+                return resolve(Object.values(results[0])[0]);
+            });
+            // this.mysqlConnect.end() 
+        });
+    }
 
     close = () => new Promise((resolve, reject) => {
         // this.mysqlConnect.end()
         // console.log("disconnect db")
     });
-
-
-
-
 
     addJob = (req) => {
         return new Promise((resolve, reject) => {

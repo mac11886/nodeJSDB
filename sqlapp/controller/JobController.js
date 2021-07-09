@@ -15,22 +15,40 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
 var cron = require('node-cron');
+const { create } = require("lodash");
 
 JobController = {}
 
-var task = cron.schedule('* * * * * *', () => {
+var create_task = cron.schedule('0 54 10 * * *', () => {
+  console.log('create a job');
+  JobController.create()
+  });
+
+var run_task = cron.schedule('0 55 10 * * *', () => {
    console.log('Running a job');
+    JobController.run()
  });
 
 
 JobController.start = async(req,res) => {
- task.start();
+ create_task.start();
+ run_task.start();
  res.json("started")
 }
 
 JobController.stop = async(req,res) =>{
   task.stop();
   res.json("stoped")
+}
+
+JobController.progress = async(req,res) => {
+  let count_all_job = await new Job().getcount();
+  let count_success_job = await new Job().wherecount(`status = "success"`);
+  let current_progress = {count_all_job: count_all_job,count_success_job:count_success_job}
+
+  res.json({current_progress})
+  // resolve({})
+  // })
 }
 
 JobController.get = async (req, res) => {
@@ -88,12 +106,11 @@ JobController.get = async (req, res) => {
                   job.service = "facebook"
           }
       });
-
-      res.json({ jobs })
+      res.json({ jobs})
 
   }
   catch (err) {
-      console.log(error)
+      console.log(err)
   }
 }
 
@@ -149,7 +166,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
     
     for (let service of services){
         if(service.name === "pantip"){
-            page = 100 //----------->> actually is 1000 <<---------------------
+            page = 10 //----------->> actually is 1000 <<---------------------
         }
         let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_thai)
@@ -210,22 +227,28 @@ return new Promise(function (resolve, reject) {
       let obj
       let job = new Job();
       let model = new Model();
+      let pk_id = ""
       model.connect()
 
       if (service == 1) {
         obj = new Shopee();
+        pk_id = "product_id"
       }
       else if (service == 2) {
         obj = new Amazon();
+        pk_id = "product_id"
       }
       else if (service == 3) {
         obj = new Pantip();
+        pk_id="post_id"
       }
       else if (service == 4) {
         obj = new Jd();
+        pk_id = "product_id"
       }
       else if (service == 5) {
         obj = new Facebook();
+        pk_id="post_id"
       }
       
       const header = raw.split(/\r?\n/)[0].split(",");
@@ -247,18 +270,11 @@ return new Promise(function (resolve, reject) {
         delete value["num"];
         try {
           if (i >= 1) {
-            if (service == 1 || service == 2 || service == 4) {
-              pk_id = "product_id"
-            }
-            else {
-              pk_id="post_id"
-            }
-            obj.check_product(value[pk_id], pk_id)
+            obj.check_product(value[pk_id])
               .then(async (check) => {
                 console.log("found =", check)
-
                 if (check > 0) {
-                  await obj.update_product(value, pk_id).then(() => {
+                  await obj.update_product(value).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 } else {
