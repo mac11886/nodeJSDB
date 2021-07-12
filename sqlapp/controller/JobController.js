@@ -15,7 +15,7 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
 var cron = require('node-cron');
-const { create } = require("lodash");
+const { create, result } = require("lodash");
 
 JobController = {}
 
@@ -208,7 +208,6 @@ async function getData(service, keyword, page) {
       python = spawn(process.env.PYTHON_PATH, [
         process.env.SCRAPE_PATH
       ]);
-      // console.log("get pythonnnnnnnnnnrsnnnnnnn",service,page,keyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
       python.stdin.end();
       python.stdout.on("data", function (data) {
@@ -228,6 +227,7 @@ async function getData(service, keyword, page) {
         let job = new Job();
         let model = new Model();
         let pk_id = ""
+        let result;
         model.connect()
 
         if (service == 1) {
@@ -256,23 +256,17 @@ async function getData(service, keyword, page) {
 
         const header = raw.split(/\r?\n/)[0].split(",");
         try {
-          if (i >= 1) {
-            await obj.check_product(value[pk_id])
-              .then(async (check) => {
-                console.log("found =", check)
-                if (check == 0) {
-                  await obj.saveEcom(value, keyword).then(() => {
-                    obj.updateJobId(lastOne[0].id);
-                  })
-                } else {
-                  await obj.update_product(value).then(() => {
-                    obj.updateJobId(lastOne[0].id);
-                  })
-                }
-              }); 
-          }
-        } catch (error) {
-          console.log(error.message, 'error ', value, keyword)
+          result = await csv(raw, { headers: header });
+        }
+        catch (err) {
+          console.log(err, "error result")
+          return;
+        }
+        try {
+          lastOne = await job.getLastOne();
+        } catch (err) {
+          console.log(err, 'error lastOne')
+          return;
         }
 
         for await (const value of result) {
