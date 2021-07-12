@@ -89,7 +89,7 @@ async function getData(service, keyword, page) {
           delete value["num"];
           try {
             if (i >= 1) {
-              obj.check_product(value[pk_id])
+              await obj.check_product(value[pk_id])
                 .then(async (check) => {
                   console.log("found =", check)
                   if (check > 0) {

@@ -143,6 +143,10 @@ class Model {
                 if (err) {
                     return reject(err);
                 }
+                if (results.length > 1){
+                    console.log(results)
+                }
+                
                 resolve(results.length);
             });
         });
