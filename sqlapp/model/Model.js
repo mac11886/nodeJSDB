@@ -9,18 +9,7 @@ class Model {
         this.pk = pk
         this.serviceId = serviceId
         this.mysqlConnect = getMysqlConnect()
-        // this.mysqlConnect = mysql.createPool({
-        //     // connectionLimit: 500,
-        //     password: process.env.DATABASE_PASSWORD,
-        //     user: process.env.DATABASE_USER,
-        //     database: process.env.DATABASE_NAME,
-        //     host: process.env.DATABASE_HOST,
-        // });
-        // this.mysqlConnect.getConnection((err) => {
-        //     if (!err) console.log("DB connection success");
-        //     else console.log("DB connect fail", err);
-
-        // });
+        
     }
     connect = () => new Promise((resolve) => {
         // this.mysqlConnect.getConnection((err) => {
