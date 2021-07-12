@@ -119,7 +119,7 @@ JobController.get = async (req, res) => {
 JobController.run = async (req, res) => {
   try {
     let model = new Model();
-    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in_progress"`))));
+    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
 
     for (const job of all_job) {
@@ -256,17 +256,23 @@ async function getData(service, keyword, page) {
 
         const header = raw.split(/\r?\n/)[0].split(",");
         try {
-          result = await csv(raw, { headers: header });
-        }
-        catch (err) {
-          console.log(err, "error result")
-          return;
-        }
-        try {
-          lastOne = await job.getLastOne();
-        } catch (err) {
-          console.log(err, 'error lastOne')
-          return;
+          if (i >= 1) {
+            await obj.check_product(value[pk_id])
+              .then(async (check) => {
+                console.log("found =", check)
+                if (check == 0) {
+                  await obj.saveEcom(value, keyword).then(() => {
+                    obj.updateJobId(lastOne[0].id);
+                  })
+                } else {
+                  await obj.update_product(value).then(() => {
+                    obj.updateJobId(lastOne[0].id);
+                  })
+                }
+              }); 
+          }
+        } catch (error) {
+          console.log(error.message, 'error ', value, keyword)
         }
 
         for await (const value of result) {

@@ -22,14 +22,11 @@ const dotenv = require("dotenv")
 async function getData(service, keyword, page) {
   return new Promise(function (resolve, reject) {
     try {
-      console.log(process.env.PYTHON_PATH,process.env.SCRAPE_PATH)
-
       let utfKeyword = encodeURI(keyword);
       python = spawn(process.env.PYTHON_PATH, [
-        process.env.SCRAPE_PATH,
+        process.env.SCRAPE_PATH
       ]);
-      console.log("get pythonnnnnnnnnnnnnnnnn")
-
+      // console.log("get pythonnnnnnnnnnrsnnnnnnn",service,page,keyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
       python.stdin.end();
       python.stdout.on("data", function (data) {
@@ -37,232 +34,89 @@ async function getData(service, keyword, page) {
         dataToSend = data.toString();
         console.log(dataToSend);
       });
-
-
+  
       // in close event we are sure that stream from child process is closed
       python.on("exit", async (code) => {
         console.log('on exit')
-        const raw = fs.readFileSync("myfile.csv", "utf8");
+        const raw = fs.readFileSync(process.env.FILE, "utf8");
         console.log(`child process close all stdio with code ${code}`);
-        console.log("service:" + service);
-
+        // console.log("service:" + service);
+  
         let i = 0;
+        let obj
         let job = new Job();
         let model = new Model();
-        let shopeeObj = new Shopee();
-        let amazonObj = new Amazon();
+        let pk_id = ""
         model.connect()
-
-        //shopee
+  
         if (service == 1) {
-          //edit header
-          const header = raw.split(/\r?\n/)[0].split(",");
-          header[6] = "send_from";
-          header[9] = "product_id";
-          try {
-            result = await csv(raw, { headers: header });
-          }
-          catch (err) {
-            console.log(err, "error result")
-            return;
-          }
-          try {
-            lastOne = await job.getLastOne();
-          } catch (err) {
-            console.log(err, 'error lastOne')
-            return;
-          }
-
-          for await (const value of result) {
-            delete value["num"];
-            try {
-              if (i >= 1) {
-                shopeeObj.check_product(value["product_id"])
-                  .then(async (check) => {
-                    console.log("found =", check)
-
-                    if (check > 0) {
-                      await shopeeObj.update_product(value).then(() => {
-                        shopeeObj.updateJobId(lastOne[0].id);
-                      })
-                    } else {
-                      await shopeeObj.saveEcom(value, keyword).then(() => {
-                        shopeeObj.updateJobId(lastOne[0].id);
-                      })
-                    }
-                  });
-              }
-            } catch (error) {
-              console.log(error.message, 'error ', value, keyword)
-            }
-            i++;
-          } resolve()
-
-          //amazon
-        } else if (service == 2) {
-          const header = raw.split(/\rsda\n/)[0].split(",");
-          header[1] = "product_id";
-          header[8] = "rank";
-          try {
-            result = await csv(raw, { headers: header });
-          } catch (error) {
-            console.log(error, 'error result')
-            return;
-          }
-          try {
-            lastOne = await job.getLastOne();
-
-          } catch (error) {
-            console.log(error, 'error lastOne')
-            return;
-          }
-
-          for (const value of result) {
-            delete value["num"];
-            try {
-              if (i >= 1) {
-
-                let check = await amazonObj.check_product(value["product_id"], "product_id");
-                console.log("found =", check)
-                if (check > 0) {
-                  await amazonObj.update_product(value, "product_id")
-                } else {
-                  await amazonObj.saveEcom(value, keyword);
-                }
-              }
-            } catch (error) {
-              console.log(error.message, 'error ', value, keyword)
-            }
-            i++;
-          }
-          try {
-            amazonObj.updateJobId(lastOne[0].id)
-          } catch (error) {
-            console.log(error, 'error update job')
-          }
-          resolve()
-
-
-          //pantip
-        } else if (service == 3) {
-          let pantipObj = new Pantip();
-          const header = raw.split(/\r?\n/)[0].split(",");
-          header[5] = "like_count";
-          header[6] = "emo_count";
-          header[9] = "date_time";
-          header[14] = "good_word";
-          header[15] = "bad_word";
-          try {
-            result = await csv(raw, { headers: header });
-          } catch (error) {
-            console.log(error, 'error result')
-            return;
-          }
-          try {
-            lastOne = await job.getLastOne();
-          } catch (error) {
-            console.log(error, 'error lastOne')
-            return;
-          }
-          model.connect()
-          for (const value of result) {
-            delete value["num"];
-            try {
-              if (i >= 1) {
-                let check = await pantipObj.check_product(value["post_id"], "post_id");
-                console.log("found =", check)
-                if (check > 0) {
-                  await pantipObj.update_product(value, "post_id")
-                } else {
-                  await pantipObj.saveEcom(value, keyword);
-                }
-              }
-              for await(const value of result){
-                delete value["num"];
-                try{
-                if (i >= 1) {
-                  let check = await facebookObj.check_product(value["post_id"],"post_id");
-                    console.log("found =",check)
-                    if (check > 0){
-                      await facebookObj.update_product(value)
-                    } else{
-                      await facebookObj.saveEcom(value, keyword);
-                    }
-                    //save to database
-                    } 
-                  }catch (error) {
-                      console.log(error.message, 'error ', value, keyword)
-                  }
-                i++;
-              }
-            } catch (error) {
-              console.log(error.message, 'error ', value, keyword)
-            }
-            i++;
-          }
-          try {
-            jdObj.updateJobId(lastOne[0].id);
-          } catch (error) {
-            console.log(error, 'error update job')
-          } resolve()
-          //facebook
-        } else if (service == 5) {
-          let facebookObj = new Facebook();
-          const header = raw.split(/\r?\n/)[0].split(",");
-          header[11] = "good_word";
-          header[12] = "bad_word";
-
-          try {
-            lastOne = await job.getLastOne();
-          } catch (error) {
-            console.log(error, 'error lastOne')
-            return;
-          }
-          try {
-            result = await csv(raw, { headers: header });
-          } catch (error) {
-            console.log(error, 'error lastOne')
-            return;
-          }
-          for await (const value of result) {
-            delete value["num"];
-            try {
-              if (i >= 1) {
-                let check = await facebookObj.check_product(value["post_id"], "post_id");
-                console.log("found =", check)
-                if (check > 0) {
-                  await facebookObj.update_product(value, "post_id")
-                } else {
-                  await facebookObj.saveEcom(value, keyword);
-                }
-                //save to database
-              }
-            } catch (error) {
-              console.log(error.message, 'error ', value, keyword)
-            }
-            i++;
-          }
-          try {
-            facebookObj.updateJobId(lastOne[0].id);
-          } catch (error) {
-            console.log(error, 'error update job')
-          }
-          resolve()
+          obj = new Shopee();
+          pk_id = "product_id"
         }
-        // resolve()
+        else if (service == 2) {
+          obj = new Amazon();
+          pk_id = "product_id"
+        }
+        else if (service == 3) {
+          obj = new Pantip();
+          pk_id="post_id"
+        }
+        else if (service == 4) {
+          obj = new Jd();
+          pk_id = "product_id"
+        }
+        else if (service == 5) {
+          obj = new Facebook();
+          pk_id="post_id"
+        }
+        
+        const header = raw.split(/\r?\n/)[0].split(",");
+        try {
+          result = await csv(raw, { headers: header });
+        }
+        catch (err) {
+          console.log(err, "error result")
+          return;
+        }
+        try {
+          lastOne = await job.getLastOne();
+        } catch (err) {
+          console.log(err, 'error lastOne')
+          return;
+        }
+  
+        for await (const value of result) {
+          delete value["num"];
+          try {
+            if (i >= 1) {
+              await obj.check_product(value[pk_id])
+                .then(async (check) => {
+                  console.log("found =", check)
+                  if (check > 0) {
+                    await obj.update_product(value).then(() => {
+                      obj.updateJobId(lastOne[0].id);
+                    })
+                  } else {
+                    await obj.saveEcom(value, keyword).then(() => {
+                      obj.updateJobId(lastOne[0].id);
+                    })
+                  }
+                });
+            }
+          } catch (error) {
+            console.log(error.message, 'error ', value, keyword)
+          }
+          i++;
+        } resolve()
+        
       });
     } catch (err) {
-      if (err.code == "PROTOCOL_CONNECTION_LOST") {
-        const model = new Model()
-        model.connect()
-      } else {
-        console.log("get data", err)
-      }
-
+      console.log("get data", err)
+  
     }
   });
-
-}
+  
+  }
 
 IndexController.get = async (req, res) => {
   const model = new Model()
@@ -322,6 +176,13 @@ IndexController.post = async (req, res) => {
       let date = new Date(); // Or the date you'd like converted.
       let startTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
 
+      let response = await model.addJob({
+        keyword: keyword.toString(),
+        service: service,
+        page: page,
+        status: "in progress",
+        start_time: startTime,
+      });
           if(typeof(keyword) == "object"){
             
             let resolve = getData(service,keyword[0],page);
@@ -329,7 +190,7 @@ IndexController.post = async (req, res) => {
               let result = getData(service,keyword[1],page);
             result.then(async() => {
               // model.connect()
-              response =  await model.updateJob(response.id);
+              response =  await model.updateJob(response.id,"success");
               res.json(response);
               console.log("-----------DONE--------------")
               });
@@ -337,7 +198,7 @@ IndexController.post = async (req, res) => {
           }else{
             let resolve = getData(service,keyword,page);
             resolve.then(async() => {
-              response =  await model.updateJob(response.id);
+              response =  await model.updateJob(response.id,"success");
               res.json(response);
               console.log("-----------DONE--------------")
               });
