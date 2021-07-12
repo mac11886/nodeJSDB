@@ -192,15 +192,15 @@ class Model {
         return new Promise(async (resolve) => {
             console.log("saving data to DB")
             try {
-                const found = await this.joinData(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, objectParam)
+                // const found = await this.joinData(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, objectParam)
 
-                if (found.length == 0) {
+                // if (found.length == 0) {
                     const insertId = await this.insertTable(`insert into ${this.table} set ? ;`, objectParam)
                     const e_id = await this.insertTable("insert into `e_service` (`service_id`,`e_id`) VALUES (" + this.serviceId + "," + insertId + ")")
                     if (this.table != "facebook") {
                         const key_id = await this.selectKeyword(`select id from keyword where thai_word = "${word}" or eng_word = "${word}"`)
                         await this.insertMainTable(`insert into main set e_service_id = ${e_id},key_id = ${key_id}`)
-                    }
+                    // }
 
                     resolve()
                 }

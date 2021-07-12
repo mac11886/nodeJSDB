@@ -37,7 +37,8 @@ JobController.start = async(req,res) => {
 }
 
 JobController.stop = async(req,res) =>{
-  task.stop();
+  create_task.stop();
+  run_task.stop();
   res.json("stoped")
 }
 
@@ -118,11 +119,11 @@ JobController.get = async (req, res) => {
 JobController.run = async(req,res) => {
   try{
     let model = new Model();
-    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in_progress"`))));
+    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
     
     for(const job of all_job){
-      await model.updateJob(job.id,"in_progress")
+      await model.updateJob(job.id,"in progress")
       await getData(job.service,job.keyword,job.page,job.id)
       await model.updateJob(job.id,"success")
     }
@@ -149,10 +150,10 @@ JobController.create = async(req,res) => {
     }
 
     await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
-    // res.json("succc")
+    res.json("succc")
   }catch(error){
     console.log(error,"create job")
-    // res.json(error)
+    res.json(error)
   }
 
 };
@@ -187,7 +188,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
     try{
     let model = new Model();
     for (let facebook_page of all_facebook_page){
-      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:100}
+      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:10}
       await model.addJob(job)
     }
     resolve()
