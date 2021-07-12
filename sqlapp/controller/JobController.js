@@ -271,19 +271,20 @@ return new Promise(function (resolve, reject) {
         delete value["num"];
         try {
           if (i >= 1) {
-            await obj.check_product(value[pk_id])
-              .then(async (check) => {
+            // console.log("checking")
+            let check = await obj.check_product(value[pk_id])
+              // .then(async (check) => {
                 console.log("found =", check)
                 if (check == 0) {
-                  await obj.saveEcom(value, keyword).then(() => {
+                  obj.saveEcom(value, keyword).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 } else {
-                  await obj.update_product(value).then(() => {
+                  obj.update_product(value).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 }
-              }); 
+              // }); 
           }
         } catch (error) {
           console.log(error.message, 'error ', value, keyword)
