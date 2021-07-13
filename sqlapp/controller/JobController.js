@@ -201,7 +201,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
 
 
 
-async function getData(service, keyword, page) {
+async function getData(service, keyword, page, job_id) {
   return new Promise(function (resolve, reject) {
     try {
       let utfKeyword = encodeURI(keyword);
@@ -262,12 +262,12 @@ async function getData(service, keyword, page) {
           console.log(err, "error result")
           return;
         }
-        try {
-          lastOne = await job.getLastOne();
-        } catch (err) {
-          console.log(err, 'error lastOne')
-          return;
-        }
+        // try {
+        //   lastOne = await job.getLastOne();
+        // } catch (err) {
+        //   console.log(err, 'error lastOne')
+        //   return;
+        // }
         
 
         for await (const value of result) {
@@ -280,11 +280,11 @@ async function getData(service, keyword, page) {
                   console.log("found =", check)
                   if (check == 0) {
                     obj.saveEcom(value, keyword).then(() => {
-                      obj.updateJobId(lastOne[0].id);
+                      obj.updateJobId(job_id);
                     })
                   } else {
                     obj.update_product(value).then(() => {
-                      obj.updateJobId(lastOne[0].id);
+                      obj.updateJobId(job_id);
                     })
                   }
                 // }); 
