@@ -122,7 +122,7 @@ JobController.run = async(req,res) => {
     let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
     
-    for(const job of all_job){
+    for (const job of all_job){
       await model.updateJob(job.id,"in progress")
       await getData(job.service,job.keyword,job.page,job.id)
       await model.updateJob(job.id,"success")
@@ -271,19 +271,20 @@ return new Promise(function (resolve, reject) {
         delete value["num"];
         try {
           if (i >= 1) {
-            obj.check_product(value[pk_id])
-              .then(async (check) => {
+            // console.log("checking")
+            let check = await obj.check_product(value[pk_id])
+              // .then(async (check) => {
                 console.log("found =", check)
-                if (check > 0) {
-                  await obj.update_product(value).then(() => {
+                if (check == 0) {
+                  obj.saveEcom(value, keyword).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 } else {
-                  await obj.saveEcom(value, keyword).then(() => {
+                  obj.update_product(value).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 }
-              });
+              // }); 
           }
         } catch (error) {
           console.log(error.message, 'error ', value, keyword)

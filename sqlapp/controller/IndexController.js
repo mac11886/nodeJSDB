@@ -89,19 +89,19 @@ async function getData(service, keyword, page) {
           delete value["num"];
           try {
             if (i >= 1) {
-              obj.check_product(value[pk_id])
-                .then(async (check) => {
+              let check = await obj.check_product(value[pk_id])
+                // .then(async (check) => {
                   console.log("found =", check)
-                  if (check > 0) {
-                    await obj.update_product(value).then(() => {
+                  if (check == 0) {
+                    obj.saveEcom(value, keyword).then(() => {
                       obj.updateJobId(lastOne[0].id);
                     })
                   } else {
-                    await obj.saveEcom(value, keyword).then(() => {
+                    obj.update_product(value).then(() => {
                       obj.updateJobId(lastOne[0].id);
                     })
                   }
-                });
+                // });
             }
           } catch (error) {
             console.log(error.message, 'error ', value, keyword)
