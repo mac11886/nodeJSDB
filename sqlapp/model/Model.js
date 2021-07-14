@@ -181,7 +181,7 @@ class Model {
         }
     }
 
-    async update_product(objectParam) {
+    update_product(objectParam) {
         return new Promise((resolve, reject) => {
             console.log("update..")
             this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${this.pk} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
@@ -201,7 +201,6 @@ class Model {
                     if (this.table != "facebook") {
                         const key_id = await this.selectKeyword(`select id from keyword where thai_word = "${word}" or eng_word = "${word}"`)
                         await this.insertMainTable(`insert into main set e_service_id = ${e_id},key_id = ${key_id}`)
-                    resolve()
                 }
                 // this.mysqlConnect.end()
             } catch (err) {
@@ -211,6 +210,7 @@ class Model {
                     console.log("save ecom", err)
                 }
             }
+            resolve()
         }
         )
     }
@@ -287,7 +287,7 @@ class Model {
 
                 }
 
-                return resolve(results);
+                resolve(results);
             });
             // this.mysqlConnect.end() 
         });

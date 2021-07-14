@@ -122,10 +122,11 @@ JobController.run = async(req,res) => {
     let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
     
-    for (const job of all_job){
+    for await (const job of all_job){
       await model.updateJob(job.id,"in progress")
       await getData(job.service,job.keyword,job.page,job.id)
       await model.updateJob(job.id,"success")
+      // console.log("loop")
     }
     console.log("doneeeeeeeeeeeeee")
     // res.json("run succ")
@@ -153,7 +154,7 @@ JobController.create = async(req,res) => {
     res.json("succc")
   }catch(error){
     console.log(error,"create job")
-    res.json(error)
+    // res.json(error)
   }
 
 };
@@ -163,17 +164,17 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
     try{
     let model = new Model();
     const services = Object.values(JSON.parse(JSON.stringify(await new Service().where(`not name = "facebook"`))))
-    let page = 1 //----------->> actually is 100 <<----------------
+    let page = 100 //----------->> actually is 100 <<----------------
     
     for (let service of services){
         if(service.name === "pantip"){
-            page = 10 //----------->> actually is 1000 <<---------------------
+            page = 1000 //----------->> actually is 1000 <<---------------------
         }
         let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_thai)
         let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_eng)
-        page = 1
+        page = 100
         }
         resolve()    
       }catch(error){
@@ -188,7 +189,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
     try{
     let model = new Model();
     for (let facebook_page of all_facebook_page){
-      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:10}
+      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:100}
       await model.addJob(job)
     }
     resolve()
@@ -201,7 +202,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
 
 
 
-async function getData(service, keyword, page) {
+async function getData(service, keyword, page,job_id) {
 return new Promise(function (resolve, reject) {
   try {
     let utfKeyword = encodeURI(keyword);
@@ -226,7 +227,6 @@ return new Promise(function (resolve, reject) {
 
       let i = 0;
       let obj
-      let job = new Job();
       let model = new Model();
       let pk_id = ""
       model.connect()
@@ -260,31 +260,22 @@ return new Promise(function (resolve, reject) {
         console.log(err, "error result")
         return;
       }
-      try {
-        lastOne = await job.getLastOne();
-      } catch (err) {
-        console.log(err, 'error lastOne')
-        return;
-      }
-
       for await (const value of result) {
         delete value["num"];
         try {
           if (i >= 1) {
             // console.log("checking")
             let check = await obj.check_product(value[pk_id])
-              // .then(async (check) => {
                 console.log("found =", check)
                 if (check == 0) {
                   obj.saveEcom(value, keyword).then(() => {
-                    obj.updateJobId(lastOne[0].id);
+                    obj.updateJobId(job_id);
                   })
                 } else {
                   obj.update_product(value).then(() => {
-                    obj.updateJobId(lastOne[0].id);
+                    obj.updateJobId(job_id);
                   })
                 }
-              // }); 
           }
         } catch (error) {
           console.log(error.message, 'error ', value, keyword)
@@ -295,6 +286,7 @@ return new Promise(function (resolve, reject) {
     });
   } catch (err) {
     console.log("get data", err)
+    model.updateJob(job_id,"error")
 
   }
 });
