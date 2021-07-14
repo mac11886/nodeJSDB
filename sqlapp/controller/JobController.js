@@ -14,34 +14,131 @@ const Facebook = require("../model/Facebook");
 const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
-
+var cron = require('node-cron');
+const { create } = require("lodash");
 
 JobController = {}
+
+var create_task = cron.schedule('0 54 10 * * *', () => {
+  console.log('create a job');
+  JobController.create()
+  });
+
+var run_task = cron.schedule('0 55 10 * * *', () => {
+   console.log('Running a job');
+    JobController.run()
+ });
+
+
+JobController.start = async(req,res) => {
+ create_task.start();
+ run_task.start();
+ res.json("started")
+}
+
+JobController.stop = async(req,res) =>{
+  create_task.stop();
+  run_task.stop();
+  res.json("stoped")
+}
+
+JobController.progress = async(req,res) => {
+  let count_all_job = await new Job().getcount();
+  let count_success_job = await new Job().wherecount(`status = "success"`);
+  let current_progress = {count_all_job: count_all_job,count_success_job:count_success_job}
+
+  res.json({current_progress})
+  // resolve({})
+  // })
+}
+
+JobController.get = async (req, res) => {
+  try {
+      let jobs = await new Job().get();
+      jobs.forEach((job) => {
+          // Convert Created time
+          let created_time = new Date(job.created_time);
+          let iso_created_time = new Date(
+              created_time.getTime() - created_time.getTimezoneOffset() * 60000
+          ).toISOString().slice(0, 19).replace("T", " ");
+          job.created_time = iso_created_time;
+
+          // Convert Start time
+          if (job.start_time == null) {
+              job.start_time = "not started yet";
+          } else {
+              let start_time = new Date(job.start_time); // Or the date you'd like converted.
+              let iso_start_time = new Date(
+                  start_time.getTime() - start_time.getTimezoneOffset() * 60000
+              ).toISOString().slice(0, 19).replace("T", " ");
+              job.start_time = iso_start_time;
+          }
+
+          // Convert End time
+          if (job.end_time == null) {
+              if (job.start_time != "not started yet") {
+                  job.end_time = "not done yet";
+              } else {
+                  job.end_time = "not started yet";
+              }
+          } else {
+              let end_time = new Date(job.end_time); // Or the date you'd like converted.
+              let iso_end_time = new Date(
+                  end_time.getTime() - end_time.getTimezoneOffset() * 60000
+              ).toISOString().slice(0, 19).replace("T", " ");
+              job.end_time = iso_end_time;
+          }
+
+          // Convert Service
+          switch (job.service) {
+              case "1":
+                  job.service = "shopee";
+                  break;
+              case "2":
+                  job.service = "amazon";
+                  break;
+              case "3":
+                  job.service = "pantip";
+                  break;
+              case "4":
+                  job.service = "jd";
+                  break;
+              case "5":
+                  job.service = "facebook"
+          }
+      });
+      res.json({ jobs})
+
+  }
+  catch (err) {
+      console.log(err)
+  }
+}
+
 
 JobController.run = async(req,res) => {
   try{
     let model = new Model();
-    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in_progress"`))));
+    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
     
     for(const job of all_job){
-      await model.updateJob(job.id,"in_progress")
+      await model.updateJob(job.id,"in progress")
       await getData(job.service,job.keyword,job.page,job.id)
       await model.updateJob(job.id,"success")
     }
     console.log("doneeeeeeeeeeeeee")
-    res.json("run succ")
+    // res.json("run succ")
   }catch(error){
     await model.updateJob(job.id,"error")
-    res.json("error")
+    // res.json("error")
   }
-    
-
-    
+ 
 };
 
 JobController.create = async(req,res) => {
   try{
+    console.log("creating")
     let all_keyword = Object.values(JSON.parse(JSON.stringify(await new Keyword().get())));
     let all_facebook_page = Object.values(JSON.parse(JSON.stringify(await new Facebook_page().get())));
     console.log(all_facebook_page)
@@ -53,7 +150,6 @@ JobController.create = async(req,res) => {
     }
 
     await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
-
     res.json("succc")
   }catch(error){
     console.log(error,"create job")
@@ -71,7 +167,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
     
     for (let service of services){
         if(service.name === "pantip"){
-            page = 100 //----------->> actually is 1000 <<---------------------
+            page = 10 //----------->> actually is 1000 <<---------------------
         }
         let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_thai)
@@ -82,7 +178,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
         resolve()    
       }catch(error){
         console.log(error,"matching keyword")
-        res.json(error)
+        // res.json(error)
       }
     })
 }
@@ -92,13 +188,13 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
     try{
     let model = new Model();
     for (let facebook_page of all_facebook_page){
-      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:100}
+      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:10}
       await model.addJob(job)
     }
     resolve()
   }catch(error){
     console.log(error,"matching keyword")
-    res.json(error)
+    // res.json(error)
   }
   })
 }
@@ -132,22 +228,28 @@ return new Promise(function (resolve, reject) {
       let obj
       let job = new Job();
       let model = new Model();
+      let pk_id = ""
       model.connect()
 
       if (service == 1) {
         obj = new Shopee();
+        pk_id = "product_id"
       }
       else if (service == 2) {
         obj = new Amazon();
+        pk_id = "product_id"
       }
       else if (service == 3) {
         obj = new Pantip();
+        pk_id="post_id"
       }
       else if (service == 4) {
         obj = new Jd();
+        pk_id = "product_id"
       }
       else if (service == 5) {
         obj = new Facebook();
+        pk_id="post_id"
       }
       
       const header = raw.split(/\r?\n/)[0].split(",");
@@ -169,18 +271,11 @@ return new Promise(function (resolve, reject) {
         delete value["num"];
         try {
           if (i >= 1) {
-            if (service == 1 || service == 2 || service == 4) {
-              pk_id = "product_id"
-            }
-            else {
-              pk_id="post_id"
-            }
-            obj.check_product(value[pk_id], pk_id)
+            obj.check_product(value[pk_id])
               .then(async (check) => {
                 console.log("found =", check)
-
                 if (check > 0) {
-                  await obj.update_product(value, pk_id).then(() => {
+                  await obj.update_product(value).then(() => {
                     obj.updateJobId(lastOne[0].id);
                   })
                 } else {
@@ -204,9 +299,5 @@ return new Promise(function (resolve, reject) {
 });
 
 }
-
-
-
-
 
 module.exports = JobController ;

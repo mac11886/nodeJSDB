@@ -7,6 +7,7 @@ var logger = require("morgan");
 const { spawn } = require("child_process");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var dataRouter = require("./routes/data");
 const dotenv = require("dotenv");
 const { createPool } = require("./db");
 dotenv.config()
@@ -32,7 +33,7 @@ app.use('public/javascripts', express.static(path.join(__dirname, 'public/javasc
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-
+app.use("/data", dataRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -52,5 +53,8 @@ app.use(function (err, req, res, next) {
 });
 app.listen(3000, () => {
   console.log(`Server is running on port: ${process.env.PORT || `3000`}`);
+  
 });
+
+
 module.exports = app;

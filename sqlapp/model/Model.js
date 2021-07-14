@@ -41,17 +41,16 @@ class Model {
             });
         });
     }
-    getCount() {
-        // this.connect()
-        return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select count(key_id) from ` + this.table, (err, results) => {
-                if (err) {
-                    return reject(null);
-                }
-                return resolve(Object.values(results[0])[0]);
-            });
-        });
-    }
+    // getCount() {
+    //     return new Promise((resolve, reject) => {
+    //         this.mysqlConnect.query(`select count(key_id) from ` + this.table, (err, results) => {
+    //             if (err) {
+    //                 return reject(null);
+    //             }
+    //             return resolve(Object.values(results[0])[0]);
+    //         });
+    //     });
+    // }
     getKeywordCount(service_id, key_id) {
         // this.connect()
         return new Promise((resolve, reject) => {
@@ -197,15 +196,15 @@ class Model {
         return new Promise(async (resolve) => {
             console.log("saving data to DB")
             try {
-                const found = await this.joinData(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, objectParam)
+                // const found = await this.joinData(`SELECT * FROM main JOIN e_service on main.e_service_id = e_service.id AND e_service.service_id=${this.serviceId} JOIN ${this.table} on e_service.e_id = ${this.table}.id WHERE ${this.table}.${this.pk}="${objectParam[this.pk]}"`, objectParam)
 
-                if (found.length == 0) {
+                // if (found.length == 0) {
                     const insertId = await this.insertTable(`insert into ${this.table} set ? ;`, objectParam)
                     const e_id = await this.insertTable("insert into `e_service` (`service_id`,`e_id`) VALUES (" + this.serviceId + "," + insertId + ")")
                     if (this.table != "facebook") {
                         const key_id = await this.selectKeyword(`select id from keyword where thai_word = "${word}" or eng_word = "${word}"`)
                         await this.insertMainTable(`insert into main set e_service_id = ${e_id},key_id = ${key_id}`)
-                    }
+                    // }
 
                     resolve()
                 }
@@ -325,15 +324,24 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
+    wherecount(condition) {
+        // this.connect()
+        return new Promise((resolve, reject) => {
+            this.mysqlConnect.query(`select count(*) from ${this.table} where ${condition}`, (err, results) => {
+                if (err) {
+                    return reject(null);
+                }
+
+                return resolve(Object.values(results[0])[0]);
+            });
+            // this.mysqlConnect.end() 
+        });
+    }
 
     close = () => new Promise((resolve, reject) => {
         // this.mysqlConnect.end()
         // console.log("disconnect db")
     });
-
-
-
-
 
     addJob = (req) => {
         return new Promise((resolve, reject) => {
