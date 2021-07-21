@@ -1,5 +1,5 @@
 const Facebook_page = require("../model/Facebook_page");
-
+const Model = require("../model/Model");
 FacebookPageController = {}
 
 FacebookPageController.get = async (req, res) => {
@@ -9,6 +9,7 @@ FacebookPageController.get = async (req, res) => {
 
 FacebookPageController.post = async (req, res) => {
     let page = req.body.name;
+    console.log(page)
     let facebook_page = await new Facebook_page().insert(page);
     console.log(facebook_page);
 }

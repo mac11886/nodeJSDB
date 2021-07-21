@@ -370,7 +370,7 @@ class Model {
             let date = new Date(); // Or the date you'd like converted.
             let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
             console.log("updating job")
-        if(status === "success"){
+        if(status === "success" || status === "error"){
           this.mysqlConnect.query(`update job set end_time = ?, status="${status}" where id = ? `,
             [isoDateTime, id],
             (err, results) => {
@@ -406,6 +406,7 @@ class Model {
             //   this.mysqlConnect.end()
         });
     };
+
 
 }
 
