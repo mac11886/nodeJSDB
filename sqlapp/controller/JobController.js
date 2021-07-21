@@ -262,31 +262,27 @@ return new Promise(function (resolve, reject) {
       }
       for await (const value of result) {
         delete value["num"];
-        try {
           if (i >= 1) {
             // console.log("checking")
             let check = await obj.check_product(value[pk_id])
                 console.log("found =", check)
                 if (check == 0) {
-                  obj.saveEcom(value, keyword).then(() => {
-                    obj.updateJobId(job_id);
-                  })
+                  await obj.saveEcom(value, keyword)
+                  await obj.updateJobId(job_id);
+                  
                 } else {
-                  obj.update_product(value).then(() => {
-                    obj.updateJobId(job_id);
-                  })
+                  await obj.update_product(value)
+                  await obj.updateJobId(job_id);
+                  
                 }
           }
-        } catch (error) {
-          console.log(error.message, 'error ', value, keyword)
-        }
         i++;
       } resolve()
       
     });
   } catch (err) {
     console.log("get data", err)
-    model.updateJob(job_id,"error")
+    new Model().updateJob(job_id,"error")
 
   }
 });
