@@ -227,9 +227,7 @@ return new Promise(function (resolve, reject) {
 
       let i = 0;
       let obj
-      let model = new Model();
       let pk_id = ""
-      model.connect()
 
       if (service == 1) {
         obj = new Shopee();
@@ -260,6 +258,8 @@ return new Promise(function (resolve, reject) {
         console.log(err, "error result")
         return;
       }
+      let keyword_id = Object.values(JSON.parse(JSON.stringify(await new Keyword().where(`thai_word = '`+ keyword + `' OR eng_word = '`+ keyword +`'` ))))[0].id;
+
       for await (const value of result) {
         delete value["num"];
           if (i >= 1) {
@@ -271,7 +271,7 @@ return new Promise(function (resolve, reject) {
                   await obj.updateJobId(job_id);
                   
                 } else {
-                  await obj.update_product(value)
+                  await obj.update_product(value,keyword_id,service)
                   await obj.updateJobId(job_id);
                   
                 }
