@@ -185,17 +185,65 @@ class Model {
         }
     }
 
-    update_product(objectParam) {
-        return new Promise((resolve, reject) => {
+    update_product(objectParam , keyword_id ,service_id) {
+        return new Promise(async(resolve, reject) => {
+            try{
             console.log("update..")
-            this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${this.pk} = '${objectParam[this.pk]}' `, objectParam, (err, results) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve("add success");
-            });
+            //get id from this table
+            const id = await this.whereGet(`SELECT id FROM ${this.table} WHERE ${this.pk} = '${objectParam[this.pk]}'`)
+            //update data by id has get brfore
+            await this.updateById(`UPDATE ${this.table} SET  ?   WHERE id = '${id[0]}'` , objectParam) 
+            //use id , service_id to get e_service_id in e_service table
+            const e_service_id = await this.whereGet(`SELECT id FROM e_service WHERE e_id = '${id[0]}' AND service_id = '${service_id}'`)
+            //use e_service_id to count those seem e_service_id and key_id
+            const found_key_id = await this.whereGet(`SELECT count(*) FROM main WHERE e_service_id = '${e_service_id}' AND key_id = '${keyword_id}'`)
+            console.log("found key id =" , found_key_id)
+            if(found_key_id == 0){ //if this keyword_id not in main table --> insert new row
+                await this.insertMainTable(`INSERT INTO main SET e_service_id = ${e_service_id},key_id = ${keyword_id}`)
+            }
+
+            }catch(error){
+                console.log(error)
+                reject()
+            }
+            resolve()
+            
         });
     }
+
+
+    updateById = (queryString,objectParam) => new Promise((resolve,reject) => {
+        this.mysqlConnect.query(`${queryString}`,objectParam ,(err,result) => {
+            if(err){
+                console.log(err)
+                reject()
+            }
+            resolve(result)
+        })
+    })
+
+    whereGet = (queryString,objectParam) => new Promise((resolve,reject) => {
+        this.mysqlConnect.query(`${queryString}`,(err,result) => {
+            if(err){
+                console.log(err)
+                reject()
+            }
+             resolve(Object.values(JSON.parse(JSON.stringify(result[0]))))
+        })
+    })
+
+    
+    // update_product(objectParam) {
+    //     return new Promise((resolve, reject) => {
+    //         console.log("update..")
+    //         this.mysqlConnect.query(` UPDATE ${this.table} SET  ?   WHERE ${this.pk} = '${objectParam[this.pk]}'`, objectParam, (err) => {
+    //             if (err) {
+    //                 return reject(err);
+    //             }
+    //             resolve("add success");
+    //         });
+    //     });
+    // }
     saveEcom(objectParam, word) {
         return new Promise(async (resolve) => {
             console.log("saving data to DB")
@@ -262,27 +310,27 @@ class Model {
     })
 
 
-    update(objectParam) {
-        return new Promise((resolve, reject) => {
-            // this.mysqlConnect.connect();
-            let object = objectParam
-            let query = ""
-            Object.keys(object).forEach(function (key) {
-                if (key != "id") {
-                    query += `${key}='${object[key]}',`
-                }
-            })
-            query = query.substring(0, query.length - 1);
+    // update(objectParam) {
+    //     return new Promise((resolve, reject) => {
+    //         // this.mysqlConnect.connect();
+    //         let object = objectParam
+    //         let query = ""
+    //         Object.keys(object).forEach(function (key) {
+    //             if (key != "id") {
+    //                 query += `${key}='${object[key]}',`
+    //             }
+    //         })
+    //         query = query.substring(0, query.length - 1);
 
-            this.mysqlConnect.query(`update ${this.table} set ${query} where id=${object["id"]}`, (err, results) => {
-                if (err) {
-                    return reject(null);
-                }
-                return resolve("edit success");
-            });
-            // this.mysqlConnect.end() 
-        });
-    }
+    //         this.mysqlConnect.query(`update ${this.table} set ${query} where id=${object["id"]}`, (err, results) => {
+    //             if (err) {
+    //                 return reject(null);
+    //             }
+    //             return resolve("edit success");
+    //         });
+    //         // this.mysqlConnect.end() 
+    //     });
+    // }
     updateJobId(jobId) {
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`update  ` + this.table + ` set job_id=${jobId} where job_id IS NULL`, (err, results) => {
