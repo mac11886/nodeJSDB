@@ -170,8 +170,10 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
         if(service.name === "pantip"){
             page = 1000 //----------->> actually is 1000 <<---------------------
         }
+        if(service.name != "amazon"){
         let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_thai)
+        }
         let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_eng)
         page = 100
