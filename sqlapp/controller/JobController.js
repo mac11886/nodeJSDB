@@ -21,24 +21,24 @@ JobController = {}
 
 var create_task = cron.schedule('0 54 10 * * *', () => {
   console.log('create a job');
-  JobController.create()
+  // JobController.create()
 });
 
 var run_task = cron.schedule('0 55 10 * * *', () => {
   console.log('Running a job');
-  JobController.run()
+  // JobController.run()
 });
 
 
 JobController.start = async (req, res) => {
-  create_task.start();
-  run_task.start();
+  // create_task.start();
+  // run_task.start();
   res.json("started")
 }
 
 JobController.stop = async (req, res) => {
-  create_task.stop();
-  run_task.stop();
+  // create_task.stop();
+  // run_task.stop();
   res.json("stoped")
 }
 
@@ -141,7 +141,6 @@ JobController.create = async (req, res) => {
     console.log("creating")
     let all_keyword = Object.values(JSON.parse(JSON.stringify(await new Keyword().get())));
     let all_facebook_page = Object.values(JSON.parse(JSON.stringify(await new Facebook_page().get())));
-    console.log(all_facebook_page)
     let date = new Date();
     let created_time = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
 
@@ -149,11 +148,11 @@ JobController.create = async (req, res) => {
       await KeywordMatchingWithService(keyword.thai_word, keyword.eng_word, created_time)
     }
 
-    await FacebookPageMatchingWithFacebook(all_facebook_page, created_time)
-    // res.json("succc")
+    // await FacebookPageMatchingWithFacebook(all_facebook_page, created_time)
+    res.json("succc")
   } catch (error) {
     console.log(error, "create job")
-    // res.json(error)
+    res.json(error)
   }
 
 };
@@ -163,17 +162,19 @@ function KeywordMatchingWithService(thai_word, eng_word, created_time) {
     try {
       let model = new Model();
       const services = Object.values(JSON.parse(JSON.stringify(await new Service().where(`not name = "facebook"`))))
-      let page = 1 //----------->> actually is 100 <<----------------
+      let page = 5 //----------->> actually is 100 <<----------------
 
       for (let service of services) {
         if (service.name === "pantip") {
-          page = 10 //----------->> actually is 1000 <<---------------------
+          page = 1000 //----------->> actually is 1000 <<---------------------
         }
         let job_thai = { service: service.id, keyword: thai_word, status: "waiting", created_time: created_time, page: page }
+        console.log(1,job_thai)
         await model.addJob(job_thai)
         let job_eng = { service: service.id, keyword: eng_word, status: "waiting", created_time: created_time, page: page }
+        console.log(2,job_eng)
         await model.addJob(job_eng)
-        page = 1
+        page = 5
       }
       resolve()
     } catch (error) {
@@ -262,19 +263,13 @@ async function getData(service, keyword, page, job_id) {
           console.log(err, "error result")
           return;
         }
-        // try {
-        //   lastOne = await job.getLastOne();
-        // } catch (err) {
-        //   console.log(err, 'error lastOne')
-        //   return;
-        // }
-        
 
         for await (const value of result) {
           delete value["num"];
           try {
             if (i >= 1) {
               // console.log("checking")
+              
               let check = await obj.check_product(value[pk_id])
                 // .then(async (check) => {
                   console.log("found =", check)
@@ -298,7 +293,6 @@ async function getData(service, keyword, page, job_id) {
       });
     } catch (err) {
       console.log("get data", err)
-
     }
   });
 

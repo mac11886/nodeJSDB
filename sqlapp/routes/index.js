@@ -17,7 +17,8 @@ router.get("/keyword", (req,res) => KeywordController.get(req,res));
 router.get("/fillterkeyword", (req,res) => KeywordController.fillter(req,res));
 router.get("/getKeywordByService", (req,res) => KeywordController.getKeywordByService(req,res));
 router.post("/createkeyword", (req,res) => KeywordController.post(req,res));
-router.post("/deletekeyword", (req,res) => KeywordController.delete(req,res));
+router.post("/deletekeyword", (req, res) => KeywordController.delete(req, res));
+router.get("/add/all/keyword", (req,res) => KeywordController.addAll(req,res));
 
 router.get("/facebook_page", (req,res) => FacebookPageController.get(req,res));
 router.post("/facebook_page/post", (req,res) => FacebookPageController.post(req,res));

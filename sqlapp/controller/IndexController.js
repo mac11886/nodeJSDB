@@ -119,48 +119,64 @@ async function getData(service, keyword, page) {
   }
 
 IndexController.get = async (req, res) => {
-  const model = new Model()
-  model.connect()
-  results = await model.all();
-  results.forEach((el) => {
-    let date = new Date(el.start_time); // Or the date you'd like converted.
-    let isoDateTime = new Date(
-      date.getTime() - date.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
-    el.start_time = isoDateTime;
-    let date2 = new Date(el.end_time); // Or the date you'd like converted.
-    let isoDateTime2 = new Date(
-      date2.getTime() - date2.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
-    el.end_time = isoDateTime2;
-    switch (el.service) {
-      case "1":
-        el.service = "shopee";
-        break;
-      case "2":
-        el.service = "amazon";
-        break;
-      case "3":
-        el.service = "pantip";
-        break;
-      case "4":
-        el.service = "jd";
-        break;
-      case "5":
-        el.service = "facebook"
-    }
-  });
+  let jobs = await new Job().get();
+    jobs.forEach((job) => {
+      // Convert Created time
+      let created_time = new Date(job.created_time);
+      let iso_created_time = new Date(
+        created_time.getTime() - created_time.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 19).replace("T", " ");
+      job.created_time = iso_created_time;
+
+      // Convert Start time
+      if (job.start_time == null) {
+        job.start_time = "not started yet";
+      } else {
+        let start_time = new Date(job.start_time); // Or the date you'd like converted.
+        let iso_start_time = new Date(
+          start_time.getTime() - start_time.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 19).replace("T", " ");
+        job.start_time = iso_start_time;
+      }
+
+      // Convert End time
+      if (job.end_time == null) {
+        if (job.start_time != "not started yet") {
+          job.end_time = "not done yet";
+        } else {
+          job.end_time = "not started yet";
+        }
+      } else {
+        let end_time = new Date(job.end_time); // Or the date you'd like converted.
+        let iso_end_time = new Date(
+          end_time.getTime() - end_time.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 19).replace("T", " ");
+        job.end_time = iso_end_time;
+      }
+
+      // Convert Service
+      switch (job.service) {
+        case "1":
+          job.service = "shopee";
+          break;
+        case "2":
+          job.service = "amazon";
+          break;
+        case "3":
+          job.service = "pantip";
+          break;
+        case "4":
+          job.service = "jd";
+          break;
+        case "5":
+          job.service = "facebook"
+      }
+    });
   let keywords = await new Keyword().get()
   let services = await new Service().get()
   let facebook_pages = await new Facebook_page().get()
 
-  res.json({ results, keywords, services, facebook_pages });
+  res.json({ jobs, keywords, services, facebook_pages });
 
 }
 

@@ -4,7 +4,11 @@ const Service = require("../model/Service");
 const Model = require("../model/Model");
 const l = require('lodash');
 const Facebook = require("../model/Facebook");
-const { indexOf } = require("lodash");
+const { indexOf, result, head } = require("lodash");
+const fs = require("fs");
+const utf8 = require("utf8");
+const csv = require("neat-csv");
+const dotenv = require("dotenv");
 
 KeywordController = {}
 
@@ -97,7 +101,6 @@ function service_loop (keyword,id,services){
 
 
 KeywordController.getKeywordByService = async(req,res) => {
-
     const service = req.query.service
     const service_id = req.query.service_id
     const id = req.query.id
@@ -135,17 +138,44 @@ KeywordController.post = async (req, res) => {
         await new Keyword().check(thai_word,eng_word); // check keyword in db and insert to db if not
     }catch(error){console.log("keyword.post",error)}
     model.close();
+    res.json()
 
 }
 
 
 KeywordController.delete = async (req, res) => {
     try{
-    let id = req.body.id
-    console.log(id)
-    await new Keyword().delete(id);
+        let id = req.body.id
+        console.log(id)
+        await new Keyword().delete(id);
     }catch(error){
         console.log("error delete",error)
+    }
+
+}
+
+KeywordController.addAll = async (req, res) => {
+    try{
+        const raw = fs.readFileSync(process.env.KEYWORD_FILE,"utf8");
+        const header = raw.split(/\r?\n/)[0].split(",");
+        console.log(raw)
+        const result = await csv(raw, { headers: header });
+        console.log(result[0])
+        // delete result[0]
+
+       
+        
+        for (let value of result) {
+            if (value.thai_word != 'thai_word') {
+                await new Keyword().check(value.thai_word,value.eng_word);
+            }
+            
+        }
+        // // console.log(result)
+        res.json(result);
+        
+    }catch(error){
+        console.log("error add all",error)
     }
 
 }

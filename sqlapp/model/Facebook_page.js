@@ -13,7 +13,7 @@ class Facebook_page extends Model {
                 console.log(results);
                 return resolve("add success");
             });
-            this.mysqlConnect.end();
+            // this.mysqlConnect.end();
         });
     }
 }
