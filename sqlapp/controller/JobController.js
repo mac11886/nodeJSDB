@@ -228,6 +228,11 @@ return new Promise(function (resolve, reject) {
       let i = 0;
       let obj
       let pk_id = ""
+      let keyword_id = ""
+
+      if(service != 5){
+        keyword_id = Object.values(JSON.parse(JSON.stringify(await new Keyword().where(`thai_word = '`+ keyword + `' OR eng_word = '`+ keyword +`'` ))))[0].id;
+      }
 
       if (service == 1) {
         obj = new Shopee();
@@ -258,7 +263,6 @@ return new Promise(function (resolve, reject) {
         console.log(err, "error result")
         return;
       }
-      let keyword_id = Object.values(JSON.parse(JSON.stringify(await new Keyword().where(`thai_word = '`+ keyword + `' OR eng_word = '`+ keyword +`'` ))))[0].id;
 
       for await (const value of result) {
         delete value["num"];

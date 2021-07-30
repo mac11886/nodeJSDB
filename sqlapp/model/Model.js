@@ -189,6 +189,7 @@ class Model {
             const id = await this.whereGet(`SELECT id FROM ${this.table} WHERE ${this.pk} = '${objectParam[this.pk]}'`)
             //update data by id has get brfore
             await this.updateById(`UPDATE ${this.table} SET  ?   WHERE id = '${id[0]}'` , objectParam) 
+            if(service_id != 5){
             //use id , service_id to get e_service_id in e_service table
             const e_service_id = await this.whereGet(`SELECT id FROM e_service WHERE e_id = '${id[0]}' AND service_id = '${service_id}'`)
             //use e_service_id to count those seem e_service_id and key_id
@@ -197,6 +198,7 @@ class Model {
             if(found_key_id == 0){ //if this keyword_id not in main table --> insert new row
                 await this.insertMainTable(`INSERT INTO main SET e_service_id = ${e_service_id},key_id = ${keyword_id}`)
             }
+        }
 
             }catch(error){
                 console.log(error)
