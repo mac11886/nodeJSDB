@@ -121,11 +121,20 @@ JobController.run = async (req, res) => {
     let model = new Model();
     let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
 
+<<<<<<< HEAD
 
     for (const job of all_job) {
       await model.updateJob(job.id, "in_progress")
       await getData(job.service, job.keyword, job.page, job.id)
       await model.updateJob(job.id, "success")
+=======
+
+    for await (const job of all_job){
+      await model.updateJob(job.id,"in progress")
+      await getData(job.service,job.keyword,job.page,job.id)
+      await model.updateJob(job.id,"success")
+      // console.log("loop")
+>>>>>>> ef2a2cb0adf4b7316ec35c0f92d83358f6546a19
     }
     console.log("doneeeeeeeeeeeeee")
     // res.json("run succ")
@@ -162,25 +171,26 @@ function KeywordMatchingWithService(thai_word, eng_word, created_time) {
     try {
       let model = new Model();
       const services = Object.values(JSON.parse(JSON.stringify(await new Service().where(`not name = "facebook"`))))
-      let page = 5 //----------->> actually is 100 <<----------------
+      let page = 100 //----------->> actually is 100 <<----------------
 
       for (let service of services) {
         if (service.name === "pantip") {
           page = 1000 //----------->> actually is 1000 <<---------------------
         }
-        let job_thai = { service: service.id, keyword: thai_word, status: "waiting", created_time: created_time, page: page }
-        console.log(1,job_thai)
-        await model.addJob(job_thai)
+        if (service.name != "amazon") {
+          let job_thai = { service: service.id, keyword: thai_word, status: "waiting", created_time: created_time, page: page }
+          await model.addJob(job_thai)
+        }
         let job_eng = { service: service.id, keyword: eng_word, status: "waiting", created_time: created_time, page: page }
-        console.log(2,job_eng)
         await model.addJob(job_eng)
-        page = 5
+        page = 100
       }
       resolve()
     } catch (error) {
       console.log(error, "matching keyword")
-      // res.json(error)
+      res.json(error)
     }
+    resolve()
   })
 }
 
@@ -192,12 +202,10 @@ function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
         let job = { service: 5, keyword: facebook_page.name, status: "waiting", created_time: created_time, page: 100 }
         await model.addJob(job)
       }
-      resolve()
     } catch (error) {
-      console.log(error, "matching keyword")
-      // res.json(error)
+      
     }
-  })
+  }
 }
 
 
@@ -209,6 +217,7 @@ async function getData(service, keyword, page, job_id) {
       python = spawn(process.env.PYTHON_PATH, [
         process.env.SCRAPE_PATH
       ]);
+      // console.log("get pythonnnnnnnnnnrsnnnnnnn",service,page,keyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
       python.stdin.end();
       python.stdout.on("data", function (data) {
@@ -222,14 +231,16 @@ async function getData(service, keyword, page, job_id) {
         console.log('on exit')
         const raw = fs.readFileSync(process.env.FILE, "utf8");
         console.log(`child process close all stdio with code ${code}`);
+        // console.log("service:" + service);
 
         let i = 0;
         let obj
-        let job = new Job();
-        let model = new Model();
         let pk_id = ""
-        let result;
-        model.connect()
+        let keyword_id = ""
+
+        if (service != 5) {
+          keyword_id = Object.values(JSON.parse(JSON.stringify(await new Keyword().where(`thai_word = '` + keyword + `' OR eng_word = '` + keyword + `'`))))[0].id;
+        }
 
         if (service == 1) {
           obj = new Shopee();
@@ -251,9 +262,6 @@ async function getData(service, keyword, page, job_id) {
           obj = new Facebook();
           pk_id = "post_id"
         }
-        else {
-          obj = new Model();
-        }
 
         const header = raw.split(/\r?\n/)[0].split(",");
         try {
@@ -266,26 +274,19 @@ async function getData(service, keyword, page, job_id) {
 
         for await (const value of result) {
           delete value["num"];
-          try {
-            if (i >= 1) {
-              // console.log("checking")
-              
-              let check = await obj.check_product(value[pk_id])
-                // .then(async (check) => {
-                  console.log("found =", check)
-                  if (check == 0) {
-                    obj.saveEcom(value, keyword).then(() => {
-                      obj.updateJobId(job_id);
-                    })
-                  } else {
-                    obj.update_product(value).then(() => {
-                      obj.updateJobId(job_id);
-                    })
-                  }
-                // }); 
+          if (i >= 1) {
+            // console.log("checking")
+            let check = await obj.check_product(value[pk_id])
+            console.log("found =", check)
+            if (check == 0) {
+              await obj.saveEcom(value, keyword)
+              await obj.updateJobId(job_id);
+
+            } else {
+              await obj.update_product(value, keyword_id, service)
+              await obj.updateJobId(job_id);
+
             }
-          } catch (error) {
-            console.log(error.message, 'error ', value, keyword)
           }
           i++;
         } resolve()
@@ -293,9 +294,39 @@ async function getData(service, keyword, page, job_id) {
       });
     } catch (err) {
       console.log("get data", err)
+      new Model().updateJob(job_id, "error")
+
+      for await (const value of result) {
+        delete value["num"];
+        try {
+          if (i >= 1) {
+            // console.log("checking")
+
+            let check = await obj.check_product(value[pk_id])
+            // .then(async (check) => {
+            console.log("found =", check)
+            if (check == 0) {
+              obj.saveEcom(value, keyword).then(() => {
+                obj.updateJobId(job_id);
+              })
+            } else {
+              obj.update_product(value).then(() => {
+                obj.updateJobId(job_id);
+              })
+            }
+            // }); 
+          }
+        } catch (error) {
+          console.log(error.message, 'error ', value, keyword)
+        }
+        i++;
+      } resolve()
+
     }
   });
 
+
+    
 }
 
 module.exports = JobController;

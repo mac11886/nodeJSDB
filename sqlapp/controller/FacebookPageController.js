@@ -1,6 +1,6 @@
 const Facebook_page = require("../model/Facebook_page");
 const { getMysqlConnect } = require("../db")
-
+const Model = require("../model/Model");
 FacebookPageController = {}
 
 FacebookPageController.get = async (req, res) => {
@@ -10,16 +10,10 @@ FacebookPageController.get = async (req, res) => {
 
 
 FacebookPageController.post = async (req, res) => {
-    try {
-        let page = req.body.name;
-        let facebook_page = await new Facebook_page().insert(page);
-        console.log(facebook_page);
-        res.json("succ")
-
-    } catch(error){
-        console.log(error)
-    }
-   
+    let page = req.body.name;
+    console.log(page)
+    let facebook_page = await new Facebook_page().insert(page);
+    console.log(facebook_page);
 }
 
 FacebookPageController.delete = async (req, res) => {
