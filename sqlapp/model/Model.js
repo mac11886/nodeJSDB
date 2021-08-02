@@ -173,21 +173,21 @@ class Model {
     update_product(objectParam , keyword_id ,service_id) {
         return new Promise(async(resolve, reject) => {
             try{
-            console.log("update..")
-            //get id from this table
-            const id = await this.whereGet(`SELECT id FROM ${this.table} WHERE ${this.pk} = '${objectParam[this.pk]}'`)
-            //update data by id has get brfore
-            await this.updateById(`UPDATE ${this.table} SET  ?   WHERE id = '${id[0]}'` , objectParam) 
-            if(service_id != 5){
-            //use id , service_id to get e_service_id in e_service table
-            const e_service_id = await this.whereGet(`SELECT id FROM e_service WHERE e_id = '${id[0]}' AND service_id = '${service_id}'`)
-            //use e_service_id to count those seem e_service_id and key_id
-            const found_key_id = await this.whereGet(`SELECT count(*) FROM main WHERE e_service_id = '${e_service_id}' AND key_id = '${keyword_id}'`)
-            console.log("found key id =" , found_key_id)
-            if(found_key_id == 0){ //if this keyword_id not in main table --> insert new row
-                await this.insertMainTable(`INSERT INTO main SET e_service_id = ${e_service_id},key_id = ${keyword_id}`)
-            }
-        }
+                console.log("update..")
+                //get id from this table
+                const id = await this.whereGet(`SELECT id FROM ${this.table} WHERE ${this.pk} = '${objectParam[this.pk]}'`)
+                //update data by id has get brfore
+                await this.updateById(`UPDATE ${this.table} SET  ?   WHERE id = '${id[0]}'` , objectParam) 
+                if(service_id != 5){
+                    //use id , service_id to get e_service_id in e_service table
+                    const e_service_id = await this.whereGet(`SELECT id FROM e_service WHERE e_id = '${id[0]}' AND service_id = '${service_id}'`)
+                    //use e_service_id to count those seem e_service_id and key_id
+                    const found_key_id = await this.whereGet(`SELECT count(*) FROM main WHERE e_service_id = '${e_service_id}' AND key_id = '${keyword_id}'`)
+                    console.log("found key id =" , found_key_id)
+                    if(found_key_id == 0){ //if this keyword_id not in main table --> insert new row
+                        await this.insertMainTable(`INSERT INTO main SET e_service_id = ${e_service_id},key_id = ${keyword_id}`)
+                    }
+                }
 
             }catch(error){
                 console.log(error)
@@ -215,7 +215,16 @@ class Model {
                 console.log(err)
                 reject()
             }
-             resolve(Object.values(JSON.parse(JSON.stringify(result[0]))))
+            console.log(result);
+            let k
+            try {
+                k = Object.values(JSON.parse(JSON.stringify(result[0])))  
+            } catch(error) {
+                console.log("erroe",error)
+                
+            }
+            
+            resolve(k)
         })
     })
 
