@@ -274,19 +274,19 @@ return new Promise(function (resolve, reject) {
         pk_id = "product_id"
       }
       else if (service == 2) {
-        obj_model = new Amazon_model;
+        obj_model = Amazon_model;
         pk_id = "product_id"
       }
       else if (service == 3) {
-        obj_model = new Pantip_model;
+        obj_model = Pantip_model;
         pk_id="post_id"
       }
       else if (service == 4) {
-        obj_model = new Jd_model;
+        obj_model = Jd_model;
         pk_id = "product_id"
       }
       else if (service == 5) {
-        obj_model = new Facebook_model;
+        obj_model = Facebook_model;
         pk_id="post_id"
       }
       
