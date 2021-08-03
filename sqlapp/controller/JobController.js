@@ -21,12 +21,12 @@ JobController = {}
 
 var create_task = cron.schedule('0 54 10 * * *', () => {
   console.log('create a job');
-  JobController.create()
+  // JobController.create()
   });
 
 var run_task = cron.schedule('0 55 10 * * *', () => {
    console.log('Running a job');
-    JobController.run()
+    // JobController.run()
  });
 
 
@@ -164,7 +164,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
     try{
     let model = new Model();
     const services = Object.values(JSON.parse(JSON.stringify(await new Service().where(`not name = "facebook"`))))
-    let page = 100 //----------->> actually is 100 <<----------------
+    let page = 5 //----------->> actually is 5 <<----------------
     
     for (let service of services){
         if(service.name === "pantip"){
@@ -174,7 +174,7 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time){
         await model.addJob(job_thai)
         let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
         await model.addJob(job_eng)
-        page = 100
+        page = 5
         }
         resolve()    
       }catch(error){
@@ -265,15 +265,15 @@ return new Promise(function (resolve, reject) {
           if (i >= 1) {
             // console.log("checking")
             let check = await obj.check_product(value[pk_id])
+            // await obj.update_product(value,keyword_id,service,check)
                 console.log("found =", check)
-                if (check == 0) {
+                if (check[0] == 0) {
                   await obj.saveEcom(value, keyword)
                   await obj.updateJobId(job_id);
                   
                 } else {
-                  await obj.update_product(value,keyword_id,service)
+                  await obj.update_product(value,keyword_id,service,check)
                   await obj.updateJobId(job_id);
-                  
                 }
           }
         i++;

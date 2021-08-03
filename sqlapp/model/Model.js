@@ -139,7 +139,7 @@ class Model {
     }
     async check_product(id) {
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
+            this.mysqlConnect.query(`SELECT count(*) from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
@@ -147,7 +147,7 @@ class Model {
                     console.log(results)
                 }
                 
-                resolve(results.length);
+                resolve(Object.values(JSON.parse(JSON.stringify(results[0]))))
             });
         });
 
@@ -192,7 +192,7 @@ class Model {
             //get id from this table
             const id = await this.whereGet(`SELECT id FROM ${this.table} WHERE ${this.pk} = '${objectParam[this.pk]}'`)
             //update data by id has get brfore
-            await this.updateById(`UPDATE ${this.table} SET  ?   WHERE id = '${id[0]}'` , objectParam) 
+            await this.updateById(`UPDATE ${this.table} SET ? WHERE id = '${id[0]}'` , objectParam) 
             //use id , service_id to get e_service_id in e_service table
             const e_service_id = await this.whereGet(`SELECT id FROM e_service WHERE e_id = '${id[0]}' AND service_id = '${service_id}'`)
             //use e_service_id to count those seem e_service_id and key_id
@@ -223,6 +223,16 @@ class Model {
     })
 
     whereGet = (queryString,objectParam) => new Promise((resolve,reject) => {
+        this.mysqlConnect.query(`${queryString}`,(err,result) => {
+            if(err){
+                console.log(err)
+                reject()
+            }
+             resolve(Object.values(JSON.parse(JSON.stringify(result[0]))))
+        })
+    })
+
+    whereUpdate = (queryString,objectParam) => new Promise((resolve,reject) => {
         this.mysqlConnect.query(`${queryString}`,(err,result) => {
             if(err){
                 console.log(err)
