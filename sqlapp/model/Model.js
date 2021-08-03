@@ -137,6 +137,21 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
+    // async check_product(id){
+    //     return new Promise((resolve, reject) => {
+    //         this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
+    //             if (err) {
+    //                 return reject(err);
+    //             }
+    //             if (results.length > 1){
+    //                 console.log(results)
+    //             }
+                
+    //             resolve(results.length);
+    //         });
+    //     });
+
+    // }
     async check_product(id){
         return new Promise((resolve, reject) => {
             this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {

@@ -1,3 +1,7 @@
+const dotenv = require("dotenv");
+const { createPool } = require("./db");
+dotenv.config()
+createPool()
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
@@ -8,13 +12,32 @@ const { spawn } = require("child_process");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var dataRouter = require("./routes/data");
-const dotenv = require("dotenv");
-const { createPool } = require("./db");
-dotenv.config()
+
+
 
 var app = express();
 
-createPool()
+
+
+const Main = require("./model/Main.model")
+const Amazon = require("./model/Amazon.model")
+const Pantip = require("./model/Pantip.model")
+const Facebook = require("./model/Facebook.model")
+
+const findOne = Facebook.findOne({ where: { id: 1 }, attributes: ['job_id'] }).then(result => {
+  // console.log(result.map(r => r.job_id))
+  // console.log(result.map(r => r.job_id))
+  if (!result) {
+    Amazon.create({
+      id : 1000,
+      name: "test"
+    })
+  } else {
+    console.log(`found`, result.job_id)
+  }
+})
+
+
 
 // view engine setup
 // app.set("views", path.join(__dirname, "views"));
