@@ -2,7 +2,9 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
-class Facebook extends Model {}
+class Facebook extends Model {
+    pk = "post_id"
+}
 
 const sequelize = getSequelize()
 

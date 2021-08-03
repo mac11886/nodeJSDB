@@ -2,7 +2,9 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
-class Pantip extends Model {}
+class Pantip extends Model {
+    pk = "post_id"
+}
 
 const sequelize = getSequelize()
 

@@ -63,7 +63,8 @@ JobController.progress = async(req,res) => {
 
 JobController.get = async (req, res) => {
   try {
-      let jobs = await new Job().get();
+      let jobs = await Job_model.findAll();
+      // let jobs = await new Job().get();
       jobs.forEach((job) => {
           // Convert Created time
           let created_time = new Date(job.created_time);
@@ -127,7 +128,7 @@ JobController.get = async (req, res) => {
 
 JobController.run = async(req,res) => {
   try{
-    // get job
+    let date = new Date();
     let all_jobs = await Job_model.findAll({where: {
       [Op.or]: [
         {status: "waiting"},
@@ -136,7 +137,6 @@ JobController.run = async(req,res) => {
     }})
 
     let all_keyword = all_jobs.map(job => job.keyword)
-
     let keyword_rows = await Keyword_model.findAll({where:  {
       [Op.or]: [
         {thai_word: {[Op.in] : all_keyword}},
@@ -148,12 +148,16 @@ JobController.run = async(req,res) => {
     // for await (const job of all_job){
     for await (const job of all_jobs){
       if (job.status == "waiting") {
+        let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
         job.status = "in progress"
+        job.start_time = isoDateTime
         await job.save()
       }
       await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
 
+      let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
       job.status = "success"
+      job.end_time = isoDateTime
       job.save()
     }
     console.log("doneeeeeeeeeeeeee")
@@ -303,6 +307,7 @@ return new Promise(function (resolve, reject) {
       for await (const value of result) {
         delete value["num"];
           if (i >= 1) {
+            console.log(obj_model)
             let check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
 
             if (!check) {
