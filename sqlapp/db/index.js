@@ -1,5 +1,7 @@
 const mysql = require("mysql2");
+const Sequelize =  require("sequelize");
 let mysqlConnect
+let sequelize
 
 const createPool = () => {
     mysqlConnect = mysql.createPool({
@@ -14,12 +16,27 @@ const createPool = () => {
         else console.log("DB connect fail", err);
 
     });
+
+    sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
+        host: process.env.DATABASE_HOST,
+        dialect: 'mysql'/* one of 'mysql' | 'mariadb' | 'postgres' | 'mssql' */
+      });
 }
 
 const getMysqlConnect = () => mysqlConnect
 
+const getSequelize = () =>{
+    if (sequelize){
+        return sequelize
+    }else{
+        createPool()
+        return sequelize
+    }
+}
+
 module.exports = {
     createPool,
+    getSequelize,
     getMysqlConnect
 }
 // const { response } = require("express");
