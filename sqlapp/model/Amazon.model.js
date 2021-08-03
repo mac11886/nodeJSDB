@@ -2,7 +2,9 @@ const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
 
-class Amazon extends Model {}
+class Amazon extends Model {
+    pk = "product_id"
+}
 const sequelize = getSequelize()
 
 Amazon.init({

@@ -1,7 +1,9 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
-class Jd extends Model {}
+class Jd extends Model {
+    pk = "product_id"
+}
 
 const sequelize = getSequelize()
 
