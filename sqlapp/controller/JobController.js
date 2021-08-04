@@ -28,6 +28,7 @@ const Facebook_page_model = require("../model/Facebook_page.model")
 const {Op} = require("sequelize")
 
 
+
 JobController = {}
 
 var create_task = cron.schedule('0 54 10 * * *', () => {
@@ -64,41 +65,9 @@ JobController.progress = async(req,res) => {
 JobController.get = async (req, res) => {
   try {
       let jobs = await Job_model.findAll();
-      // let jobs = await new Job().get();
+
       jobs.forEach((job) => {
-          // Convert Created time
-          let created_time = new Date(job.created_time);
-          let iso_created_time = new Date(
-              created_time.getTime() - created_time.getTimezoneOffset() * 60000
-          ).toISOString().slice(0, 19).replace("T", " ");
-          job.created_time = iso_created_time;
-
-          // Convert Start time
-          if (job.start_time == null) {
-              job.start_time = "not started yet";
-          } else {
-              let start_time = new Date(job.start_time); // Or the date you'd like converted.
-              let iso_start_time = new Date(
-                  start_time.getTime() - start_time.getTimezoneOffset() * 60000
-              ).toISOString().slice(0, 19).replace("T", " ");
-              job.start_time = iso_start_time;
-          }
-
-          // Convert End time
-          if (job.end_time == null) {
-              if (job.start_time != "not started yet") {
-                  job.end_time = "not done yet";
-              } else {
-                  job.end_time = "not started yet";
-              }
-          } else {
-              let end_time = new Date(job.end_time); // Or the date you'd like converted.
-              let iso_end_time = new Date(
-                  end_time.getTime() - end_time.getTimezoneOffset() * 60000
-              ).toISOString().slice(0, 19).replace("T", " ");
-              job.end_time = iso_end_time;
-          }
-
+          
           // Convert Service
           switch (job.service) {
               case "1":
@@ -128,7 +97,6 @@ JobController.get = async (req, res) => {
 
 JobController.run = async(req,res) => {
   try{
-    let date = new Date();
     let all_jobs = await Job_model.findAll({where: {
       [Op.or]: [
         {status: "waiting"},
@@ -147,18 +115,16 @@ JobController.run = async(req,res) => {
     
     // for await (const job of all_job){
     for await (const job of all_jobs){
-      if (job.status == "waiting") {
-        let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
-        job.status = "in progress"
-        job.start_time = isoDateTime
-        await job.save()
-      }
-      await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
+      if (job.status == "waiting" || job.status == "in progress" ) {
 
-      let isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
-      job.status = "success"
-      job.end_time = isoDateTime
-      job.save()
+        job.status = "in progress"
+        job.start_time = new Date()
+        await job.save()
+        await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
+        job.status = "success"
+        job.end_time = new Date()
+        job.save()
+      } 
     }
     console.log("doneeeeeeeeeeeeee")
   }catch(error){
@@ -176,8 +142,7 @@ JobController.create = async(req,res) => {
       [Op.not]: [
       {name: "facebook"}
     ]}})
-    let date = new Date();
-    let created_time = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+    let created_time = new Date();
 
     for (const keyword of all_keyword){
         await KeywordMatchingWithService(keyword.thai_word,keyword.eng_word,created_time,services) 
@@ -195,19 +160,24 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
   //add all keyword matching with service without facebook
     return new Promise (async(resolve) =>{
     try{
-    let page = 100 //----------->> actually is 100 <<----------------
+    let page = 5 //----------->> actually is 100 <<----------------
     
     for (let service of services){
         if(service.name === "pantip"){
-            page = 1000 //----------->> actually is 1000 <<---------------------
+          let word = thai_word + " " + eng_word
+          let pantip_job = {service: service.id,keyword: word,status: "waiting",created_time: created_time,page: 1000}
+          await Job_model.create(pantip_job)
         }
-        if(service.name != "amazon"){
-        let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
-        await Job_model.create(job_thai)
-        }
-        let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
-        await Job_model.create(job_eng)
-        page = 100
+
+        if(service.name != "pantip"){
+          if(service.name != "amazon"){
+            let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
+            await Job_model.create(job_thai)
+          }
+
+          let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
+          await Job_model.create(job_eng)
+          }
         }
         resolve()    
       }catch(error){
@@ -319,6 +289,7 @@ return new Promise(function (resolve, reject) {
                       e_id: created_row.id
                     })
                 } else { 
+                  console.log(check)
                   await check.update({...value,job_id})
                   if(service != 5){
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})

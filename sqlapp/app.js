@@ -15,27 +15,28 @@ var dataRouter = require("./routes/data");
 
 
 
+
 var app = express();
 
 
 
-const Main = require("./model/Main.model")
-const Amazon = require("./model/Amazon.model")
-const Pantip = require("./model/Pantip.model")
-const Facebook = require("./model/Facebook.model")
+// const Main = require("./model/Main.model")
+// const Amazon = require("./model/Amazon.model")
+// const Pantip = require("./model/Pantip.model")
+// const Facebook = require("./model/Facebook.model")
 
-const findOne = Facebook.findOne({ where: { id: 1 }, attributes: ['job_id'] }).then(result => {
-  // console.log(result.map(r => r.job_id))
-  // console.log(result.map(r => r.job_id))
-  if (!result) {
-    Amazon.create({
-      id : 1000,
-      name: "test"
-    })
-  } else {
-    console.log(`found`, result.job_id)
-  }
-})
+// const findOne = Facebook.findOne({ where: { id: 1 }, attributes: ['job_id'] }).then(result => {
+//   // console.log(result.map(r => r.job_id))
+//   // console.log(result.map(r => r.job_id))
+//   if (!result) {
+//     Amazon.create({
+//       id : 1000,
+//       name: "test"
+//     })
+//   } else {
+//     console.log(`found`, result.job_id)
+//   }
+// })
 
 
 

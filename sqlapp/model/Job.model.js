@@ -11,9 +11,9 @@ Job.init({
     service : DataTypes.CHAR,
     page : DataTypes.NUMBER,
     status : DataTypes.CHAR,
-    created_time : DataTypes.CHAR,
-    start_time : DataTypes.CHAR,
-    end_time : DataTypes.CHAR,
+    created_time : DataTypes.DATE,
+    start_time : DataTypes.DATE,
+    end_time : DataTypes.DATE,
 }, { sequelize, modelName: 'job', tableName: 'job', timestamps: false });
 
 module.exports = Job

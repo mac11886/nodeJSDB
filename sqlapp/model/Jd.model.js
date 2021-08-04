@@ -15,7 +15,8 @@ Jd.init({
     img_src : DataTypes.TEXT,
     type : DataTypes.TEXT,
     review : DataTypes.TEXT,
-    send_from : DataTypes.TEXT
+    send_from : DataTypes.TEXT,
+    url : DataTypes.TEXT
 }, { sequelize, modelName: 'jd', tableName: 'jd', timestamps: false });
 
 module.exports = Jd
