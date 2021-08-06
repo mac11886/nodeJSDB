@@ -1,6 +1,7 @@
 
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
+const Main_model = require("./Main.model")
 
 class Shopee extends Model {
     pk = "product_id"
@@ -20,5 +21,9 @@ Shopee.init({
     img_src: DataTypes.TEXT,
     url: DataTypes.TEXT
 }, { sequelize, modelName: 'shopee', tableName: 'shopee', timestamps: false });
+
+// Shopee.hasMany(Main_model,{
+//     foreignKey:'e_id'
+// })
 
 module.exports = Shopee

@@ -234,7 +234,7 @@ return new Promise(function (resolve, reject) {
 
       if(service != 5){
         keyword_row = all_keywords.find(row => row.thai_word == keyword || row.eng_word == keyword)
-      //   keyword_row = await Keyword_model.findOne({where:  {[Op.or]: [
+      //   keyword_row = await Keyword_model.findOne({where: {[Op.or]: [
       //     {thai_word: keyword},
       //     {eng_word: keyword}
       //   ]}

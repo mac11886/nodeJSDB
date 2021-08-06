@@ -9,13 +9,13 @@ const sequelize = getSequelize()
 
 Jd.init({
     job_id : DataTypes.NUMBER,
-    product_id : DataTypes.TEXT,
+    product_id : DataTypes.CHAR,
     name : DataTypes.TEXT,
-    price : DataTypes.NUMBER,
+    price : DataTypes.FLOAT,
     img_src : DataTypes.TEXT,
-    type : DataTypes.TEXT,
-    review : DataTypes.TEXT,
-    send_from : DataTypes.TEXT,
+    type : DataTypes.CHAR,
+    review : DataTypes.CHAR,
+    send_from : DataTypes.CHAR,
     url : DataTypes.TEXT
 }, { sequelize, modelName: 'jd', tableName: 'jd', timestamps: false });
 

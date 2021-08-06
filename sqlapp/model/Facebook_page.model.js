@@ -6,7 +6,8 @@ class Facebook_page extends Model {}
 const sequelize = getSequelize()
 
 Facebook_page.init({
-    name: DataTypes.TEXT,
+    name: DataTypes.CHAR,
+    page_id: DataTypes.CHAR
 
 }, { sequelize, modelName: 'facebook_page', tableName: 'facebook_page', timestamps: false });
 
