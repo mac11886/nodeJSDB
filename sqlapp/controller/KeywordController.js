@@ -4,13 +4,23 @@ const Service = require("../model/Service");
 const Model = require("../model/Model");
 const l = require('lodash');
 const Facebook = require("../model/Facebook");
+const Keyword_model = require("../model/Keyword.model")
+const Service_model = require("../model/Service.model")
+const Main_model = require("../model/Main.model")
+const Facebook_model = require("../model/Facebook.model")
+const Shopee_model = require("../model/Shopee.model")
+const Amazon_model = require("../model/Amazon.model")
+const Pantip_model = require("../model/Pantip.model")
+const Jd_model = require("../model/Jd.model")
+
+const {Op, where} = require("sequelize")
 
 
 KeywordController = {}
 
 KeywordController.get = async (req, res) => {
     try{
-    let keywords = await new Keyword().get();
+    let keywords = await Keyword_model.findAll();
     res.json( { keywords } );
     }catch(error){
         res.json();
@@ -18,24 +28,36 @@ KeywordController.get = async (req, res) => {
 }
 
 KeywordController.fillter = (req,res) => {
+    let id = ""
+    let keyword_row = ""
+    let services = ""
+
 
     let values = new Promise(async(resolve,reject) => {
-        const  id = req.query.id
-        let where = await new Keyword().where("id = " + id);
-        const keyword = Object.values(JSON.parse(JSON.stringify(where)))[0]
+        id = req.query.id
+        console.log(id)
+        // let where = await new Keyword().where("id = " + id);
+        keyword_row = await Keyword_model.findOne({where: {id:id}})
+        console.log("keyyyyy ++++",keyword_row)
+        // const keyword = Object.values(JSON.parse(JSON.stringify(where)))[0]
+        // console.log("key => ",keyword)
         
-        let get = await new Service().get()
-        let services = Object.values(JSON.parse(JSON.stringify(get)))
+        services = await Service_model.findAll()
 
-        resolve({keyword:keyword,id:id,services:services})
+        resolve({keyword:keyword_row,id:id,services:services})
+        // resolve(keyword_row,id,services)
     })
     values.then(async(resolve)=>{
-        let maincount = service_loop(resolve.keyword,resolve.id,resolve.services)
+        console.log("services ---->",resolve.keyword)
+        let maincount = await service_loop(resolve.keyword,resolve.id,resolve.services)
+        console.log("maincount=====>>>>",maincount)
 
-        maincount.then(async(maincount) =>{
-            const lodash = l.groupBy(maincount,"service")
-            res.json({lodash}) 
-        })
+        
+        const lodash = l.groupBy(maincount,"service")
+
+        console.log(lodash)
+        res.json({lodash}) 
+        
     })
    
 
@@ -67,17 +89,28 @@ function service_loop (keyword,id,services){
     return new Promise(async(resolve,reject) => {
         
         let maincount = []
-        let data =0
-        console.log(keyword)
+        let data = 0
+        console.log("keyword",keyword)
+
         for (let service of services){
             console.log(service.id)
         try {
             if(service.id === 5){
-                data = await new Facebook().searchKeywordCount(keyword.thai_word,keyword.eng_word)  
+                data = await Facebook_model.count({where: {[Op.or]: [
+                    {post_text: {[Op.like] : '%'+keyword.thai_word+'%'}},
+                    {post_text: {[Op.like] : '%'+keyword.eng_word+'%'}}
+                ]}
+            })
+                // data = await new Facebook().searchKeywordCount(keyword.thai_word,keyword.eng_word)  
             
                 
             }else{
-                data = await new Main().getKeywordCount(service.id,id)
+                // data = await new Main().getKeywordCount(service.id,id)
+                data = await Main_model.count({where: {[Op.and]: [
+                    {service_id:service.id},
+                    {key_id: id}
+                ]}
+            })
                 
             }
 
@@ -90,6 +123,7 @@ function service_loop (keyword,id,services){
           }
 
         }
+        // console.log(maincount)
         resolve(maincount)
     })
     
@@ -101,13 +135,24 @@ KeywordController.getKeywordByService = async(req,res) => {
     const service = req.query.service
     const service_id = req.query.service_id
     const id = req.query.id
-    const words = await new Keyword().where("id = "+id)
-    const thai_word = words[0].thai_word
-    const eng_word = words[0].eng_word
- 
+    const word = await Keyword_model.findOne({where: {id:id}})
+
+    // console.log(words)
+    // const words = await new Keyword().where("id = "+id)
+    // const thai_word = words[0].thai_word
+    // const eng_word = words[0].eng_word 
     if(service === "facebook"){
+        service_model = Facebook_model
         try{
-            let data = await new Facebook().searchKeywordAll(thai_word,eng_word)
+            let data = "notthing"
+            // let data = await new Facebook().searchKeywordAll(thai_word,eng_word)
+            // data = await new Facebook().searchKeywordAll(thai_word,eng_word)
+            data = await Facebook_model.findAll({where: {[Op.or]: [
+                {post_text: {[Op.like] : '%'+word.thai_word+'%'}},
+                {post_text: {[Op.like] : '%'+word.eng_word+'%'}}
+            ]}
+            })
+            // console.log(data)
                 res.json({data})
             }catch(error){
                 res.json()
@@ -115,10 +160,13 @@ KeywordController.getKeywordByService = async(req,res) => {
 
     }else{
         try{
-        let data = await new Model().getproductbykeyword(service,id,service_id)
-            res.json({data})
+        let data = await Main_model.findAll({where:{key_id: id,service_id: service_id},include: service});
+        // console.log(data.map(r => r[service]))
+        res.json(data.map(r => r[service]))
+
         }catch(error){
-            res.json()
+            console.log(error)
+            res.json("error")
         }
     }
 
