@@ -153,7 +153,7 @@ KeywordController.getKeywordByService = async(req,res) => {
             ]}
             })
             // console.log(data)
-                res.json({data})
+                res.json(data)
             }catch(error){
                 res.json()
             }
