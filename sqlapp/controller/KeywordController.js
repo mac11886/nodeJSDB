@@ -207,8 +207,10 @@ KeywordController.post = async (req, res) => {
 KeywordController.delete = async (req, res) => {
     try{
     let id = req.body.id
-    console.log(id)
-    await new Keyword().delete(id);
+    // console.log(id)
+    await Keyword_model.delete({where: {
+        id:id
+    }});
     }catch(error){
         console.log("error delete",error)
     }
