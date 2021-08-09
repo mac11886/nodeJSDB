@@ -191,7 +191,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   return new Promise (async(resolve) => {
     try{
     for (let facebook_page of all_facebook_page){
-      let job = {service: 5,keyword: facebook_page.name,status: "waiting",created_time: created_time,page:100}
+      let job = {service: 5,keyword: facebook_page.page_id,status: "waiting",created_time: created_time,page:100}
       await Job_model.create(job)
     }
     resolve()

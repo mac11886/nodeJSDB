@@ -153,7 +153,7 @@ KeywordController.getKeywordByService = async(req,res) => {
             ]}
             })
             // console.log(data)
-                res.json({data})
+                res.json(data)
             }catch(error){
                 res.json()
             }
@@ -161,7 +161,9 @@ KeywordController.getKeywordByService = async(req,res) => {
     }else{
         try{
         let data = await Main_model.findAll({where:{key_id: id,service_id: service_id},include: service});
-        // console.log(data.map(r => r[service]))
+        datas = data.map(r => r[service])
+        console.log(datas[0].name)
+
         res.json(data.map(r => r[service]))
 
         }catch(error){
@@ -175,14 +177,28 @@ KeywordController.getKeywordByService = async(req,res) => {
 };
 
 KeywordController.post = async (req, res) => {
-    let model = new Model();
+    // let model = new Model();
     let thai_word = req.body.thai_word
+    console.log(thai_word)
     let eng_word = req.body.eng_word
-    console.log("thai",thai_word)
+
     try{
-        await new Keyword().check(thai_word,eng_word); // check keyword in db and insert to db if not
-    }catch(error){console.log("keyword.post",error)}
-    model.close();
+        // await new Keyword().check(thai_word,eng_word); 
+        // check keyword in db and insert to db if not
+        keyword_check = await Keyword_model.count({where: {
+            [Op.and]: [
+              {thai_word: thai_word},
+              {eng_word: eng_word}
+            ]
+          }})
+        if(keyword_check == 0){
+            console.log("add key")
+            await Keyword_model.create({thai_word:thai_word,eng_word:eng_word})
+        } // check keyword in db and insert to db if not
+    }catch(error){
+        console.log("keyword.post",error)
+    }
+    // model.close();
     res.json("success")
 
 }

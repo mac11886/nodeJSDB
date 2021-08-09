@@ -19,37 +19,44 @@ TestController.test = async (req, res) => {
     // console.log(keywords)
     // console.log(keywords);
     // services = await new Service().get();
-    services = await Service_model.findAll();
 
-    for(const key of keywords.map(r => r)){
-      console.log(key.thai_word)
-      for(const service of services.map(r => r)){
-        try{
+    // services = await Service_model.findAll();
+
+    // for(const key of keywords.map(r => r)){
+    //   console.log(key.thai_word)
+    //   for(const service of services.map(r => r)){
+    //     try{
+
           // data = await new Main().getKeywordCount(service.id ,key.id);
-          let count = await Main_model.count({where:{key_id: key.id,service_id: service.id}});
+
+          // let count = await Main_model.count({where:{key_id: key.id,service_id: service.id}});
+
           // console.log(data);
-        if (count > 0){        
-          obj = {service: service.name , thai_word:key.thai_word , count: count}
+
+        // if (count > 0){        
+        //   obj = {service: service.name , thai_word:key.thai_word , count: count}
+
           // console.log(obj);
           // console.log(service.id + "service")
           // console.log(data)
-          maincount.push(obj);
-        }
-      }catch(error){
-        console.log(error,"error count inner")
-      }
-      }
-    }
+
+          // maincount.push(obj);
+      //   }
+      // }catch(error){
+      //   console.log(error,"error count inner")
+      // }
+    //   }
+    // }
     // console.log(maincount)
     // console.log(maincount[1])
     // const shopee =maincount.filter(service => service.service === "Shopee")
     // console.log(shopee)
 
-    const lodash = l.groupBy(maincount,"service")
-    // console.log(lodash)rs
-    console.log(lodash)
+    // const lodash = l.groupBy(maincount,"service")
+    // console.log(lodash)
     
-    res.json({lodash,keywords})
+    // res.json({lodash,keywords})
+    res.json({keywords})
 
   }catch(error){
     console.log(error,"error count outer")
