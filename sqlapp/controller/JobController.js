@@ -24,6 +24,7 @@ const Main_model = require("../model/Main.model")
 const Job_model = require("../model/Job.model")
 const Service_model = require("../model/Service.model")
 const Facebook_page_model = require("../model/Facebook_page.model")
+const Thaijo_model = require("../model/Thaijo.model")
 
 const {Op} = require("sequelize")
 
@@ -170,14 +171,16 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
         }
 
         if(service.name != "pantip"){
-          if(service.name != "amazon"){
+          if(service.name != "amazon"  || service.name != "science direct"){
             let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
             await Job_model.create(job_thai)
           }
-
+          
+        if(service.name != "thaijo"){
           let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
           await Job_model.create(job_eng)
           }
+        }
         }
         resolve()    
       }catch(error){
