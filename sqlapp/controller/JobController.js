@@ -165,23 +165,19 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
     
     for (let service of services){
         if(service.name === "pantip"){
-          let word = thai_word + " " + eng_word
-          let pantip_job = {service: service.id,keyword: word,status: "waiting",created_time: created_time,page: 1000}
-          await Job_model.create(pantip_job)
+          page = 1000
         }
 
-        if(service.name != "pantip"){
-          if(service.name != "amazon"  || service.name != "science direct"){
-            let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
-            await Job_model.create(job_thai)
-          }
-          
-        if(service.name != "thaijo"){
-          let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
-          await Job_model.create(job_eng)
-          }
+        if(service.name != "amazon"){
+          let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
+          await Job_model.create(job_thai)
         }
+
+        let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
+        await Job_model.create(job_eng)
+        page = 5
         }
+        
         resolve()    
       }catch(error){
         console.log(error,"matching keyword")

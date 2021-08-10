@@ -206,6 +206,7 @@ KeywordController.post = async (req, res) => {
 
 KeywordController.delete = async (req, res) => {
     try{
+        console.log("deleting")
     let id = req.body.id
     console.log(id)
     await Keyword_model.destroy({where: {
