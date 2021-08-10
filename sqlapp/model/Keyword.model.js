@@ -1,7 +1,9 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
-class Keyword extends Model {}
+class Keyword extends Model {
+}
+
 
 const sequelize = getSequelize()
 
