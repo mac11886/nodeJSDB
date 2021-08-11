@@ -279,15 +279,16 @@ return new Promise(function (resolve, reject) {
             let check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
 
             if (!check) {
+              console.log("updatiing")
                   let created_row = await obj_model.create({...value,job_id})
-                  console.log("service",service)
+                  // console.log("service",service)
                     await Main_model.create({
                       key_id:keyword_row.id,
                       service_id: service,
                       e_id: created_row.id
                     })
                 } else { 
-                  console.log(check)
+                  console.log("saving")
                   await check.update({...value,job_id})
                   if(service != 5){
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
