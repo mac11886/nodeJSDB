@@ -25,6 +25,9 @@ const Job_model = require("../model/Job.model")
 const Service_model = require("../model/Service.model")
 const Facebook_page_model = require("../model/Facebook_page.model")
 const Thaijo_model = require("../model/Thaijo.model")
+const ScienceDirect_model = require("../model/ScienceDirect.model")
+const { JSDOM } = require("jsdom")
+const { window } = new JSDOM()
 
 const {Op} = require("sequelize")
 
@@ -168,14 +171,16 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
           page = 1000
         }
 
-        if(service.name != "amazon"){
+        if(service.name != "amazon" || service.name != "science direct"){
           let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
           await Job_model.create(job_thai)
         }
 
-        let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
-        await Job_model.create(job_eng)
-        page = 5
+        if(service.name != "thaijo"){
+          let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
+          await Job_model.create(job_eng)
+          page = 5
+          }
         }
         
         resolve()    
@@ -210,7 +215,14 @@ return new Promise(function (resolve, reject) {
       process.env.SCRAPE_PATH
     ]);
 
-    python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
+    if(service != 8){
+      python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
+    }
+    else{
+      console.log("sci di -->")
+      python.stdin.write(`${service}\n` + page + "\n" + keyword);
+    }
+    
     python.stdin.end();
     python.stdout.on("data", function (data) {
       console.log("Pipe data from python script ...");
@@ -262,6 +274,16 @@ return new Promise(function (resolve, reject) {
         obj_model = Facebook_model;
         pk_id="post_id"
       }
+      else if (service == 7) {
+        obj_model = ScienceDirect_model;
+        pk_id="keyword_id"
+      }
+      else if (service == 8) {
+        obj_model = Thaijo_model;
+        pk_id="issue_id"
+      }
+      
+
       
       const header = raw.split(/\r?\n/)[0].split(",");
       try {
@@ -274,22 +296,46 @@ return new Promise(function (resolve, reject) {
 
       // products
       for await (const value of result) {
+        let check
         delete value["num"];
           if (i >= 1) {
-            console.log(obj_model)
-            let check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
+            if( service != 7){
+              console.log("checking")
+              const start = window.performance.now()
+              check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
+              const stop = window.performance.now()
+              console.log(`Time to checking = ${(stop - start)/1000} seconds`);
+              
+            }
+            else{ //when service is sci direct
+              console.log("checking")
+              // console.log(keyword_row.id)
+              check = await obj_model.findOne({where: {[pk_id]: keyword_row.id,year:value["year"]}})
+            }
 
             if (!check) {
-                  let created_row = await obj_model.create({...value,job_id})
+              console.log("saving")
+              if(service == 7){
+                created_row = await obj_model.create({...value,job_id,keyword_id: keyword_row.id})
+              }
+              else{
+                created_row = await obj_model.create({...value,job_id})
+              }
                   console.log("service",service)
                     await Main_model.create({
                       key_id:keyword_row.id,
                       service_id: service,
                       e_id: created_row.id
                     })
-                } else { 
-                  console.log(check)
-                  await check.update({...value,job_id})
+                } 
+            else {
+              console.log("updating")
+                  if (service == 7){
+                    await check.update({...value,job_id})
+                  }
+                  else{
+                    await check.update({...value,job_id})
+                  }
                   if(service != 5){
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
                     if(main_row == 0){

@@ -10,8 +10,9 @@ const sequelize = getSequelize()
 
 Thaijo.init({
     issue_id : DataTypes.CHAR,
-    abtract_clean : DataTypes.TEXT,
-    title : DataTypes.CHAR,
+    job_id : DataTypes.NUMBER,
+    abstract_clean : DataTypes.TEXT,
+    title : DataTypes.TEXT,
     article_url : DataTypes.TEXT,
     issue_date_published : DataTypes.DATE,
     issue_cover_Image : DataTypes.TEXT,
