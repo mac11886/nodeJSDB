@@ -6,7 +6,7 @@ const TestController = require("../controller/TestController");
 const KeywordController = require("../controller/KeywordController");
 const FacebookPageController = require("../controller/FacebookPageController");
 const JobController = require("../controller/JobController");
-
+const FacebookController = require("../controller/FacebookController")
 let results = {};
 /* GET home page. */
 
@@ -29,7 +29,9 @@ router.get("/job/progress", (req, res) => JobController.progress(req, res));
 router.post("/job/run", (req,res) => JobController.run(req,res));
 router.post("/job/create", (req,res) => JobController.create(req,res));
 router.post("/job/start", (req,res) => JobController.start(req,res));
-router.post("/job/stop", (req,res) => JobController.stop(req,res));
+router.post("/job/stop", (req, res) => JobController.stop(req, res));
+
+router.get("/facebook", (req, res) => FacebookController.get(req, res))
 
 
 

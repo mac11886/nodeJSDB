@@ -4,10 +4,11 @@ let mysqlConnect
 const createPool = () => {
     mysqlConnect = mysql.createPool({
         // connectionLimit: 500,
-        password: process.env.DATABASE_PASSWORD,
-        user: process.env.DATABASE_USER,
-        database: process.env.DATABASE_NAME,
-        host: process.env.DATABASE_HOST,
+        password: process.env.DB_PASSWORD,
+        user: process.env.DB_USERNAME,
+        database: process.env.DB_DATABASE,
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT
     });
     mysqlConnect.getConnection((err) => {
         if (!err) console.log("DB connection success");
