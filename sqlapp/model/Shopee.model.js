@@ -11,7 +11,7 @@ const sequelize = getSequelize()
 
 Shopee.init({
     job_id: DataTypes.NUMBER,
-    product_id: DataTypes.CHAR,
+    product_id: DataTypes.NUMBER,
     name: DataTypes.TEXT,
     price: DataTypes.CHAR,
     type: DataTypes.CHAR,
