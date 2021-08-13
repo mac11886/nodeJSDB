@@ -17,7 +17,7 @@ Facebook.init({
     image_l: DataTypes.TEXT,
     reaction: DataTypes.TEXT,
     post_url: DataTypes.TEXT,
-    post_id: DataTypes.TEXT,
+    post_id: DataTypes.NUMBER,
     post_text: DataTypes.TEXT,
     meaning: DataTypes.CHAR,
     good_word: DataTypes.TEXT,	

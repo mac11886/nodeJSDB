@@ -317,7 +317,7 @@ return new Promise(function (resolve, reject) {
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     }
     else{
-      console.log("sci di -->")
+      console.log("sci di -->",keyword)
       python.stdin.write(`${service}\n` + page + "\n" + keyword);
     }
     
