@@ -30,6 +30,8 @@ router.post("/job/create", (req,res) => JobController.create(req,res));
 router.post("/job/start", (req,res) => JobController.start(req,res));
 router.post("/job/stop", (req,res) => JobController.stop(req,res));
 
+router.post("/job/facebook", (req,res) => JobController.facebook(req,res));
+
 
 
 module.exports = router;

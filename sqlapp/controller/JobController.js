@@ -88,6 +88,12 @@ JobController.get = async (req, res) => {
                   break;
               case "5":
                   job.service = "facebook"
+                  break;
+              case "7":
+                  job.service = "science direct";
+                  break;
+              case "8":
+                  job.service = "thaijo";                
           }
       });
       res.json({ jobs})
@@ -95,6 +101,98 @@ JobController.get = async (req, res) => {
   }
   catch (err) {
       console.log(err)
+  }
+}
+
+JobController.facebook = async(req,res) => {
+  try{
+    beauty_words = ["สวย","หล่อ","เท่ดูดี","น่ารัก"]
+    food_words = ["อาหาร","เครื่องดืม","ของกิน","ขนม","อร่อย"]
+    health_words = ["สุขภาพ","แข็งแรง","บำรุง","อ่อนเยาว์","ฉลาด"]
+    spa_words = ["หอม","สบาย","นวด","สปา","ผ่อนคลาย","อโรมา"]
+    travel_words = ["ท่องเที่ยว","รื่นเริง","เดินทาง","ที่พัก","โรงแรม","พักผ่อน"]
+
+    console.log("hello")
+    facebooks = await Facebook_model.findAll()
+
+    // text = "สวย---------สวย--------สวย-----อาหาร"
+    for (let facebook of facebooks){
+      console.log("processing")
+      let text = facebook.post_text
+      let beauty_count = 0
+      let food_count = 0
+      let health_count = 0
+      let spa_count = 0
+      let travel_count = 0
+      let beauty_array = []
+      let food_array = []
+      let health_arrray = []
+      let spa_array = []
+      let travel_array = []
+
+      for await(word of beauty_words){
+        // console.log(word)
+        beauty_count += text.split(word).length - 1
+
+        if (text.split(word).length - 1 > 0){
+          beauty_array.push(word)
+        }  
+        // console.log("count",beauty_count)
+      }
+      for await(word of food_words){
+        food_count += text.split(word).length - 1
+        
+        if (text.split(word).length - 1 > 0){
+          food_array.push(word)
+        } 
+        // console.log("fff",food_count)
+      }
+      for await(word of health_words){
+        health_count += text.split(word).length - 1
+        
+        if (text.split(word).length - 1 > 0){
+          health_arrray.push(word)
+        } 
+      }
+      for await(word of spa_words){
+        spa_count += text.split(word).length - 1
+        
+        if (text.split(word).length - 1 > 0){
+          spa_array.push(word)
+        } 
+      }
+      for await(word of travel_words){
+        travel_count += text.split(word).length - 1
+        
+        if (text.split(word).length - 1 > 0){
+          travel_array.push(word)
+        } 
+      }
+      
+      console.log("updating...")
+      // console.log(food_count)
+      console.log(facebook.id)
+      await facebook.update({spa_word_count: spa_count,
+        travel_word_count: travel_count,
+        food_word_count:food_count,
+        health_word_count: health_count,
+        beauty_word_count:beauty_count,
+        spa_word: spa_array.toString(),
+        travel_word : travel_array.toString(),
+        food_word : food_array.toString(),
+        health_word : health_arrray.toString(),
+        beauty_word : beauty_array.toString()
+        
+      })
+      
+      
+      // console.log(facebook.user_name)
+    }
+    // console.log(facebook_row)
+    // res.json(facebooks)
+  }
+  catch(error){
+    console.log(error)
   }
 }
 
@@ -167,11 +265,11 @@ function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
     let page = 5 //----------->> actually is 100 <<----------------
     
     for (let service of services){
-        if(service.name === "pantip"){
+        if(service.name === "pantip" || service.name === "science direct" || service.name === "thaijo"){
           page = 1000
         }
 
-        if(service.name != "amazon" || service.name != "science direct"){
+        if(service.name != "amazon" && service.name != "science direct"){
           let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
           await Job_model.create(job_thai)
         }
@@ -305,7 +403,7 @@ return new Promise(function (resolve, reject) {
               const start = window.performance.now()
               check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
               const stop = window.performance.now()
-              console.log(`Time to checking = ${(stop - start)/1000} seconds`);
+              console.log(`Time to checking = ${(stop - start)/1000} seconds`);                     
               
             }
             else{ //when service is sci direct
@@ -331,8 +429,8 @@ return new Promise(function (resolve, reject) {
                 } 
             else {
               console.log("updating")
-                    await check.update({...value,job_id})
-
+                  await check.update({...value,job_id})
+                  
                   if(service != 5){
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
                     if(main_row == 0){

@@ -21,7 +21,7 @@ Pantip.init({
     date_time: DataTypes.CHAR,
     post_link: DataTypes.TEXT,
     img_src: DataTypes.TEXT,
-    post_id: DataTypes.CHAR,
+    post_id: DataTypes.NUMBER,
     meaning: DataTypes.CHAR,
     good_word: DataTypes.TEXT,	
     bad_word: DataTypes.TEXT,
