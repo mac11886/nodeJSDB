@@ -314,10 +314,11 @@ return new Promise(function (resolve, reject) {
     ]);
 
     if(service != 8){
+      console.log("sent to python --> ",service,page,utfKeyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     }
     else{
-      console.log("sci di -->",keyword)
+      console.log("sent to python --> ",service,page,keyword)
       python.stdin.write(`${service}\n` + page + "\n" + keyword);
     }
     
@@ -394,6 +395,7 @@ return new Promise(function (resolve, reject) {
 
       // products
       for await (const value of result) {
+        try{
         let check
         delete value["num"];
           if (i >= 1) {
@@ -443,7 +445,12 @@ return new Promise(function (resolve, reject) {
                 }
           }
         i++;
-      } resolve()
+       resolve()
+        }catch(error){
+          reject()
+          console.log(error)
+        }
+    }
       
     });
   } catch (err) {
