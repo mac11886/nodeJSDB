@@ -404,8 +404,7 @@ return new Promise(function (resolve, reject) {
               const start = window.performance.now()
               check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
               const stop = window.performance.now()
-              console.log(`Time to checking = ${(stop - start)/1000} seconds`); 
-              console.log(check)                                 
+              console.log(`Time to checking = ${(stop - start)/1000} seconds`);                                 
             }
             else{ //when service is sci direct
               console.log("checking")
@@ -433,11 +432,7 @@ return new Promise(function (resolve, reject) {
                   await check.update({...value,job_id})
                   
                   if(service != 5){
-                    try{
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
-                    }catch(error){
-                      console.log(error)
-                    }
                     if(main_row == 0){
                       await Main_model.create({
                         key_id: keyword_row.id ,
