@@ -308,6 +308,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
 async function getData(service, keyword, page,job_id, job = null, all_keywords=[]) {
 return new Promise(function (resolve, reject) {
   try {
+    console.log(service)
     let utfKeyword = encodeURI(keyword);
     python = spawn(process.env.PYTHON_PATH, [
       process.env.SCRAPE_PATH
@@ -395,8 +396,6 @@ return new Promise(function (resolve, reject) {
 
       // products
       for await (const value of result) {
-        try{
-        let check
         delete value["num"];
           if (i >= 1) {
             if( service != 7){
@@ -404,8 +403,7 @@ return new Promise(function (resolve, reject) {
               const start = window.performance.now()
               check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
               const stop = window.performance.now()
-              console.log(`Time to checking = ${(stop - start)/1000} seconds`);
-              
+              console.log(`Time to checking = ${(stop - start)/1000} seconds`);                                 
             }
             else{ //when service is sci direct
               console.log("checking")
@@ -446,10 +444,7 @@ return new Promise(function (resolve, reject) {
           }
         i++;
        resolve()
-        }catch(error){
-          reject()
-          console.log(error)
-        }
+        
     }
       
     });
