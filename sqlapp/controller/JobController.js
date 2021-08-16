@@ -26,7 +26,7 @@ const Service_model = require("../model/Service.model")
 const Facebook_page_model = require("../model/Facebook_page.model")
 const Thaijo_model = require("../model/Thaijo.model")
 const ScienceDirect_model = require("../model/ScienceDirect.model")
-const { JSDOM } = require("jsdom")
+const { JSDOM, VirtualConsole } = require("jsdom")
 const { window } = new JSDOM()
 
 const {Op} = require("sequelize")
