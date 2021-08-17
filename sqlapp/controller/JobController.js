@@ -443,10 +443,9 @@ return new Promise(function (resolve, reject) {
                 }
           }
         i++;
-       resolve()
-        
+       
     }
-      
+    resolve() 
     });
   } catch (err) {
     console.log("get data", err)
