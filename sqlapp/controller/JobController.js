@@ -28,6 +28,7 @@ const Thaijo_model = require("../model/Thaijo.model")
 const ScienceDirect_model = require("../model/ScienceDirect.model")
 const { JSDOM, VirtualConsole } = require("jsdom")
 const { window } = new JSDOM()
+// const fs = require("fs")
 
 const {Op} = require("sequelize")
 
@@ -308,6 +309,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
 async function getData(service, keyword, page,job_id, job = null, all_keywords=[]) {
 return new Promise(function (resolve, reject) {
   try {
+    
     console.log(service)
     let utfKeyword = encodeURI(keyword);
     python = spawn(process.env.PYTHON_PATH, [
@@ -319,6 +321,9 @@ return new Promise(function (resolve, reject) {
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     }
     else{
+      fs.writeFile(process.env.INPUT_FILE , keyword, (err) => {
+        if (err) throw err;
+    })
       console.log("sent to python --> ",service,page,keyword)
       python.stdin.write(`${service}\n` + page + "\n" + keyword);
     }
