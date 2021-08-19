@@ -1,13 +1,15 @@
 const Job = require("../model/Job");
-const Keyword = require("../model/Keyword");
-const Model = require("../model/model");
-const Service = require("../model/Service");
 const fs = require("fs");
 const utf8 = require("utf8");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
 const Amazon = require("../model/Amazon");
 const Shopee = require("../model/Shopee");
+const Shopee_model = require("../model/Shopee.model");
+const Amazon_model = require("../model/Amazon.model");
+const Facebook_model = require("../model/Facebook.model");
+const Jd_model = require("../model/Jd.model");
+const Pantip_model = require("../model/Pantip.model");
 const Pantip = require("../model/Pantip");
 const Jd = require("../model/Jd");
 const Facebook = require("../model/Facebook");
@@ -15,19 +17,33 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
 var cron = require('node-cron');
-const { create, result } = require("lodash");
+const { create } = require("lodash");
+// const Eservice_model = require("../model/E_service.model")
+const Keyword_model = require("../model/Keyword.model")
+const Main_model = require("../model/Main.model")
+const Job_model = require("../model/Job.model")
+const Service_model = require("../model/Service.model")
+const Facebook_page_model = require("../model/Facebook_page.model")
+const Thaijo_model = require("../model/Thaijo.model")
+const ScienceDirect_model = require("../model/ScienceDirect.model")
+const { JSDOM } = require("jsdom")
+const { window } = new JSDOM()
+
+const {Op} = require("sequelize")
+
+
 
 JobController = {}
 
 var create_task = cron.schedule('0 54 10 * * *', () => {
   console.log('create a job');
   // JobController.create()
-});
+  });
 
 var run_task = cron.schedule('0 55 10 * * *', () => {
-  console.log('Running a job');
-  // JobController.run()
-});
+   console.log('Running a job');
+    // JobController.run()
+ });
 
 
 JobController.start = async (req, res) => {
@@ -42,72 +58,39 @@ JobController.stop = async (req, res) => {
   res.json("stoped")
 }
 
-JobController.progress = async (req, res) => {
-  let count_all_job = await new Job().getcount();
-  let count_success_job = await new Job().wherecount(`status = "success"`);
-  let current_progress = { count_all_job: count_all_job, count_success_job: count_success_job }
+JobController.progress = async(req,res) => {
+  let count_all_job = await Job_model.count()
+  let count_success_job = await Job_model.count({where: {status: "success"}})
+  let current_progress = {count_all_job: count_all_job,count_success_job:count_success_job}
 
-  res.json({ current_progress })
-  // resolve({})
-  // })
+  res.json({current_progress})
 }
 
 JobController.get = async (req, res) => {
   try {
-    let jobs = await new Job().get();
-    jobs.forEach((job) => {
-      // Convert Created time
-      let created_time = new Date(job.created_time);
-      let iso_created_time = new Date(
-        created_time.getTime() - created_time.getTimezoneOffset() * 60000
-      ).toISOString().slice(0, 19).replace("T", " ");
-      job.created_time = iso_created_time;
+      let jobs = await Job_model.findAll();
 
-      // Convert Start time
-      if (job.start_time == null) {
-        job.start_time = "not started yet";
-      } else {
-        let start_time = new Date(job.start_time); // Or the date you'd like converted.
-        let iso_start_time = new Date(
-          start_time.getTime() - start_time.getTimezoneOffset() * 60000
-        ).toISOString().slice(0, 19).replace("T", " ");
-        job.start_time = iso_start_time;
-      }
-
-      // Convert End time
-      if (job.end_time == null) {
-        if (job.start_time != "not started yet") {
-          job.end_time = "not done yet";
-        } else {
-          job.end_time = "not started yet";
-        }
-      } else {
-        let end_time = new Date(job.end_time); // Or the date you'd like converted.
-        let iso_end_time = new Date(
-          end_time.getTime() - end_time.getTimezoneOffset() * 60000
-        ).toISOString().slice(0, 19).replace("T", " ");
-        job.end_time = iso_end_time;
-      }
-
-      // Convert Service
-      switch (job.service) {
-        case "1":
-          job.service = "shopee";
-          break;
-        case "2":
-          job.service = "amazon";
-          break;
-        case "3":
-          job.service = "pantip";
-          break;
-        case "4":
-          job.service = "jd";
-          break;
-        case "5":
-          job.service = "facebook"
-      }
-    });
-    res.json({ jobs })
+      jobs.forEach((job) => {
+          
+          // Convert Service
+          switch (job.service) {
+              case "1":
+                  job.service = "shopee";
+                  break;
+              case "2":
+                  job.service = "amazon";
+                  break;
+              case "3":
+                  job.service = "pantip";
+                  break;
+              case "4":
+                  job.service = "jd";
+                  break;
+              case "5":
+                  job.service = "facebook"
+          }
+      });
+      res.json({ jobs})
 
   }
   catch (err) {
@@ -116,23 +99,40 @@ JobController.get = async (req, res) => {
 }
 
 
-JobController.run = async (req, res) => {
-  try {
-    let model = new Model();
-    let all_job = Object.values(JSON.parse(JSON.stringify(await new Job().where(`status = "waiting" or status = "in progress"`))));
+JobController.run = async(req,res) => {
+  try{
+    let all_jobs = await Job_model.findAll({where: {
+      [Op.or]: [
+        {status: "waiting"},
+        {status: "in progress"}
+      ]
+    }})
 
+    let all_keyword = all_jobs.map(job => job.keyword)
+    let keyword_rows = await Keyword_model.findAll({where:  {
+      [Op.or]: [
+        {thai_word: {[Op.in] : all_keyword}},
+        {eng_word: {[Op.in] : all_keyword}}
+      ]}
+    })  
 
-    for (const job of all_job) {
-      console.log("job ID: ",job.id)
-      await model.updateJob(job.id, "in progress")
-      await getData(job.service,job.keyword,job.page,job.id)
-      await model.updateJob(job.id,"success")
-      // console.log("loop")
+    
+    // for await (const job of all_job){
+    for await (const job of all_jobs){
+      if (job.status == "waiting" || job.status == "in progress" ) {
+
+        job.status = "in progress"
+        job.start_time = new Date()
+        await job.save()
+        await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
+        job.status = "success"
+        job.end_time = new Date()
+        job.save()
+      } 
     }
-    // res.json("run succ")
-  } catch (error) {
-    await model.updateJob(job.id, "error")
-    // res.json("error")
+    console.log("doneeeeeeeeeeeeee")
+  }catch(error){
+    console.log("error",error)
   }
 
 };
@@ -140,49 +140,68 @@ JobController.run = async (req, res) => {
 JobController.create = async (req, res) => {
   try {
     console.log("creating")
-    let all_keyword = Object.values(JSON.parse(JSON.stringify(await new Keyword().get())));
-    let all_facebook_page = Object.values(JSON.parse(JSON.stringify(await new Facebook_page().get())));
-    let date = new Date();
-    let created_time = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 19).replace('T', ' ');
+    let all_keyword = await Keyword_model.findAll()
+    let all_facebook_page = await (Facebook_page_model.findAll())
+    const services = await Service_model.findAll({where: {
+      [Op.not]: [
+      {name: "facebook"}
+    ]}})
+    let created_time = new Date();
 
-    for (const keyword of all_keyword) {
-      await KeywordMatchingWithService(keyword.thai_word, keyword.eng_word, created_time)
+    for (const keyword of all_keyword){
+        await KeywordMatchingWithService(keyword.thai_word,keyword.eng_word,created_time,services) 
     }
 
     // await FacebookPageMatchingWithFacebook(all_facebook_page, created_time)
     res.json("succc")
-  } catch (error) {
-    console.log(error, "create job")
-    res.json(error)
+  }catch(error){
+    console.log(error,"create job")
   }
 
 };
 
-function KeywordMatchingWithService(thai_word, eng_word, created_time) {
-  return new Promise(async (resolve) => {
-    try {
-      let model = new Model();
-      const services = Object.values(JSON.parse(JSON.stringify(await new Service().where(`not name = "facebook"`))))
-      let page = 5 //----------->> actually is 100 <<----------------
+function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
+  //add all keyword matching with service without facebook
+    return new Promise (async(resolve) =>{
+    try{
+    let page = 5 //----------->> actually is 100 <<----------------
+    
+    for (let service of services){
+        if(service.name === "pantip"){
+          page = 1000
+        }
 
-      for (let service of services) {
-        if (service.name === "pantip") {
-          page = 1000 //----------->> actually is 1000 <<---------------------
+        if(service.name != "amazon" || service.name != "science direct"){
+          let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
+          await Job_model.create(job_thai)
         }
-        if (service.name != "amazon") {
-          let job_thai = { service: service.id, keyword: thai_word, status: "waiting", created_time: created_time, page: page }
-          await model.addJob(job_thai)
+
+        if(service.name != "thaijo"){
+          let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
+          await Job_model.create(job_eng)
+          page = 5
+          }
         }
-        let job_eng = { service: service.id, keyword: eng_word, status: "waiting", created_time: created_time, page: page }
-        await model.addJob(job_eng)
-        page = 5
+        
+        resolve()    
+      }catch(error){
+        console.log(error,"matching keyword")
       }
-      resolve()
-    } catch (error) {
-      console.log(error, "matching keyword")
-      res.json(error)
+    })
+}
+
+function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
+  //add all facebook page matching facebook only
+  return new Promise (async(resolve) => {
+    try{
+    for (let facebook_page of all_facebook_page){
+      let job = {service: 5,keyword: facebook_page.page_id,status: "waiting",created_time: created_time,page:100}
+      await Job_model.create(job)
     }
     resolve()
+  }catch(error){
+    console.log(error,"matching keyword")
+  }
   })
 }
 
@@ -201,16 +220,22 @@ function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
 }
 
 
-
-async function getData(service, keyword, page, job_id) {
+async function getData(service, keyword, page, job_id, job = null, all_keywords = []) {
   return new Promise(function (resolve, reject) {
     try {
       let utfKeyword = encodeURI(keyword);
       python = spawn(process.env.PYTHON_PATH, [
         process.env.SCRAPE_PATH
       ]);
-      // console.log("get pythonnnnnnnnnnrsnnnnnnn",service,page,keyword)
-      python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
+
+      if (service != 8) {
+        python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
+      }
+      else {
+        console.log("sci di -->")
+        python.stdin.write(`${service}\n` + page + "\n" + keyword);
+      }
+      
       python.stdin.end();
       python.stdout.on("data", function (data) {
         console.log("Pipe data from python script ...");
@@ -223,39 +248,56 @@ async function getData(service, keyword, page, job_id) {
         console.log('on exit')
         const raw = fs.readFileSync(process.env.FILE, "utf8");
         console.log(`child process close all stdio with code ${code}`);
-        // console.log("service:" + service);
 
         let i = 0;
-        let obj
         let pk_id = ""
-        let keyword_id = ""
-        let result;
+        let obj_model
+        let keyword_row = {
+          id: null,
+          thai_word: null,
+          eng_word: null
+        }
 
         if (service != 5) {
-          keyword_id = Object.values(JSON.parse(JSON.stringify(await new Keyword().where(`thai_word = '` + keyword + `' OR eng_word = '` + keyword + `'`))))[0].id;
+          keyword_row = all_keywords.find(row => row.thai_word == keyword || row.eng_word == keyword)
+          //   keyword_row = await Keyword_model.findOne({where: {[Op.or]: [
+          //     {thai_word: keyword},
+          //     {eng_word: keyword}
+          //   ]}
+          // })  
         }
 
         if (service == 1) {
-          obj = new Shopee();
+          obj_model = Shopee_model;
           pk_id = "product_id"
         }
         else if (service == 2) {
-          obj = new Amazon();
+          obj_model = Amazon_model;
           pk_id = "product_id"
         }
         else if (service == 3) {
-          obj = new Pantip();
+          obj_model = Pantip_model;
           pk_id = "post_id"
         }
         else if (service == 4) {
-          obj = new Jd();
+          obj_model = Jd_model;
           pk_id = "product_id"
         }
         else if (service == 5) {
-          obj = new Facebook();
+          obj_model = Facebook_model;
           pk_id = "post_id"
         }
+        else if (service == 7) {
+          obj_model = ScienceDirect_model;
+          pk_id = "keyword_id"
+        }
+        else if (service == 8) {
+          obj_model = Thaijo_model;
+          pk_id = "issue_id"
+        }
+        
 
+        
         const header = raw.split(/\r?\n/)[0].split(",");
         try {
           result = await csv(raw, { headers: header });
@@ -265,61 +307,70 @@ async function getData(service, keyword, page, job_id) {
           return;
         }
 
-        for (const value of result) {
+        // products
+        for await (const value of result) {
+          let check
           delete value["num"];
           if (i >= 1) {
-            // console.log("checking")
-            let check = await obj.check_product(value[pk_id])
-            console.log("found =", check)
-            if (check == 0) {
-              console.log("save ecom")
-              await obj.saveEcom(value, keyword)
-              await obj.updateJobId(job_id);
+            if (service != 7) {
+              console.log("checking")
+              const start = window.performance.now()
+              check = await obj_model.findOne({ where: { [pk_id]: value[pk_id] } })
+              const stop = window.performance.now()
+              console.log(`Time to checking = ${(stop - start) / 1000} seconds`);
+                
+            }
+            else { //when service is sci direct
+              console.log("checking")
+              // console.log(keyword_row.id)
+              check = await obj_model.findOne({ where: { [pk_id]: keyword_row.id, year: value["year"] } })
+            }
 
-            } else {
-              await obj.update_product(value, keyword_id, service)
-              await obj.updateJobId(job_id);
+            if (!check) {
+              console.log("saving")
+              if (service == 7) {
+                created_row = await obj_model.create({ ...value, job_id, keyword_id: keyword_row.id })
+              }
+              else {
+                created_row = await obj_model.create({ ...value, job_id })
+              }
+              console.log("service", service)
+              await Main_model.create({
+                key_id: keyword_row.id,
+                service_id: service,
+                e_id: created_row.id
+              })
+            }
+            else {
+              console.log("updating")
+              if (service == 7) {
+                await check.update({ ...value, job_id })
+              }
+              else {
+                await check.update({ ...value, job_id })
+              }
+              if (service != 5) {
+                let main_row = await Main_model.count({ where: { e_id: check.id, key_id: keyword_row.id, service_id: service } })
+                if (main_row == 0) {
+                  await Main_model.create({
+                    key_id: keyword_row.id,
+                    service_id: service,
+                    e_id: check.id,
+                  })
+                }
+              }
             }
           }
           i++;
         } resolve()
-
+        
       });
     } catch (err) {
       console.log("get data", err)
-      new Model().updateJob(job_id, "error")
+      // new Model().updateJob(job_id,"error")
 
-      // for await (const value of result) {
-      //   delete value["num"];
-      //   try {
-      //     if (i >= 1) {
-      //       // console.log("checking")
-
-      //       let check = await obj.check_product(value[pk_id])
-      //       // .then(async (check) => {
-      //       console.log("found =", check)
-      //       if (check == 0) {
-      //         obj.saveEcom(value, keyword).then(() => {
-      //           obj.updateJobId(job_id);
-      //         })
-      //       } else {
-      //         obj.update_product(value).then(() => {
-      //           obj.updateJobId(job_id);
-      //         })
-      //       }
-      //       // }); 
-      //     }
-      //   } catch (error) {
-      //     console.log(error.message, 'error ', value, keyword)
-      //   }
-      //   i++;
-      // } resolve()
-
-    }
+    }    
   });
-
-
-    
 }
 
 module.exports = JobController;

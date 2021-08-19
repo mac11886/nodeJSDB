@@ -1,5 +1,4 @@
 const Model = require("./model");
-
 class Main extends Model {
     constructor(){
         super("main")

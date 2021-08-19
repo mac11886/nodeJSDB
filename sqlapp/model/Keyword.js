@@ -7,7 +7,8 @@ class Keyword extends Model {
     getEmptyObj(){
         return {
             id : null,
-            word : null,
+            thai_word : null,
+            eng_word : null
         }
     }
 }

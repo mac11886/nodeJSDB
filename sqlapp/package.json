@@ -15,7 +15,9 @@
     "express": "~4.16.1",
     "html": "^1.0.0",
     "http-errors": "~1.6.3",
+    "jsdom": "^16.7.0",
     "lodash": "^4.17.21",
+    "moment-timezone": "^0.5.33",
     "morgan": "~1.9.1",
     "mysql": "^2.18.1",
     "mysql-pool": "^0.2.2",
@@ -24,8 +26,10 @@
     "node-cron": "^3.0.0",
     "nodemon": "^2.0.12",
     "pug": "^3.0.2",
+    "sequelize": "^6.6.5",
     "shelljs": "^0.8.4",
-    "utf8": "^3.0.0"
+    "utf8": "^3.0.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/node": "^16.0.0"

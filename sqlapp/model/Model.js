@@ -1,4 +1,4 @@
-const { reject, range } = require("lodash");
+const { reject, range, result } = require("lodash");
 // const mysql = require("mysql2");
 const { getMysqlConnect } = require("../db")
 
@@ -126,9 +126,24 @@ class Model {
             // this.mysqlConnect.end() 
         });
     }
+    // async check_product(id){
+    //     return new Promise((resolve, reject) => {
+    //         this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
+    //             if (err) {
+    //                 return reject(err);
+    //             }
+    //             if (results.length > 1){
+    //                 console.log(results)
+    //             }
+                
+    //             resolve(results.length);
+    //         });
+    //     });
+
+    // }
     async check_product(id){
         return new Promise((resolve, reject) => {
-            this.mysqlConnect.query(`select * from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
+            this.mysqlConnect.query(`SELECT count(*) from ${this.table} where ${this.pk} = '${id}' `, (err, results) => {
                 if (err) {
                     return reject(err);
                 }
@@ -136,7 +151,7 @@ class Model {
                     console.log(results)
                 }
                 
-                resolve(results.length);
+                resolve(Object.values(JSON.parse(JSON.stringify(results[0]))))
             });
         });
 
@@ -150,6 +165,7 @@ class Model {
                 if (err) {
                     return reject(err);
                 }
+                console.log("check done")
                 return resolve(results);
             });
         });
@@ -161,12 +177,15 @@ class Model {
                         if (err) {
                             return reject(err);
                         }
+                        console.log("insert table done")
                         return resolve("yes");
                     });
                 });
             } catch (error) {
                 console.log(error, "error select keyword")
             }
+        }else{
+            console.log("found",result.length)
         }
     }
 
@@ -225,6 +244,16 @@ class Model {
             }
             
             resolve(k)
+        })
+    })
+
+    whereUpdate = (queryString,objectParam) => new Promise((resolve,reject) => {
+        this.mysqlConnect.query(`${queryString}`,(err,result) => {
+            if(err){
+                console.log(err)
+                reject()
+            }
+             resolve(Object.values(JSON.parse(JSON.stringify(result[0]))))
         })
     })
 
