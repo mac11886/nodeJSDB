@@ -31,6 +31,7 @@ router.post("/job/start", (req,res) => JobController.start(req,res));
 router.post("/job/stop", (req,res) => JobController.stop(req,res));
 
 router.post("/job/facebook", (req,res) => JobController.facebook(req,res));
+router.post("/job/inside/shopee", (req, res) => JobController.getInsideShopee(req, res));
 
 
 
