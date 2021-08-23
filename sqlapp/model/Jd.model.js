@@ -9,7 +9,7 @@ const sequelize = getSequelize()
 
 Jd.init({
     job_id : DataTypes.NUMBER,
-    product_id : DataTypes.CHAR,
+    product_id : DataTypes.NUMBER,
     name : DataTypes.TEXT,
     price : DataTypes.FLOAT,
     img_src : DataTypes.TEXT,

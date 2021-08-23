@@ -33,6 +33,8 @@ router.post("/job/stop", (req, res) => JobController.stop(req, res));
 
 router.get("/facebook", (req, res) => FacebookController.get(req, res))
 
+router.post("/job/facebook", (req,res) => JobController.facebook(req,res));
+
 
 
 module.exports = router;

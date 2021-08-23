@@ -9,7 +9,7 @@ class Thaijo extends Model {
 const sequelize = getSequelize()
 
 Thaijo.init({
-    issue_id : DataTypes.CHAR,
+    issue_id : DataTypes.NUMBER,
     job_id : DataTypes.NUMBER,
     abstract_clean : DataTypes.TEXT,
     title : DataTypes.TEXT,

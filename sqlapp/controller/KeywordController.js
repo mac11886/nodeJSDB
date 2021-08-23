@@ -177,9 +177,9 @@ KeywordController.getKeywordByService = async(req,res) => {
 
 KeywordController.post = async (req, res) => {
     // let model = new Model();
-    let thai_word = req.body.thai_word
+    let thai_word = req.body.thai_word.trim()
     console.log(thai_word)
-    let eng_word = req.body.eng_word
+    let eng_word = req.body.eng_word.trim()
 
     try{
         // await new Keyword().check(thai_word,eng_word); 
