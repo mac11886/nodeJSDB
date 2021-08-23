@@ -19,7 +19,10 @@ Shopee.init({
     sold: DataTypes.CHAR,
     send_from: DataTypes.CHAR,
     img_src: DataTypes.TEXT,
-    url: DataTypes.TEXT
+    url: DataTypes.TEXT,
+    brand: DataTypes.CHAR,
+    rating: DataTypes.CHAR,
+    description: DataTypes.TEXT
 }, { sequelize, modelName: 'shopee', tableName: 'shopee', timestamps: false });
 
 // Shopee.hasMany(Main_model,{

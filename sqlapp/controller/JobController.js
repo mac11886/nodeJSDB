@@ -106,29 +106,42 @@ JobController.get = async (req, res) => {
   }
 }
 
-JobController.getInsideShopee = async(req,res) => {
-  try{
-    
+JobController.getInside = async(req,res) => {
+  try{ 
+    let Obj_model
+    let input_num
+    const service = req.query.service
     res.json("enter inside shopee")
+    if(service == "shopee"){
+      Obj_model =  Shopee_model
+      input_num = "9"    
+    }
+    if(service == "amazon"){
+      Obj_model = Amazon_model
+      input_num = "10"
+    }
     const start = window.performance.now()
-    shopee = await Shopee_model.findAll()
+    // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
+    rows = await Obj_model.findAll()
     const stop = window.performance.now()
-    console.log(`Time to checking = ${(stop - start)/1000} seconds`);  
+    console.log(`Time to findAll = ${(stop - start)/1000} seconds`);  
 
     const csvWriter = createCsvWriter({
-      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input.csv',
+      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
       header: [
       {id: 'product_id', title: 'product_id'},
       {id: 'url', title: 'url'},
       ]
     })
-    await csvWriter.writeRecords(shopee)
+    await csvWriter.writeRecords(rows)
 
+    console.log("calling python")
     python = spawn(process.env.PYTHON_PATH, [
       process.env.SCRAPE_PATH
     ]);
-    python.stdin.write("9");
+    python.stdin.write(input_num);
     python.stdin.end();
+    
     await python.on("exit", async () => {
       console.log('on exit')
       const raw = fs.readFileSync(process.env.FILE, "utf8");
@@ -137,9 +150,9 @@ JobController.getInsideShopee = async(req,res) => {
 
       for await (const value of results){
         console.log(value["product_id"])
-        let shopee_row = await Shopee_model.findOne({ where: { product_id: value["product_id"] } })
-        if (shopee_row) {
-          await shopee_row.update(value)
+        let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
+        if (obj_row) {
+          await obj_row.update(value)
         }
       }
       console.log("succ")
