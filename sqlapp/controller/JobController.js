@@ -28,6 +28,7 @@ const Thaijo_model = require("../model/Thaijo.model")
 const ScienceDirect_model = require("../model/ScienceDirect.model")
 const { JSDOM, VirtualConsole } = require("jsdom")
 const { window } = new JSDOM()
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 // const fs = require("fs")
 
 const {Op} = require("sequelize")
@@ -102,6 +103,63 @@ JobController.get = async (req, res) => {
   }
   catch (err) {
       console.log(err)
+  }
+}
+
+JobController.getInside = async(req,res) => {
+  try{ 
+    let Obj_model
+    let input_num
+    const service = req.query.service
+    res.json("enter inside shopee")
+    if(service == "shopee"){
+      Obj_model =  Shopee_model
+      input_num = "9"    
+    }
+    if(service == "amazon"){
+      Obj_model = Amazon_model
+      input_num = "10"
+    }
+    const start = window.performance.now()
+    // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
+    rows = await Obj_model.findAll()
+    const stop = window.performance.now()
+    console.log(`Time to findAll = ${(stop - start)/1000} seconds`);  
+
+    const csvWriter = createCsvWriter({
+      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
+      header: [
+      {id: 'product_id', title: 'product_id'},
+      {id: 'url', title: 'url'},
+      ]
+    })
+    await csvWriter.writeRecords(rows)
+
+    console.log("calling python")
+    python = spawn(process.env.PYTHON_PATH, [
+      process.env.SCRAPE_PATH
+    ]);
+    python.stdin.write(input_num);
+    python.stdin.end();
+    
+    await python.on("exit", async () => {
+      console.log('on exit')
+      const raw = fs.readFileSync(process.env.FILE, "utf8");
+      const header = raw.split(/\r?\n/)[0].split(",");
+      results = await csv(raw, { headers: header });
+
+      for await (const value of results){
+        console.log(value["product_id"])
+        let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
+        if (obj_row) {
+          await obj_row.update(value)
+        }
+      }
+      console.log("succ")
+    }); 
+  }     
+  catch(error){
+    console.log(error)
   }
 }
 
@@ -309,7 +367,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
 async function getData(service, keyword, page,job_id, job = null, all_keywords=[]) {
 return new Promise(function (resolve, reject) {
   try {
-    fs.writeFile(process.env.INPUT_FILE , keyword, (err) => {
+    fs.writeFile(process.env.INPUT_FILE_TXT , keyword, (err) => {
       if (err) throw err;
     })
     console.log(service)
@@ -415,7 +473,7 @@ return new Promise(function (resolve, reject) {
               check = await obj_model.findOne({where: {[pk_id]: keyword_row.id,year:value["year"]}})
             }
 
-            if (!check) {
+            if (!check) { //for saving
               console.log("saving")
               if(service == 7){
                 created_row = await obj_model.create({...value,job_id,keyword_id: keyword_row.id})
@@ -430,7 +488,7 @@ return new Promise(function (resolve, reject) {
                       e_id: created_row.id
                     })
                 } 
-            else {
+            else { // for updating
               console.log("updating")
                   await check.update({...value,job_id})
                   
