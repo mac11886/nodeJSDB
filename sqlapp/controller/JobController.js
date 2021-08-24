@@ -107,25 +107,39 @@ JobController.get = async (req, res) => {
 }
 
 JobController.getInside = async(req,res) => {
-  try{ 
+  try{
+    const service = req.query.service
+    await getDetail(service)
+  }
+  catch (error){
+
+  }
+}
+
+async function getDetail(service) {
+  try{
+  return new Promise (async(resolve) => {
+    console.log("geting detail..")
+    const raw = fs.readFileSync(process.env.FILE, "utf8")
+    const header = raw.split(/\r?\n/)[0].split(",");
+    results = (await csv(raw, { headers: header })).map(r => r.product_id); //turn csv file to object
+    
     let Obj_model
     let input_num
-    const service = req.query.service
-    res.json("enter inside shopee")
-    if(service == "shopee"){
+    if(service == 1){
       Obj_model =  Shopee_model
       input_num = "9"    
     }
-    if(service == "amazon"){
+    if(service == 2){
       Obj_model = Amazon_model
       input_num = "10"
     }
     const start = window.performance.now()
     // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
-    rows = await Obj_model.findAll()
+    rows = await Obj_model.findAll({where:{product_id: results}})
+    console.log(rows)
     const stop = window.performance.now()
     console.log(`Time to findAll = ${(stop - start)/1000} seconds`);  
-
     const csvWriter = createCsvWriter({
       path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
       header: [
@@ -155,9 +169,12 @@ JobController.getInside = async(req,res) => {
           await obj_row.update(value)
         }
       }
+      resolve()
       console.log("succ")
     }); 
-  }     
+  })
+  }
+   
   catch(error){
     console.log(error)
   }
@@ -282,6 +299,9 @@ JobController.run = async(req,res) => {
         job.start_time = new Date()
         await job.save()
         await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
+        if (job.service == 1 || job.service == 2){
+          await getDetail(job.service)
+        }
         job.status = "success"
         job.end_time = new Date()
         job.save()
