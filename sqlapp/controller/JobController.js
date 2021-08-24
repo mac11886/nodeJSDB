@@ -134,14 +134,11 @@ async function getDetail(service) {
       Obj_model = Amazon_model
       input_num = "10"
     }
-    const start = window.performance.now()
     // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
     rows = await Obj_model.findAll({where:{product_id: results}})
-    console.log(rows)
-    const stop = window.performance.now()
-    console.log(`Time to findAll = ${(stop - start)/1000} seconds`);  
+     
     const csvWriter = createCsvWriter({
-      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
+      path: 'C:\\Users\\Administrator\\Desktop\\nodeJSDB\\sqlapp\\input_file\\input_file.csv',
       header: [
       {id: 'product_id', title: 'product_id'},
       {id: 'url', title: 'url'},
@@ -150,6 +147,7 @@ async function getDetail(service) {
     await csvWriter.writeRecords(rows)
 
     console.log("calling python")
+    const start = window.performance.now()
     python = spawn(process.env.PYTHON_PATH, [
       process.env.SCRAPE_PATH
     ]);
@@ -168,7 +166,10 @@ async function getDetail(service) {
         if (obj_row) {
           await obj_row.update(value)
         }
+      const stop = window.performance.now()
+      console.log(`Time to findAll = ${(stop - start)/1000} seconds`);
       }
+       
       resolve()
       console.log("succ")
     }); 
