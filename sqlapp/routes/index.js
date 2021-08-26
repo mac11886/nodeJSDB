@@ -34,6 +34,7 @@ router.post("/job/facebook/rework", (req,res) => JobController.facebook(req,res)
 router.post("/job/inside", (req, res) => JobController.getInside(req, res));
 router.post("/job/create/facebook", (req, res) => JobController.facebookCreateJob(req, res));
 router.get("/job/facebook", (req, res) => JobController.getFacebookJob(req, res));
+router.post("/job/run/facebook", (req, res) => JobController.runFacebook(req, res));
 
 
 

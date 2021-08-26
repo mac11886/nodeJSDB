@@ -304,6 +304,30 @@ JobController.facebook = async(req,res) => {
   }
 }
 
+JobController.runFacebook = async(req,res) => {
+  try{
+    let all_job_facebook = await Job_FaceBook_model.findAll({where: {
+      [Op.or]: [
+        {status: "waiting"},
+        {status: "in progress"}
+      ]
+    }})
+
+    let all_page_id = all_job_facebook.map(job => job.page_id)
+    console.log(all_page_id)
+    let all_page = await Facebook_page_model.findAll({where: {page_id: {[Op.in] : all_page_id}}})
+
+    // await getData(5,job.page_id,job.amount_post,job.id, all_page)
+
+  
+
+
+  }
+  catch(error){
+    console.log(error)
+  }
+}
+
 
 JobController.run = async(req,res) => {
   try{
@@ -330,7 +354,7 @@ JobController.run = async(req,res) => {
         job.status = "in progress"
         job.start_time = new Date()
         await job.save()
-        await getData(job.service,job.keyword,job.page,job.id, job, keyword_rows)
+        await getData(job.service,job.keyword,job.page,job.id, keyword_rows)
         if (job.service == 1 || job.service == 2){
           await getDetail(job.service)
         }
@@ -404,7 +428,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   return new Promise (async(resolve) => {
     try{
     for (let facebook_page of all_facebook_page){
-      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time}
+      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time,status:"waiting"}
       await Job_FaceBook_model.create(job)
     }
     resolve()
@@ -415,8 +439,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
 }
 
 
-
-async function getData(service, keyword, page,job_id, job = null, all_keywords=[]) {
+async function getData(service, keyword, page,job_id, all_keywords=[]) {
 return new Promise(function (resolve, reject) {
   try {
     fs.writeFile(process.env.INPUT_FILE_TXT , keyword, (err) => {
@@ -496,9 +519,7 @@ return new Promise(function (resolve, reject) {
         obj_model = Thaijo_model;
         pk_id="issue_id"
       }
-      
 
-      
       const header = raw.split(/\r?\n/)[0].split(",");
       try {
         result = await csv(raw, { headers: header });
@@ -507,12 +528,11 @@ return new Promise(function (resolve, reject) {
         console.log(err, "error result")
         return;
       }
-
       // products
       for await (const value of result) {
         delete value["num"];
           if (i >= 1) {
-            if( service != 7){
+            if( service != 7){ //for service ecom
               console.log("checking")
               const start = window.performance.now()
               check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
@@ -544,7 +564,7 @@ return new Promise(function (resolve, reject) {
               console.log("updating")
                   await check.update({...value,job_id})
                   
-                  if(service != 5){
+                  if(service != 5){ //with out facebook cuz facebook not in main
                     let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
                     if(main_row == 0){
                       await Main_model.create({
