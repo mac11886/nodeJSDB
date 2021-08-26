@@ -139,7 +139,7 @@ async function getDetail(service) {
     rows = await Obj_model.findAll({where:{product_id: results}})
      
     const csvWriter = createCsvWriter({
-      path: 'C:\\Users\\Administrator\\Desktop\\nodeJSDB\\sqlapp\\input_file\\input_file.csv',
+      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
       header: [
       {id: 'product_id', title: 'product_id'},
       {id: 'url', title: 'url'},
@@ -170,12 +170,13 @@ async function getDetail(service) {
           await obj_row.update(value)
         }
       }
-      const stop = window.performance.now()
-      console.log(`Time to getDetail = ${(stop - start)/1000} seconds`);
-       
-      resolve()
-      console.log("succ")
+      
     }
+    const stop = window.performance.now()
+    console.log(`Time to getDetail = ${(stop - start)/1000} seconds`);
+      
+    resolve()
+    console.log("succ")
     }); 
   })
   }
@@ -312,12 +313,34 @@ JobController.runFacebook = async(req,res) => {
         {status: "in progress"}
       ]
     }})
+    for (let job of all_job_facebook){
+      job.service = 5
+    }
+
 
     let all_page_id = all_job_facebook.map(job => job.page_id)
     console.log(all_page_id)
     let all_page = await Facebook_page_model.findAll({where: {page_id: {[Op.in] : all_page_id}}})
 
+    await queuing(all_job_facebook)
+
     // await getData(5,job.page_id,job.amount_post,job.id, all_page)
+
+    // for await (const job of all_job_facebook){
+    //   if (job.status == "waiting" || job.status == "in progress" ) {
+
+    //     job.status = "in progress"
+    //     job.start_time = new Date()
+    //     await job.save()
+    //     await getData(job.service,job.keyword,job.page,job.id, keyword_rows)
+    //     if (job.service == 1 || job.service == 2){
+    //       await getDetail(job.service)
+    //     }
+    //     job.status = "success"
+    //     job.end_time = new Date()
+    //     job.save()
+    //   } 
+    // }
 
   
 
@@ -346,23 +369,23 @@ JobController.run = async(req,res) => {
       ]}
     })  
 
-    
-    // for await (const job of all_job){
-    for await (const job of all_jobs){
-      if (job.status == "waiting" || job.status == "in progress" ) {
+    await queuing(all_jobs,keyword_rows)
 
-        job.status = "in progress"
-        job.start_time = new Date()
-        await job.save()
-        await getData(job.service,job.keyword,job.page,job.id, keyword_rows)
-        if (job.service == 1 || job.service == 2){
-          await getDetail(job.service)
-        }
-        job.status = "success"
-        job.end_time = new Date()
-        job.save()
-      } 
-    }
+    // for await (const job of all_jobs){
+    //   if (job.status == "waiting" || job.status == "in progress" ) {
+
+    //     job.status = "in progress"
+    //     job.start_time = new Date()
+    //     await job.save()
+    //     await getData(job.service,job.keyword,job.page,job.id, keyword_rows)
+    //     if (job.service == 1 || job.service == 2){
+    //       await getDetail(job.service)
+    //     }
+    //     job.status = "success"
+    //     job.end_time = new Date()
+    //     job.save()
+    //   } 
+    // }
     console.log("doneeeeeeeeeeeeee")
   }catch(error){
     console.log("error",error)
@@ -437,6 +460,40 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   }
   })
 }
+
+function queuing(jobs,keyword_rows=[]){
+  return new Promise(async(resolve,reject) => {
+    try{
+      let search_word
+      let amount
+      for await (const job of jobs){
+        if(job.service != 5){
+          search_word = job.keyword
+          amount = job.page
+        }
+        else{
+          search_word = job.page_id
+          amount = job.amount_post
+        }
+        job.status = "in progress"
+        job.start_time = new Date()
+        await job.save()
+        await getData(job.service,search_word,amount,job.id,keyword_rows)
+        if (job.service == 1 || job.service == 2){
+          await getDetail(job.service)
+        }
+        job.status = "success"
+        job.end_time = new Date()
+        job.save()
+      }
+      resolve()
+    }
+    catch(error){
+      console.log(error)
+    }
+  })
+}
+
 
 
 async function getData(service, keyword, page,job_id, all_keywords=[]) {
@@ -531,7 +588,7 @@ return new Promise(function (resolve, reject) {
       // products
       for await (const value of result) {
         delete value["num"];
-          if (i >= 1) {
+          if (i >= 1) { //not read header
             if( service != 7){ //for service ecom
               console.log("checking")
               const start = window.performance.now()
@@ -553,12 +610,13 @@ return new Promise(function (resolve, reject) {
               else{
                 created_row = await obj_model.create({...value,job_id})
               }
-                  console.log("service",service)
-                    await Main_model.create({
-                      key_id:keyword_row.id,
-                      service_id: service,
-                      e_id: created_row.id
-                    })
+              if (service != 5){
+                await Main_model.create({
+                  key_id:keyword_row.id,
+                  service_id: service,
+                  e_id: created_row.id
+                })
+              }
                 } 
             else { // for updating
               console.log("updating")
