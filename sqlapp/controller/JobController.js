@@ -160,18 +160,21 @@ async function getDetail(service) {
       const header = raw.split(/\r?\n/)[0].split(",");
       results = await csv(raw, { headers: header });
 
-      for await (const value of results){
+      for await (const [i,value] of results.entries()){
+        if(i != 0){        
+        console.log(value)
         console.log(value["product_id"])
         let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
         if (obj_row) {
           await obj_row.update(value)
         }
-      const stop = window.performance.now()
-      console.log(`Time to findAll = ${(stop - start)/1000} seconds`);
       }
+      const stop = window.performance.now()
+      console.log(`Time to getDetail = ${(stop - start)/1000} seconds`);
        
       resolve()
       console.log("succ")
+    }
     }); 
   })
   }
