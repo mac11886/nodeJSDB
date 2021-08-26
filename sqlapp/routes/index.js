@@ -30,8 +30,11 @@ router.post("/job/create", (req,res) => JobController.create(req,res));
 router.post("/job/start", (req,res) => JobController.start(req,res));
 router.post("/job/stop", (req,res) => JobController.stop(req,res));
 
-router.post("/job/facebook", (req,res) => JobController.facebook(req,res));
+router.post("/job/facebook/rework", (req,res) => JobController.facebook(req,res));
 router.post("/job/inside", (req, res) => JobController.getInside(req, res));
+router.post("/job/create/facebook", (req, res) => JobController.facebookCreateJob(req, res));
+router.get("/job/facebook", (req, res) => JobController.getFacebookJob(req, res));
+
 
 
 

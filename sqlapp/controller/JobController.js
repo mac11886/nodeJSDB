@@ -20,6 +20,7 @@ var cron = require('node-cron');
 const { create } = require("lodash");
 // const Eservice_model = require("../model/E_service.model")
 const Keyword_model = require("../model/Keyword.model")
+const Job_FaceBook_model = require("../model/Job_Facebook.model")
 const Main_model = require("../model/Main.model")
 const Job_model = require("../model/Job.model")
 const Service_model = require("../model/Service.model")
@@ -180,6 +181,33 @@ async function getDetail(service) {
   }
 }
 
+JobController.getFacebookJob = async(req,res) => {
+  try{
+    let fb_job = await Job_FaceBook_model.findAll()
+    console.log(fb_job)
+    res.json(fb_job)
+  }
+  catch(error){
+    console.log(error)
+  }
+
+}
+
+JobController.facebookCreateJob = async(req,res) => {
+  try{
+    console.log("facebook create")
+    let all_facebook_page = await (Facebook_page_model.findAll())
+    console.log(all_facebook_page)
+    let created_time = new Date();
+    await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
+    console.log("succ")
+  }
+  catch(error){
+    console.log(error)
+  }
+}
+
+
 JobController.facebook = async(req,res) => {
   try{
     beauty_words = ["สวย","หล่อ","เท่ดูดี","น่ารัก"]
@@ -318,7 +346,7 @@ JobController.create = async(req,res) => {
   try{
     console.log("creating")
     let all_keyword = await Keyword_model.findAll()
-    let all_facebook_page = await (Facebook_page_model.findAll())
+    // let all_facebook_page = await (Facebook_page_model.findAll())
     const services = await Service_model.findAll({where: {
       [Op.not]: [
       {name: "facebook"}
@@ -329,7 +357,7 @@ JobController.create = async(req,res) => {
         await KeywordMatchingWithService(keyword.thai_word,keyword.eng_word,created_time,services) 
     }
 
-    await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
+    // await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
     res.json("succc")
   }catch(error){
     console.log(error,"create job")
@@ -372,8 +400,8 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   return new Promise (async(resolve) => {
     try{
     for (let facebook_page of all_facebook_page){
-      let job = {service: 5,keyword: facebook_page.page_id,status: "waiting",created_time: created_time,page:100}
-      await Job_model.create(job)
+      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time}
+      await Job_FaceBook_model.create(job)
     }
     resolve()
   }catch(error){
