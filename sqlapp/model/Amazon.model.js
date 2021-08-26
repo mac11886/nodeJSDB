@@ -17,6 +17,8 @@ Amazon.init({
     img_src : DataTypes.TEXT,
     url : DataTypes.TEXT,
     rank : DataTypes.CHAR,
+    brand : DataTypes.CHAR,
+    description : DataTypes.TEXT,
 }, { sequelize, modelName: 'amazon', tableName: 'amazon', timestamps: false });
 
 module.exports = Amazon

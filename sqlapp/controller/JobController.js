@@ -71,7 +71,7 @@ JobController.progress = async (req, res) => {
 JobController.get = async (req, res) => {
   try {
     let jobs = await Job_model.findAll();
-    
+
     jobs.forEach((job) => {
 
       // Convert Service
@@ -108,56 +108,77 @@ JobController.get = async (req, res) => {
 
 JobController.getInside = async (req, res) => {
   try {
-    let Obj_model
-    let input_num
     const service = req.query.service
-    res.json(service)
-    if (service == "shopee") {
-      Obj_model = Shopee_model
-      input_num = "9"
-    }
-    if (service == "amazon") {
-      Obj_model = Amazon_model
-      input_num = "10"
-    }
-    const start = window.performance.now()
-    // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
-    rows = await Obj_model.findAll()
-    const stop = window.performance.now()
-    console.log(`Time to findAll = ${(stop - start) / 1000} seconds`);
-
-    const csvWriter = createCsvWriter({
-      path: process.env.INPUT_FILE_CSV,
-      header: [
-        { id: 'product_id', title: 'product_id' },
-        { id: 'url', title: 'url' },
-      ]
-    })
-    await csvWriter.writeRecords(rows)
-
-    console.log("calling python")
-    python = spawn(process.env.PYTHON_PATH, [
-      process.env.SCRAPE_PATH
-    ]);
-    python.stdin.write(input_num);
-    python.stdin.end();
-
-    await python.on("exit", async () => {
-      console.log('on exit')
-      const raw = fs.readFileSync(process.env.FILE, "utf8");
-      const header = raw.split(/\r?\n/)[0].split(",");
-      results = await csv(raw, { headers: header });
-
-      for await (const value of results) {
-        console.log(value["product_id"])
-        let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
-        if (obj_row) {
-          await obj_row.update(value)
-        }
-      }
-      console.log("succ")
-    });
+    await getDetail(service)
   }
+  catch (error) {
+
+  }
+}
+
+async function getDetail(service) {
+  try {
+    return new Promise(async (resolve) => {
+      console.log("geting detail..")
+      const raw = fs.readFileSync(process.env.FILE, "utf8")
+      const header = raw.split(/\r?\n/)[0].split(",");
+      results = (await csv(raw, { headers: header })).map(r => r.product_id); //turn csv file to object
+
+      let Obj_model
+      let input_num
+      if (service == 1) {
+        Obj_model = Shopee_model
+        input_num = "9"
+      }
+      if (service == 2) {
+        Obj_model = Amazon_model
+        input_num = "10"
+      }
+      // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
+      rows = await Obj_model.findAll({ where: { product_id: results } })
+
+      const csvWriter = createCsvWriter({
+        path: process.env.INPUT_FILE_CSV,
+        header: [
+          { id: 'product_id', title: 'product_id' },
+          { id: 'url', title: 'url' },
+        ]
+      })
+      await csvWriter.writeRecords(rows)
+
+      console.log("calling python")
+      const start = window.performance.now()
+      python = spawn(process.env.PYTHON_PATH, [
+        process.env.SCRAPE_PATH
+      ]);
+      python.stdin.write(input_num);
+      python.stdin.end();
+
+      await python.on("exit", async () => {
+        console.log('on exit')
+        const raw = fs.readFileSync(process.env.FILE, "utf8");
+        const header = raw.split(/\r?\n/)[0].split(",");
+        results = await csv(raw, { headers: header });
+
+        for await (const [i, value] of results.entries()) {
+          if (i != 0) {
+            console.log(value)
+            console.log(value["product_id"])
+            let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
+            if (obj_row) {
+              await obj_row.update(value)
+            }
+          }
+          const stop = window.performance.now()
+          console.log(`Time to getDetail = ${(stop - start) / 1000} seconds`);
+
+          resolve()
+          console.log("succ")
+        }
+      });
+    })
+  }
+
   catch (error) {
     console.log(error)
   }
@@ -287,6 +308,9 @@ JobController.run = async (req, res) => {
         job.start_time = new Date()
         await job.save()
         await getData(job.service, job.keyword, job.page, job.id, job, keyword_rows)
+        if (job.service == 1 || job.service == 2) {
+          await getDetail(job.service)
+        }
         job.status = "success"
         job.end_time = new Date()
         job.save()
