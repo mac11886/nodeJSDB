@@ -17,7 +17,7 @@ const { resolve } = require("path");
 const { rejects } = require("assert");
 const Facebook_page = require("../model/Facebook_page");
 var cron = require('node-cron');
-const { create } = require("lodash");
+const { create, result } = require("lodash");
 // const Eservice_model = require("../model/E_service.model")
 const Keyword_model = require("../model/Keyword.model")
 const Job_FaceBook_model = require("../model/Job_Facebook.model")
@@ -319,10 +319,10 @@ JobController.runFacebook = async(req,res) => {
 
 
     let all_page_id = all_job_facebook.map(job => job.page_id)
-    console.log(all_page_id)
+    // console.log(all_page_id)
     let all_page = await Facebook_page_model.findAll({where: {page_id: {[Op.in] : all_page_id}}})
 
-    await queuing(all_job_facebook)
+    await queuing(all_job_facebook,all_page)
 
     // await getData(5,job.page_id,job.amount_post,job.id, all_page)
 
@@ -461,11 +461,12 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   })
 }
 
-function queuing(jobs,keyword_rows=[]){
+function queuing(jobs,keyword_rows=[],page_name=""){
   return new Promise(async(resolve,reject) => {
     try{
       let search_word
       let amount
+      console.log(keyword_rows)
       for await (const job of jobs){
         if(job.service != 5){
           search_word = job.keyword
@@ -474,11 +475,22 @@ function queuing(jobs,keyword_rows=[]){
         else{
           search_word = job.page_id
           amount = job.amount_post
+          let result = keyword_rows.find(row => row.name == job.page_name)
+          if(result.lasted_post_id){
+            lasted_post_id = result.lasted_post_id
+          }
+          else{
+            console.log("lasted is null")
+            lasted_post_id = "no_limit"
+          }
         }
         job.status = "in progress"
         job.start_time = new Date()
         await job.save()
-        await getData(job.service,search_word,amount,job.id,keyword_rows)
+        const start = window.performance.now()
+        await getData(job.service,search_word,amount,job.id,keyword_rows,lasted_post_id)
+        const stop = window.performance.now()
+        console.log(`Time to Getdata = ${(stop - start)/1000} seconds`); 
         if (job.service == 1 || job.service == 2){
           await getDetail(job.service)
         }
@@ -496,22 +508,28 @@ function queuing(jobs,keyword_rows=[]){
 
 
 
-async function getData(service, keyword, page,job_id, all_keywords=[]) {
+async function getData(service, search_word, page,job_id, all_keywords=[],lasted_post_id="") {
 return new Promise(function (resolve, reject) {
   try {
-    fs.writeFile(process.env.INPUT_FILE_TXT , keyword, (err) => {
+    console.log(lasted_post_id)
+    fs.writeFile(process.env.INPUT_FILE_TXT , search_word, (err) => {
       if (err) throw err;
     })
-    console.log(service)
-    let utfKeyword = encodeURI(keyword);
+
+    let utfKeyword = encodeURI(search_word);
     python = spawn(process.env.PYTHON_PATH, [
       process.env.SCRAPE_PATH
     ]);
 
-      console.log(utfKeyword)
+    if(service != 5){
       console.log("sent to python --> ",service,page,utfKeyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
-    
+    }
+    else{
+      console.log("sent to python --> ",service,page,search_word,lasted_post_id)
+      python.stdin.write(`${service}\n` + page + "\n" + search_word + "\n" + lasted_post_id);
+    }
+
     python.stdin.end();
     python.stdout.on("data", function (data) {
       console.log("Pipe data from python script ...");
@@ -525,6 +543,7 @@ return new Promise(function (resolve, reject) {
       const raw = fs.readFileSync(process.env.FILE, "utf8");
       console.log(`child process close all stdio with code ${code}`);
 
+      let result
       let i = 0;
       let pk_id = ""
       let obj_model
@@ -536,11 +555,6 @@ return new Promise(function (resolve, reject) {
 
       if(service != 5){
         keyword_row = all_keywords.find(row => row.thai_word == keyword || row.eng_word == keyword)
-      //   keyword_row = await Keyword_model.findOne({where: {[Op.or]: [
-      //     {thai_word: keyword},
-      //     {eng_word: keyword}
-      //   ]}
-      // })  
       }
 
       if (service == 1) {
@@ -604,8 +618,15 @@ return new Promise(function (resolve, reject) {
               }
               else{
                 created_row = await obj_model.create({...value,job_id})
+                if(service == 5 && i == 1){
+                  console.log("updating facebook page")
+                  let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
+                  if(facebook_page_row){
+                    await facebook_page_row.update({lasted_post_id : value["post_id"]})
+                  }
+                }
               }
-              if (service != 5){
+              if (service != 5){ //facebook not in main
                 await Main_model.create({
                   key_id:keyword_row.id,
                   service_id: service,
@@ -613,8 +634,8 @@ return new Promise(function (resolve, reject) {
                 })
               }
                 } 
-            else { // for updating
-              console.log("updating")
+              else { // for updating
+                console.log("updating")
                   await check.update({...value,job_id})
                   
                   if(service != 5){ //with out facebook cuz facebook not in main
@@ -625,6 +646,18 @@ return new Promise(function (resolve, reject) {
                         service_id : service,
                         e_id: check.id,
                       })
+                    }
+                  }
+                  if(service == 5 && i == 1){ // for facebook update lasted postid on facebook page
+                    console.log("updating facebook page")
+                    let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
+                    console.log(facebook_page_row)
+                    if(facebook_page_row){
+                      console.log("enter if ")
+                      await facebook_page_row.update({lasted_post_id : value["post_id"]})
+                      console.log(facebook_page_row.lasted_post_id)
+                      console.log(value["post_id"])
+                      console.log("updated")
                     }
                   }            
                 }
