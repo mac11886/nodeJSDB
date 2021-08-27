@@ -117,7 +117,7 @@ JobController.getInside = async(req,res) => {
   }
 }
 
-async function getDetail(service) {
+function getDetail(service) {
   try{
   return new Promise (async(resolve) => {
     console.log("geting detail..")
@@ -174,10 +174,10 @@ async function getDetail(service) {
     }
     const stop = window.performance.now()
     console.log(`Time to getDetail = ${(stop - start)/1000} seconds`);
-      
-    resolve()
     console.log("succ")
+    resolve()
     }); 
+    
   })
   }
    
@@ -508,14 +508,9 @@ return new Promise(function (resolve, reject) {
       process.env.SCRAPE_PATH
     ]);
 
-    if(service != 8){
+      console.log(utfKeyword)
       console.log("sent to python --> ",service,page,utfKeyword)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
-    }
-    else{
-      console.log("sent to python --> ",service,page,keyword)
-      python.stdin.write(`${service}\n` + page + "\n" + keyword);
-    }
     
     python.stdin.end();
     python.stdout.on("data", function (data) {
