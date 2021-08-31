@@ -202,7 +202,7 @@ JobController.facebookCreateJob = async(req,res) => {
 }
 
 
-JobController.facebook = async(req,res) => {
+JobController.facebook = async(req,res) => { //this funcc for read facebook in db and set words
   try{
     beauty_words = ["สวย","หล่อ","เท่ดูดี","น่ารัก"]
     food_words = ["อาหาร","เครื่องดืม","ของกิน","ขนม","อร่อย"]
