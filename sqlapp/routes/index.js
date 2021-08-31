@@ -1,8 +1,6 @@
 var express = require("express");
 var router = express.Router();
 
-const IndexController = require("../controller/IndexController");
-const TestController = require("../controller/TestController");
 const KeywordController = require("../controller/KeywordController");
 const FacebookPageController = require("../controller/FacebookPageController");
 const JobController = require("../controller/JobController");

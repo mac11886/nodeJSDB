@@ -1,17 +1,10 @@
-const Keyword = require("../model/Keyword");
-const Main = require("../model/Main");
-const Service = require("../model/Service");
-const Model = require("../model/Model");
+
 const l = require('lodash');
-const Facebook = require("../model/Facebook");
 const Keyword_model = require("../model/Keyword.model")
 const Service_model = require("../model/Service.model")
 const Main_model = require("../model/Main.model")
 const Facebook_model = require("../model/Facebook.model")
-const Shopee_model = require("../model/Shopee.model")
-const Amazon_model = require("../model/Amazon.model")
-const Pantip_model = require("../model/Pantip.model")
-const Jd_model = require("../model/Jd.model")
+
 
 const {Op, where} = require("sequelize")
 
