@@ -74,7 +74,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-let port = 3001
+let port = 3000
 app.listen(port, () => {
   console.log(`Server is running on port: ${process.env.PORT || port}`);
   

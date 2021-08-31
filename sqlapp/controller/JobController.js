@@ -1,21 +1,11 @@
-const Job = require("../model/Job");
 const fs = require("fs");
-const utf8 = require("utf8");
 const csv = require("neat-csv");
 const { spawn } = require("child_process");
-const Amazon = require("../model/Amazon");
-const Shopee = require("../model/Shopee");
 const Shopee_model = require("../model/Shopee.model");
 const Amazon_model = require("../model/Amazon.model");
 const Facebook_model = require("../model/Facebook.model");
 const Jd_model = require("../model/Jd.model");
 const Pantip_model = require("../model/Pantip.model");
-const Pantip = require("../model/Pantip");
-const Jd = require("../model/Jd");
-const Facebook = require("../model/Facebook");
-const { resolve } = require("path");
-const { rejects } = require("assert");
-const Facebook_page = require("../model/Facebook_page");
 var cron = require('node-cron');
 const { create, result } = require("lodash");
 // const Eservice_model = require("../model/E_service.model")
@@ -117,7 +107,7 @@ JobController.getInside = async(req,res) => {
   }
 }
 
-function getDetail(service) {
+async function getDetail(service) {
   try{
   return new Promise (async(resolve) => {
     console.log("geting detail..")
@@ -155,7 +145,7 @@ function getDetail(service) {
     python.stdin.write(input_num);
     python.stdin.end();
     
-    await python.on("exit", async () => {
+    python.on("exit", async () => {
       console.log('on exit')
       const raw = fs.readFileSync(process.env.FILE, "utf8");
       const header = raw.split(/\r?\n/)[0].split(",");
@@ -163,7 +153,6 @@ function getDetail(service) {
 
       for await (const [i,value] of results.entries()){
         if(i != 0){        
-        console.log(value)
         console.log(value["product_id"])
         let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
         if (obj_row) {
@@ -466,6 +455,7 @@ function queuing(jobs,keyword_rows=[],page_name=""){
     try{
       let search_word
       let amount
+      let lasted_post_id = ""
       console.log(keyword_rows)
       for await (const job of jobs){
         if(job.service != 5){
@@ -489,11 +479,13 @@ function queuing(jobs,keyword_rows=[],page_name=""){
         await job.save()
         const start = window.performance.now()
         await getData(job.service,search_word,amount,job.id,keyword_rows,lasted_post_id)
-        const stop = window.performance.now()
-        console.log(`Time to Getdata = ${(stop - start)/1000} seconds`); 
+
         if (job.service == 1 || job.service == 2){
           await getDetail(job.service)
         }
+
+        const stop = window.performance.now()
+        console.log(`Time to process ====> ${(stop - start)/1000} seconds`); 
         job.status = "success"
         job.end_time = new Date()
         job.save()
@@ -508,7 +500,7 @@ function queuing(jobs,keyword_rows=[],page_name=""){
 
 
 
-async function getData(service, search_word, page,job_id, all_keywords=[],lasted_post_id="") {
+async function getData(service, search_word, page,job_id, all_keywords=[],lasted_post_id) {
 return new Promise(function (resolve, reject) {
   try {
     console.log(lasted_post_id)
@@ -522,7 +514,7 @@ return new Promise(function (resolve, reject) {
     ]);
 
     if(service != 5){
-      console.log("sent to python --> ",service,page,utfKeyword)
+      console.log("sent to python --> ",service,page,search_word)
       python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
     }
     else{
@@ -554,7 +546,7 @@ return new Promise(function (resolve, reject) {
       }
 
       if(service != 5){
-        keyword_row = all_keywords.find(row => row.thai_word == keyword || row.eng_word == keyword)
+        keyword_row = all_keywords.find(row => row.thai_word == search_word || row.eng_word == search_word)
       }
 
       if (service == 1) {
