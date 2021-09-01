@@ -440,7 +440,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   return new Promise (async(resolve) => {
     try{
     for (let facebook_page of all_facebook_page){
-      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time,status:"waiting"}
+      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time,status:"waiting"} //amount_page == 100 (facebook 10 post per page)
       await Job_FaceBook_model.create(job)
     }
     resolve()
@@ -450,7 +450,7 @@ function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
   })
 }
 
-function queuing(jobs,keyword_rows=[],page_name=""){
+function queuing(jobs,keyword_rows=[]){
   return new Promise(async(resolve,reject) => {
     try{
       let search_word
@@ -610,7 +610,7 @@ return new Promise(function (resolve, reject) {
               }
               else{
                 created_row = await obj_model.create({...value,job_id})
-                if(service == 5 && i == 1){
+                if(service == 5 && i == 2){ //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
                   console.log("updating facebook page")
                   let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
                   if(facebook_page_row){
@@ -640,7 +640,7 @@ return new Promise(function (resolve, reject) {
                       })
                     }
                   }
-                  if(service == 5 && i == 1){ // for facebook update lasted postid on facebook page
+                  if(service == 5 && i == 2){ //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
                     console.log("updating facebook page")
                     let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
                     console.log(facebook_page_row)
