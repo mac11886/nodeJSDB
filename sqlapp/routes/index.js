@@ -4,7 +4,6 @@ var router = express.Router();
 const KeywordController = require("../controller/KeywordController");
 const FacebookPageController = require("../controller/FacebookPageController");
 const JobController = require("../controller/JobController");
-const FacebookController = require("../controller/FacebookController")
 let results = {};
 /* GET home page. */
 
