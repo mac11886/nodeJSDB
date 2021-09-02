@@ -1,4 +1,3 @@
-
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const { getSequelize } = require("../db")
 
@@ -36,4 +35,3 @@ Facebook.init({
 }, { sequelize, modelName: 'facebook', tableName: 'facebook', timestamps: false });
 
 module.exports = Facebook
-

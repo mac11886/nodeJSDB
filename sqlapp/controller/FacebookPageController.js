@@ -1,6 +1,3 @@
-const Facebook_page = require("../model/Facebook_page");
-const { getMysqlConnect } = require("../db")
-const Model = require("../model/Model");
 const Facebook_page_model = require("../model/Facebook_page.model")
 FacebookPageController = {}
 
