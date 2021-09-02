@@ -4,7 +4,7 @@ var router = express.Router();
 const KeywordController = require("../controller/KeywordController");
 const FacebookPageController = require("../controller/FacebookPageController");
 const JobController = require("../controller/JobController");
-
+const FacebookController = require("../controller/FacebookController")
 let results = {};
 /* GET home page. */
 
@@ -13,7 +13,8 @@ router.get("/keyword", (req,res) => KeywordController.get(req,res)); //get all k
 router.get("/fillterkeyword", (req,res) => KeywordController.fillter(req,res));
 router.get("/getKeywordByService", (req,res) => KeywordController.getKeywordByService(req,res));
 router.post("/createkeyword", (req,res) => KeywordController.post(req,res));
-router.post("/deletekeyword", (req,res) => KeywordController.delete(req,res));
+router.post("/deletekeyword", (req, res) => KeywordController.delete(req, res));
+router.get("/add/all/keyword", (req,res) => KeywordController.addAll(req,res));
 
 router.get("/facebook_page", (req,res) => FacebookPageController.get(req,res)); //get facebook page
 router.post("/facebook_page/post", (req,res) => FacebookPageController.post(req,res));

@@ -124,7 +124,6 @@ function service_loop (keyword,id,services){
 
 
 KeywordController.getKeywordByService = async(req,res) => {
-
     const service = req.query.service
     const service_id = req.query.service_id
     const id = req.query.id
@@ -210,6 +209,32 @@ KeywordController.delete = async (req, res) => {
     }
     console.log("del keyword succ")
     res.json("del suc keyword")
+
+}
+
+KeywordController.addAll = async (req, res) => {
+    try{
+        const raw = fs.readFileSync(process.env.KEYWORD_FILE,"utf8");
+        const header = raw.split(/\r?\n/)[0].split(",");
+        console.log(raw)
+        const result = await csv(raw, { headers: header });
+        console.log(result[0])
+        // delete result[0]
+
+       
+        
+        for (let value of result) {
+            if (value.thai_word != 'thai_word') {
+                await new Keyword().check(value.thai_word,value.eng_word);
+            }
+            
+        }
+        // // console.log(result)
+        res.json(result);
+        
+    }catch(error){
+        console.log("error add all",error)
+    }
 
 }
 

@@ -21,8 +21,8 @@ const { JSDOM, VirtualConsole } = require("jsdom")
 const { window } = new JSDOM()
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 // const fs = require("fs")
-
-const {Op} = require("sequelize")
+const dotenv = require("dotenv")
+const { Op } = require("sequelize")
 
 
 
@@ -31,190 +31,190 @@ JobController = {}
 var create_task = cron.schedule('0 54 10 * * *', () => {
   console.log('create a job');
   // JobController.create()
-  });
+});
 
 var run_task = cron.schedule('0 55 10 * * *', () => {
-   console.log('Running a job');
-    // JobController.run()
- });
+  console.log('Running a job');
+  // JobController.run()
+});
 
 
-JobController.start = async(req,res) => {
- create_task.start();
- run_task.start();
- res.json("started")
+JobController.start = async (req, res) => {
+  create_task.start();
+  run_task.start();
+  res.json("started")
 }
 
-JobController.stop = async(req,res) =>{
+JobController.stop = async (req, res) => {
   create_task.stop();
   run_task.stop();
   res.json("stoped")
 }
 
-JobController.progress = async(req,res) => {
+JobController.progress = async (req, res) => {
   let count_all_job = await Job_model.count()
-  let count_success_job = await Job_model.count({where: {status: "success"}})
-  let current_progress = {count_all_job: count_all_job,count_success_job:count_success_job}
+  let count_success_job = await Job_model.count({ where: { status: "success" } })
+  let current_progress = { count_all_job: count_all_job, count_success_job: count_success_job }
 
-  res.json({current_progress})
+  res.json({ current_progress })
 }
 
 JobController.get = async (req, res) => {
   try {
-      let jobs = await Job_model.findAll();
+    let jobs = await Job_model.findAll();
 
-      jobs.forEach((job) => {
-          
-          // Convert Service
-          switch (job.service) {
-              case "1":
-                  job.service = "shopee";
-                  break;
-              case "2":
-                  job.service = "amazon";
-                  break;
-              case "3":
-                  job.service = "pantip";
-                  break;
-              case "4":
-                  job.service = "jd";
-                  break;
-              case "5":
-                  job.service = "facebook"
-                  break;
-              case "7":
-                  job.service = "science direct";
-                  break;
-              case "8":
-                  job.service = "thaijo";                
-          }
-      });
-      res.json({ jobs})
+    jobs.forEach((job) => {
+
+      // Convert Service
+      switch (job.service) {
+        case "1":
+          job.service = "shopee";
+          break;
+        case "2":
+          job.service = "amazon";
+          break;
+        case "3":
+          job.service = "pantip";
+          break;
+        case "4":
+          job.service = "jd";
+          break;
+        case "5":
+          job.service = "facebook"
+          break;
+        case "7":
+          job.service = "science direct";
+          break;
+        case "8":
+          job.service = "thaijo";
+      }
+    });
+    res.json({ jobs })
 
   }
   catch (err) {
-      console.log(err)
+    console.log(err)
   }
 }
 
-JobController.getInside = async(req,res) => {
-  try{
+JobController.getInside = async (req, res) => {
+  try {
     const service = req.query.service
     await getDetail(service)
   }
-  catch (error){
+  catch (error) {
 
   }
 }
 
 async function getDetail(service) {
-  try{
-  return new Promise (async(resolve) => {
-    console.log("geting detail..")
-    const raw = fs.readFileSync(process.env.FILE, "utf8")
-    const header = raw.split(/\r?\n/)[0].split(",");
-    results = (await csv(raw, { headers: header })).map(r => r.product_id); //turn csv file to object
-    
-    let Obj_model
-    let input_num
-    if(service == 1){
-      Obj_model =  Shopee_model
-      input_num = "9"    
-    }
-    if(service == 2){
-      Obj_model = Amazon_model
-      input_num = "10"
-    }
-    // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
-    rows = await Obj_model.findAll({where:{product_id: results}})
-     
-    const csvWriter = createCsvWriter({
-      path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
-      header: [
-      {id: 'product_id', title: 'product_id'},
-      {id: 'url', title: 'url'},
-      ]
-    })
-    await csvWriter.writeRecords(rows)
-
-    console.log("calling python")
-    const start = window.performance.now()
-    python = spawn(process.env.PYTHON_PATH, [
-      process.env.SCRAPE_PATH
-    ]);
-    python.stdin.write(input_num);
-    python.stdin.end();
-    
-    python.on("exit", async () => {
-      console.log('on exit')
-      const raw = fs.readFileSync(process.env.FILE, "utf8");
+  try {
+    return new Promise(async (resolve) => {
+      console.log("geting detail..")
+      const raw = fs.readFileSync(process.env.FILE, "utf8")
       const header = raw.split(/\r?\n/)[0].split(",");
-      results = await csv(raw, { headers: header });
+      results = (await csv(raw, { headers: header })).map(r => r.product_id); //turn csv file to object
 
-      for await (const [i,value] of results.entries()){
-        if(i != 0){        
-        console.log(value["product_id"])
-        let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
-        if (obj_row) {
-          await obj_row.update(value)
-        }
+      let Obj_model
+      let input_num
+      if (service == 1) {
+        Obj_model = Shopee_model
+        input_num = "9"
       }
-      
-    }
-    const stop = window.performance.now()
-    console.log(`Time to getDetail = ${(stop - start)/1000} seconds`);
-    console.log("succ")
-    resolve()
-    }); 
-    
-  })
+      if (service == 2) {
+        Obj_model = Amazon_model
+        input_num = "10"
+      }
+      // rows = await Obj_model.findAll({where:{product_id : 5049388344}})
+      rows = await Obj_model.findAll({ where: { product_id: results } })
+
+      const csvWriter = createCsvWriter({
+        path: '/Users/mcmxcix/nodeJSDB/sqlapp/input_file/input_file.csv',
+        header: [
+          { id: 'product_id', title: 'product_id' },
+          { id: 'url', title: 'url' },
+        ]
+      })
+      await csvWriter.writeRecords(rows)
+
+      console.log("calling python")
+      const start = window.performance.now()
+      python = spawn(process.env.PYTHON_PATH, [
+        process.env.SCRAPE_PATH
+      ]);
+      python.stdin.write(input_num);
+      python.stdin.end();
+
+      python.on("exit", async () => {
+        console.log('on exit')
+        const raw = fs.readFileSync(process.env.FILE, "utf8");
+        const header = raw.split(/\r?\n/)[0].split(",");
+        results = await csv(raw, { headers: header });
+
+        for await (const [i, value] of results.entries()) {
+          if (i != 0) {
+            console.log(value["product_id"])
+            let obj_row = await Obj_model.findOne({ where: { product_id: value["product_id"] } })
+            if (obj_row) {
+              await obj_row.update(value)
+            }
+          }
+
+        }
+        const stop = window.performance.now()
+        console.log(`Time to getDetail = ${(stop - start) / 1000} seconds`);
+        console.log("succ")
+        resolve()
+      });
+
+    })
   }
-   
-  catch(error){
+
+  catch (error) {
     console.log(error)
   }
 }
 
-JobController.getFacebookJob = async(req,res) => {
-  try{
+JobController.getFacebookJob = async (req, res) => {
+  try {
     let fb_job = await Job_FaceBook_model.findAll()
     console.log(fb_job)
     res.json(fb_job)
   }
-  catch(error){
+  catch (error) {
     console.log(error)
   }
 
 }
 
-JobController.facebookCreateJob = async(req,res) => {
-  try{
+JobController.facebookCreateJob = async (req, res) => {
+  try {
     console.log("facebook create")
     let all_facebook_page = await (Facebook_page_model.findAll())
     console.log(all_facebook_page)
     let created_time = new Date();
-    await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
+    await FacebookPageMatchingWithFacebook(all_facebook_page, created_time)
     console.log("succ")
   }
-  catch(error){
+  catch (error) {
     console.log(error)
   }
 }
 
 
-JobController.facebook = async(req,res) => { //this funcc for read facebook in db and set words
-  try{
-    beauty_words = ["สวย","หล่อ","เท่ดูดี","น่ารัก"]
-    food_words = ["อาหาร","เครื่องดืม","ของกิน","ขนม","อร่อย"]
-    health_words = ["สุขภาพ","แข็งแรง","บำรุง","อ่อนเยาว์","ฉลาด"]
-    spa_words = ["หอม","สบาย","นวด","สปา","ผ่อนคลาย","อโรมา"]
-    travel_words = ["ท่องเที่ยว","รื่นเริง","เดินทาง","ที่พัก","โรงแรม","พักผ่อน"]
+JobController.facebook = async (req, res) => { //this funcc for read facebook in db and set words
+  try {
+    beauty_words = ["สวย", "หล่อ", "เท่ดูดี", "น่ารัก"]
+    food_words = ["อาหาร", "เครื่องดืม", "ของกิน", "ขนม", "อร่อย"]
+    health_words = ["สุขภาพ", "แข็งแรง", "บำรุง", "อ่อนเยาว์", "ฉลาด"]
+    spa_words = ["หอม", "สบาย", "นวด", "สปา", "ผ่อนคลาย", "อโรมา"]
+    travel_words = ["ท่องเที่ยว", "รื่นเริง", "เดินทาง", "ที่พัก", "โรงแรม", "พักผ่อน"]
 
     console.log("hello")
     facebooks = await Facebook_model.findAll()
 
     // text = "สวย---------สวย--------สวย-----อาหาร"
-    for (let facebook of facebooks){
+    for (let facebook of facebooks) {
       console.log("processing")
       let text = facebook.post_text
       let beauty_count = 0
@@ -228,90 +228,93 @@ JobController.facebook = async(req,res) => { //this funcc for read facebook in d
       let spa_array = []
       let travel_array = []
 
-      for await(word of beauty_words){
+      for await (word of beauty_words) {
         // console.log(word)
         beauty_count += text.split(word).length - 1
 
-        if (text.split(word).length - 1 > 0){
+        if (text.split(word).length - 1 > 0) {
           beauty_array.push(word)
-        }  
+        }
         // console.log("count",beauty_count)
       }
-      for await(word of food_words){
+      for await (word of food_words) {
         food_count += text.split(word).length - 1
-        
-        if (text.split(word).length - 1 > 0){
+
+        if (text.split(word).length - 1 > 0) {
           food_array.push(word)
-        } 
+        }
         // console.log("fff",food_count)
       }
-      for await(word of health_words){
+      for await (word of health_words) {
         health_count += text.split(word).length - 1
-        
-        if (text.split(word).length - 1 > 0){
+
+        if (text.split(word).length - 1 > 0) {
           health_arrray.push(word)
-        } 
+        }
       }
-      for await(word of spa_words){
+      for await (word of spa_words) {
         spa_count += text.split(word).length - 1
-        
-        if (text.split(word).length - 1 > 0){
+
+        if (text.split(word).length - 1 > 0) {
           spa_array.push(word)
-        } 
+        }
       }
-      for await(word of travel_words){
+      for await (word of travel_words) {
         travel_count += text.split(word).length - 1
-        
-        if (text.split(word).length - 1 > 0){
+
+        if (text.split(word).length - 1 > 0) {
           travel_array.push(word)
-        } 
+        }
       }
-      
+
       console.log("updating...")
       // console.log(food_count)
       console.log(facebook.id)
-      await facebook.update({spa_word_count: spa_count,
+      await facebook.update({
+        spa_word_count: spa_count,
         travel_word_count: travel_count,
-        food_word_count:food_count,
+        food_word_count: food_count,
         health_word_count: health_count,
-        beauty_word_count:beauty_count,
+        beauty_word_count: beauty_count,
         spa_word: spa_array.toString(),
-        travel_word : travel_array.toString(),
-        food_word : food_array.toString(),
-        health_word : health_arrray.toString(),
-        beauty_word : beauty_array.toString()
-        
+        travel_word: travel_array.toString(),
+        food_word: food_array.toString(),
+        health_word: health_arrray.toString(),
+        beauty_word: beauty_array.toString()
+
       })
-      
-      
+
+
       // console.log(facebook.user_name)
     }
     // console.log(facebook_row)
     // res.json(facebooks)
   }
-  catch(error){
+  catch (error) {
     console.log(error)
   }
 }
 
-JobController.runFacebook = async(req,res) => {
-  try{
-    let all_job_facebook = await Job_FaceBook_model.findAll({where: {
-      [Op.or]: [
-        {status: "waiting"},
-        {status: "in progress"}
-      ]
-    }})
-    for (let job of all_job_facebook){
+JobController.runFacebook = async (req, res) => {
+  try {
+    let all_job_facebook = await Job_FaceBook_model.findAll({
+      where: {
+        [Op.or]: [
+          { status: "waiting" },
+          { status: "in progress" }
+        ]
+      }
+    })
+    for (let job of all_job_facebook) {
       job.service = 5
     }
 
 
     let all_page_id = all_job_facebook.map(job => job.page_id)
     // console.log(all_page_id)
-    let all_page = await Facebook_page_model.findAll({where: {page_id: {[Op.in] : all_page_id}}})
+    let all_page = await Facebook_page_model.findAll({ where: { page_id: { [Op.in]: all_page_id } } })
 
-    await queuing(all_job_facebook,all_page)
+    await queuing(all_job_facebook, all_page)
 
     // await getData(5,job.page_id,job.amount_post,job.id, all_page)
 
@@ -331,34 +334,38 @@ JobController.runFacebook = async(req,res) => {
     //   } 
     // }
 
-  
+
 
 
   }
-  catch(error){
+  catch (error) {
     console.log(error)
   }
 }
 
 
-JobController.run = async(req,res) => {
-  try{
-    let all_jobs = await Job_model.findAll({where: {
-      [Op.or]: [
-        {status: "waiting"},
-        {status: "in progress"}
-      ]
-    }})
+JobController.run = async (req, res) => {
+  try {
+    let all_jobs = await Job_model.findAll({
+      where: {
+        [Op.or]: [
+          { status: "waiting" },
+          { status: "in progress" }
+        ]
+      }
+    })
 
     let all_keyword = all_jobs.map(job => job.keyword)
-    let keyword_rows = await Keyword_model.findAll({where:  {
-      [Op.or]: [
-        {thai_word: {[Op.in] : all_keyword}},
-        {eng_word: {[Op.in] : all_keyword}}
-      ]}
-    })  
+    let keyword_rows = await Keyword_model.findAll({
+      where: {
+        [Op.or]: [
+          { thai_word: { [Op.in]: all_keyword } },
+          { eng_word: { [Op.in]: all_keyword } }
+        ]
+      }
+    })
 
-    await queuing(all_jobs,keyword_rows)
+    await queuing(all_jobs, keyword_rows)
 
     // for await (const job of all_jobs){
     //   if (job.status == "waiting" || job.status == "in progress" ) {
@@ -373,103 +380,106 @@ JobController.run = async(req,res) => {
     //     job.status = "success"
     //     job.end_time = new Date()
     //     job.save()
-    //   } 
+    //   }
     // }
     console.log("doneeeeeeeeeeeeee")
-  }catch(error){
-    console.log("error",error)
+  } catch (error) {
+    console.log("error", error)
   }
- 
+
 };
 
-JobController.create = async(req,res) => {
-  try{
+JobController.create = async (req, res) => {
+  try {
     console.log("creating")
     let all_keyword = await Keyword_model.findAll()
     // let all_facebook_page = await (Facebook_page_model.findAll())
-    const services = await Service_model.findAll({where: {
-      [Op.not]: [
-      {name: "facebook"}
-    ]}})
+    const services = await Service_model.findAll({
+      where: {
+        [Op.not]: [
+          { name: "facebook" }
+        ]
+      }
+    })
     let created_time = new Date();
 
-    for (const keyword of all_keyword){
-        await KeywordMatchingWithService(keyword.thai_word,keyword.eng_word,created_time,services) 
+    for (const keyword of all_keyword) {
+      await KeywordMatchingWithService(keyword.thai_word, keyword.eng_word, created_time, services)
     }
 
     // await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
     res.json("succc")
-  }catch(error){
-    console.log(error,"create job")
+  } catch (error) {
+    console.log(error, "create job")
   }
 
 };
 
-function KeywordMatchingWithService(thai_word,eng_word,created_time,services){
+function KeywordMatchingWithService(thai_word, eng_word, created_time, services) {
   //add all keyword matching with service without facebook
-    return new Promise (async(resolve) =>{
-    try{
-    let page = 5 //----------->> actually is 100 <<----------------
-    
-    for (let service of services){
-        if(service.name === "pantip" || service.name === "science direct" || service.name === "thaijo"){
+  return new Promise(async (resolve) => {
+    try {
+      let page = 5 //----------->> actually is 100 <<----------------
+
+      for (let service of services) {
+        if (service.name === "pantip" || service.name === "science direct" || service.name === "thaijo") {
           page = 1000
         }
 
-        if(service.name != "amazon" && service.name != "science direct"){
-          let job_thai = {service: service.id,keyword: thai_word,status: "waiting",created_time: created_time,page: page}
+        if (service.name != "amazon" && service.name != "science direct") {
+          let job_thai = { service: service.id, keyword: thai_word, status: "waiting", created_time: created_time, page: page }
           await Job_model.create(job_thai)
         }
 
-        if(service.name != "thaijo"){
-          let job_eng = {service: service.id,keyword: eng_word,status: "waiting",created_time: created_time,page: page}
+        if (service.name != "thaijo") {
+          let job_eng = { service: service.id, keyword: eng_word, status: "waiting", created_time: created_time, page: page }
           await Job_model.create(job_eng)
           page = 5
-          }
         }
-        
-        resolve()    
-      }catch(error){
-        console.log(error,"matching keyword")
       }
-    })
-}
 
-function FacebookPageMatchingWithFacebook(all_facebook_page,created_time){
-  //add all facebook page matching facebook only
-  return new Promise (async(resolve) => {
-    try{
-    for (let facebook_page of all_facebook_page){
-      let job = {page_name:facebook_page.name,page_id:facebook_page.page_id,amount_post:100,created_time:created_time,status:"waiting"} //amount_page == 100 (facebook 10 post per page)
-      await Job_FaceBook_model.create(job)
+      resolve()
+    } catch (error) {
+      console.log(error, "matching keyword")
     }
-    resolve()
-  }catch(error){
-    console.log(error,"matching keyword")
-  }
   })
 }
 
-function queuing(jobs,keyword_rows=[]){
-  return new Promise(async(resolve,reject) => {
-    try{
+function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
+  //add all facebook page matching facebook only
+  return new Promise(async (resolve) => {
+    try {
+      for (let facebook_page of all_facebook_page) {
+        let job = { page_name: facebook_page.name, page_id: facebook_page.page_id, amount_post: 100, created_time: created_time, status: "waiting" } //amount_page == 100 (facebook 10 post per page)
+        await Job_FaceBook_model.create(job)
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }
+  })
+}
+
+function queuing(jobs, keyword_rows = []) {
+  return new Promise(async (resolve, reject) => {
+    try {
       let search_word
       let amount
       let lasted_post_id = ""
       console.log(keyword_rows)
-      for await (const job of jobs){
-        if(job.service != 5){
+      for await (const job of jobs) {
+        if (job.service != 5) {
           search_word = job.keyword
           amount = job.page
         }
-        else{
+        else {
           search_word = job.page_id
           amount = job.amount_post
           let result = keyword_rows.find(row => row.name == job.page_name)
-          if(result.lasted_post_id){
+          if (result.lasted_post_id) {
             lasted_post_id = result.lasted_post_id
           }
-          else{
+          else {
             console.log("lasted is null")
             lasted_post_id = "no_limit"
           }
@@ -478,21 +488,21 @@ function queuing(jobs,keyword_rows=[]){
         job.start_time = new Date()
         await job.save()
         const start = window.performance.now()
-        await getData(job.service,search_word,amount,job.id,keyword_rows,lasted_post_id)
+        await getData(job.service, search_word, amount, job.id, keyword_rows, lasted_post_id)
 
-        if (job.service == 1 || job.service == 2){
+        if (job.service == 1 || job.service == 2) {
           await getDetail(job.service)
         }
 
         const stop = window.performance.now()
-        console.log(`Time to process ====> ${(stop - start)/1000} seconds`); 
+        console.log(`Time to process ====> ${(stop - start) / 1000} seconds`);
         job.status = "success"
         job.end_time = new Date()
         job.save()
       }
       resolve()
     }
-    catch(error){
+    catch (error) {
       console.log(error)
     }
   })
@@ -500,172 +510,170 @@ function queuing(jobs,keyword_rows=[]){
 
 
 
-async function getData(service, search_word, page,job_id, all_keywords=[],lasted_post_id) {
-return new Promise(function (resolve, reject) {
-  try {
-    console.log(lasted_post_id)
-    fs.writeFile(process.env.INPUT_FILE_TXT , search_word, (err) => {
-      if (err) throw err;
-    })
+async function getData(service, search_word, page, job_id, all_keywords = [], lasted_post_id) {
+  return new Promise(function (resolve, reject) {
+    try {
+      console.log(lasted_post_id)
+      fs.writeFile(process.env.INPUT_FILE_TXT, search_word, (err) => {
+        if (err) throw err;
+      })
 
-    let utfKeyword = encodeURI(search_word);
-    python = spawn(process.env.PYTHON_PATH, [
-      process.env.SCRAPE_PATH
-    ]);
+      let utfKeyword = encodeURI(search_word);
+      python = spawn(process.env.PYTHON_PATH, [
+        process.env.SCRAPE_PATH
+      ]);
 
-    if(service != 5){
-      console.log("sent to python --> ",service,page,search_word)
-      python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
-    }
-    else{
-      console.log("sent to python --> ",service,page,search_word,lasted_post_id)
-      python.stdin.write(`${service}\n` + page + "\n" + search_word + "\n" + lasted_post_id);
-    }
-
-    python.stdin.end();
-    python.stdout.on("data", function (data) {
-      console.log("Pipe data from python script ...");
-      dataToSend = data.toString();
-      console.log(dataToSend);
-    });
-
-    // in close event we are sure that stream from child process is closed
-    python.on("exit", async (code) => {
-      console.log('on exit')
-      const raw = fs.readFileSync(process.env.FILE, "utf8");
-      console.log(`child process close all stdio with code ${code}`);
-
-      let result
-      let i = 0;
-      let pk_id = ""
-      let obj_model
-      let keyword_row = {
-        id: null,
-        thai_word: null,
-        eng_word: null
+      if (service != 5) {
+        console.log("sent to python --> ", service, page, search_word)
+        python.stdin.write(`${service}\n` + page + "\n" + utfKeyword);
+      }
+      else {
+        console.log("sent to python --> ", service, page, search_word, lasted_post_id)
+        python.stdin.write(`${service}\n` + page + "\n" + search_word + "\n" + lasted_post_id);
       }
 
-      if(service != 5){
-        keyword_row = all_keywords.find(row => row.thai_word == search_word || row.eng_word == search_word)
-      }
+      python.stdin.end();
+      python.stdout.on("data", function (data) {
+        console.log("Pipe data from python script ...");
+        dataToSend = data.toString();
+        console.log(dataToSend);
+      });
 
-      if (service == 1) {
-        obj_model = Shopee_model;
-        pk_id = "product_id"
-      }
-      else if (service == 2) {
-        obj_model = Amazon_model;
-        pk_id = "product_id"
-      }
-      else if (service == 3) {
-        obj_model = Pantip_model;
-        pk_id="post_id"
-      }
-      else if (service == 4) {
-        obj_model = Jd_model;
-        pk_id = "product_id"
-      }
-      else if (service == 5) {
-        obj_model = Facebook_model;
-        pk_id="post_id"
-      }
-      else if (service == 7) {
-        obj_model = ScienceDirect_model;
-        pk_id="keyword_id"
-      }
-      else if (service == 8) {
-        obj_model = Thaijo_model;
-        pk_id="issue_id"
-      }
+      // in close event we are sure that stream from child process is closed
+      python.on("exit", async (code) => {
+        console.log('on exit')
+        const raw = fs.readFileSync(process.env.FILE, "utf8");
+        console.log(`child process close all stdio with code ${code}`);
 
-      const header = raw.split(/\r?\n/)[0].split(",");
-      try {
-        result = await csv(raw, { headers: header });
-      }
-      catch (err) {
-        console.log(err, "error result")
-        return;
-      }
-      // products
-      for await (const value of result) {
-        delete value["num"];
+        let result
+        let i = 0;
+        let pk_id = ""
+        let obj_model
+        let keyword_row = {
+          id: null,
+          thai_word: null,
+          eng_word: null
+        }
+
+        if (service != 5) {
+          keyword_row = all_keywords.find(row => row.thai_word == search_word || row.eng_word == search_word)
+        }
+
+        if (service == 1) {
+          obj_model = Shopee_model;
+          pk_id = "product_id"
+        }
+        else if (service == 2) {
+          obj_model = Amazon_model;
+          pk_id = "product_id"
+        }
+        else if (service == 3) {
+          obj_model = Pantip_model;
+          pk_id = "post_id"
+        }
+        else if (service == 4) {
+          obj_model = Jd_model;
+          pk_id = "product_id"
+        }
+        else if (service == 5) {
+          obj_model = Facebook_model;
+          pk_id = "post_id"
+        }
+        else if (service == 7) {
+          obj_model = ScienceDirect_model;
+          pk_id = "keyword_id"
+        }
+        else if (service == 8) {
+          obj_model = Thaijo_model;
+          pk_id = "issue_id"
+        }
+
+        const header = raw.split(/\r?\n/)[0].split(",");
+        try {
+          result = await csv(raw, { headers: header });
+        }
+        catch (err) {
+          console.log(err, "error result")
+          return;
+        }
+        // products
+        for await (const value of result) {
+          delete value["num"];
           if (i >= 1) { //not read header
-            if( service != 7){ //for service ecom
+            if (service != 7) { //for service ecom
               console.log("checking")
               const start = window.performance.now()
-              check = await obj_model.findOne({where: {[pk_id]: value[pk_id]}})
+              check = await obj_model.findOne({ where: { [pk_id]: value[pk_id] } })
               const stop = window.performance.now()
-              console.log(`Time to checking = ${(stop - start)/1000} seconds`);                                 
+              console.log(`Time to checking = ${(stop - start) / 1000} seconds`);
             }
-            else{ //when service is sci direct
+            else { //when service is sci direct
               console.log("checking")
               // console.log(keyword_row.id)
-              check = await obj_model.findOne({where: {[pk_id]: keyword_row.id,year:value["year"]}})
+              check = await obj_model.findOne({ where: { [pk_id]: keyword_row.id, year: value["year"] } })
             }
 
             if (!check) { //for saving
               console.log("saving")
-              if(service == 7){
-                created_row = await obj_model.create({...value,job_id,keyword_id: keyword_row.id})
+              if (service == 7) {
+                created_row = await obj_model.create({ ...value, job_id, keyword_id: keyword_row.id })
               }
-              else{
-                created_row = await obj_model.create({...value,job_id})
-                if(service == 5 && i == 2){ //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
+              else {
+                created_row = await obj_model.create({ ...value, job_id })
+                if (service == 5 && i == 2) { //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
                   console.log("updating facebook page")
-                  let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
-                  if(facebook_page_row){
-                    await facebook_page_row.update({lasted_post_id : value["post_id"]})
+                  let facebook_page_row = await Facebook_page_model.findOne({ where: { page_id: search_word } })
+                  if (facebook_page_row) {
+                    await facebook_page_row.update({ lasted_post_id: value["post_id"] })
                   }
                 }
               }
-              if (service != 5){ //facebook not in main
+              if (service != 5) { //facebook not in main
                 await Main_model.create({
-                  key_id:keyword_row.id,
+                  key_id: keyword_row.id,
                   service_id: service,
                   e_id: created_row.id
                 })
               }
-                } 
-              else { // for updating
-                console.log("updating")
-                  await check.update({...value,job_id})
-                  
-                  if(service != 5){ //with out facebook cuz facebook not in main
-                    let main_row = await Main_model.count({where: {e_id:check.id , key_id: keyword_row.id ,service_id: service}})
-                    if(main_row == 0){
-                      await Main_model.create({
-                        key_id: keyword_row.id ,
-                        service_id : service,
-                        e_id: check.id,
-                      })
-                    }
-                  }
-                  if(service == 5 && i == 2){ //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
-                    console.log("updating facebook page")
-                    let facebook_page_row = await Facebook_page_model.findOne({where : {page_id : search_word}})
-                    console.log(facebook_page_row)
-                    if(facebook_page_row){
-                      console.log("enter if ")
-                      await facebook_page_row.update({lasted_post_id : value["post_id"]})
-                      console.log(facebook_page_row.lasted_post_id)
-                      console.log(value["post_id"])
-                      console.log("updated")
-                    }
-                  }            
-                }
-          }
-        i++;
-       
-    }
-    resolve() 
-    });
-  } catch (err) {
-    console.log("get data", err)
-    // new Model().updateJob(job_id,"error")
+            }
+            else { // for updating
+              console.log("updating")
+              await check.update({ ...value, job_id })
 
-  }
-});
+              if (service != 5) { //with out facebook cuz facebook not in main
+                let main_row = await Main_model.count({ where: { e_id: check.id, key_id: keyword_row.id, service_id: service } })
+                if (main_row == 0) {
+                  await Main_model.create({
+                    key_id: keyword_row.id,
+                    service_id: service,
+                    e_id: check.id,
+                  })
+                }
+              }
+              if (service == 5 && i == 2) { //get post_id from i==2 in .csv (i == 1 : pin post, i == 2 : lasted_post)
+                console.log("updating facebook page")
+                let facebook_page_row = await Facebook_page_model.findOne({ where: { page_id: search_word } })
+                console.log(facebook_page_row)
+                if (facebook_page_row) {
+                  console.log("enter if ")
+                  await facebook_page_row.update({ lasted_post_id: value["post_id"] })
+                  console.log(facebook_page_row.lasted_post_id)
+                  console.log(value["post_id"])
+                  console.log("updated")
+                }
+              }
+            }
+          }
+          i++;
+        }
+        resolve()
+      });
+    } catch (err) {
+      console.log("get data", err)
+      // new Model().updateJob(job_id,"error")
+    }
+  });
 
 }
 
-module.exports = JobController ;
+module.exports = JobController;
