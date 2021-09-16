@@ -7,7 +7,7 @@ const Facebook_model = require("../model/Facebook.model");
 const Jd_model = require("../model/Jd.model");
 const Pantip_model = require("../model/Pantip.model");
 var cron = require('node-cron');
-const { create, result } = require("lodash");
+const { create, result, reduce, reject } = require("lodash");
 // const Eservice_model = require("../model/E_service.model")
 const Keyword_model = require("../model/Keyword.model")
 const Job_FaceBook_model = require("../model/Job_Facebook.model")
@@ -172,6 +172,7 @@ async function getDetail(service) {
 
   catch (error) {
     console.log(error)
+    reject("error")
   }
 }
 
@@ -297,24 +298,24 @@ JobController.facebook = async (req, res) => { //this funcc for read facebook in
 
 JobController.runFacebook = async (req, res) => {
   try {
-    let all_job_facebook = await Job_FaceBook_model.findAll({
+    while(true){
+    let job_facebook = await Job_FaceBook_model.findOne({
       where: {
-        [Op.or]: [
-          { status: "waiting" },
-          { status: "in progress" }
-        ]
+        status: "in progress"
       }
     })
-    for (let job of all_job_facebook) {
+    
+
+    if(job_facebook){
       job.service = 5
+      let page_row = await Facebook_page_model.findAll({ where: { page_id: job.page_id } })
+      await queuing(job_facebook, page_row)
     }
-
-
-    let all_page_id = all_job_facebook.map(job => job.page_id)
-    // console.log(all_page_id)
-    let all_page = await Facebook_page_model.findAll({ where: { page_id: { [Op.in]: all_page_id } } })
-
-    await queuing(all_job_facebook, all_page)
+    else{
+      console.log("runing job success")
+      break
+    }
+  }
 
     // await getData(5,job.page_id,job.amount_post,job.id, all_page)
 
@@ -346,30 +347,32 @@ JobController.runFacebook = async (req, res) => {
 
 JobController.run = async (req, res) => {
   try {
-    let all_jobs = await Job_model.findAll({
-      where: {
-        [Op.or]: [
-          { status: "waiting" },
-          { status: "in progress" }
-        ]
-      }
-    })
 
-    let all_keyword = all_jobs.map(job => job.keyword)
-    let keyword_rows = await Keyword_model.findAll({
-      where: {
-        [Op.or]: [
-          { thai_word: { [Op.in]: all_keyword } },
-          { eng_word: { [Op.in]: all_keyword } }
-        ]
-      }
-    })
+    while (true){
 
-    await queuing(all_jobs, keyword_rows)
+      let job = await Job_model.findOne({
+        where: {
+          status: "waiting"
+        }
+      })
+
+      if (!job){ //no more job = break loop
+        break
+      }
+      // let all_keyword = job.map(job => job.keyword)
+      let keyword_row = await Keyword_model.findAll({
+        where: {
+          [Op.or]: [
+            { thai_word: job.keyword },                   
+            { eng_word: job.keyword}
+          ]
+        }
+      })
+      await queuing(job, keyword_row)
+    }
 
     // for await (const job of all_jobs){
     //   if (job.status == "waiting" || job.status == "in progress" ) {
-
     //     job.status = "in progress"
     //     job.start_time = new Date()
     //     await job.save()
@@ -406,7 +409,7 @@ JobController.create = async (req, res) => {
     for (const keyword of all_keyword) {
       await KeywordMatchingWithService(keyword.thai_word, keyword.eng_word, created_time, services)
     }
-
+    console.log("create job succ")
     // await FacebookPageMatchingWithFacebook(all_facebook_page,created_time)
     res.json("succc")
   } catch (error) {
@@ -460,56 +463,57 @@ function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
   })
 }
 
-function queuing(jobs, keyword_rows = []) {
+function queuing(job, keyword_row = []) {
   return new Promise(async (resolve, reject) => {
+    let start
     try {
+      console.log(job)
       let search_word
       let amount
-      let lasted_post_id = ""
-      console.log(keyword_rows)
-      for await (const job of jobs) {
-        if (job.service != 5) {
-          search_word = job.keyword
-          amount = job.page
-        }
-        else {
-          search_word = job.page_id
-          amount = job.amount_post
-          let result = keyword_rows.find(row => row.name == job.page_name)
-          if (result.lasted_post_id) {
-            lasted_post_id = result.lasted_post_id
-          }
-          else {
-            lasted_post_id = "no_limit"
-          }
-        }
-        job.status = "in progress"
-        job.start_time = new Date()
-        await job.save()
-        try{
-        const start = window.performance.now()
-        await getData(job.service, search_word, amount, job.id, keyword_rows, lasted_post_id)
+      let lasted_post_id = "no_limit"
 
-        if (job.service == 1 || job.service == 2) {
-          await getDetail(job.service)
-        }
-
-        const stop = window.performance.now()
-        console.log(`Time to process ====> ${(stop - start) / 1000} seconds`);
-        job.status = "success"
-        job.end_time = new Date()
-        job.save()
+      if (job.service != 5) { //nonfacebook
+        search_word = job.keyword
+        amount = job.page
       }
-        catch(error){
-          job.status = error.toString()
+      else { //for facebook
+        search_word = job.page_id
+        amount = job.amount_post
+        let result = keyword_row.find(row => row.name == job.page_name)
+        if (result.lasted_post_id) {
+          lasted_post_id = result.lasted_post_id
+        }
+      }
+      job.status = "in progress"
+      job.worker = process.env.WORKER_NAME
+      job.start_time = new Date()
+      await job.save()
+
+      const start = window.performance.now()
+      await getData(job.service, search_word, amount, job.id, keyword_row, lasted_post_id)
+      if (job.service == 1 || job.service == 2) { //get detail for shopee,amazon
+          function_status = await getDetail(job.service)
+          const stop = window.performance.now()
+          console.log(`Time to process ====> ${(stop - start) / 1000} seconds`);
           job.end_time = new Date()
-          job.save()
+          job.status = "success"
         }
-      }
+        else{
+          const stop = window.performance.now()
+          console.log(`Time to process ====> ${(stop - start) / 1000} seconds`);
+          job.end_time = new Date()
+          job.status = "success"
+        }
+      job.save()
       resolve()
     }
     catch (error) {
-      console.log(error)
+      const stop = window.performance.now()
+      console.log(`Time to process ====> ${(stop - start) / 1000} seconds`);
+      job.status = "failed"
+      job.end_time = new Date()
+      job.save()
+      resolve()
     }
   })
 }
@@ -519,7 +523,6 @@ function queuing(jobs, keyword_rows = []) {
 async function getData(service, search_word, page, job_id, all_keywords = [], lasted_post_id) {
   return new Promise(function (resolve, reject) {
     try {
-      console.log(lasted_post_id)
       fs.writeFile(process.env.INPUT_FILE_TXT, search_word, (err) => {
         if (err) throw err;
       })
@@ -595,13 +598,7 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
         }
 
         const header = raw.split(/\r?\n/)[0].split(",");
-        try {
-          result = await csv(raw, { headers: header });
-        }
-        catch (err) {
-          console.log(err, "error result")
-          return;
-        }
+        result = await csv(raw, { headers: header });
         // products
         for await (const value of result) {
       
@@ -677,7 +674,7 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
       });
     } catch (err) {
       console.log("get data", err)
-      reject(err)
+      reject("error")
       // new Model().updateJob(job_id,"error")
     }
   });
