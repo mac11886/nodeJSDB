@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
       {
-        name: "Test App",
+        name: "Scrape App",
         script: "app.js",
         env: {
           PORT: 3000,

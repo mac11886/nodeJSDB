@@ -14,6 +14,7 @@ Job.init({
     created_time : DataTypes.DATE,
     start_time : DataTypes.DATE,
     end_time : DataTypes.DATE,
+    worker : DataTypes.CHAR
 }, { sequelize, modelName: 'job', tableName: 'job', timestamps: false });
 
 module.exports = Job

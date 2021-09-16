@@ -480,13 +480,13 @@ function queuing(jobs, keyword_rows = []) {
             lasted_post_id = result.lasted_post_id
           }
           else {
-            console.log("lasted is null")
             lasted_post_id = "no_limit"
           }
         }
         job.status = "in progress"
         job.start_time = new Date()
         await job.save()
+        try{
         const start = window.performance.now()
         await getData(job.service, search_word, amount, job.id, keyword_rows, lasted_post_id)
 
@@ -499,6 +499,12 @@ function queuing(jobs, keyword_rows = []) {
         job.status = "success"
         job.end_time = new Date()
         job.save()
+      }
+        catch(error){
+          job.status = error.toString()
+          job.end_time = new Date()
+          job.save()
+        }
       }
       resolve()
     }
@@ -598,6 +604,7 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
         }
         // products
         for await (const value of result) {
+      
           delete value["num"];
           if (i >= 1) { //not read header
             if (service != 7) { //for service ecom
@@ -670,6 +677,7 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
       });
     } catch (err) {
       console.log("get data", err)
+      reject(err)
       // new Model().updateJob(job_id,"error")
     }
   });
