@@ -30,12 +30,14 @@ JobController = {}
 
 var create_task = cron.schedule('0 54 10 * * *', () => {
   console.log('create a job');
-  // JobController.create()
+  // await JobController.create()
+  //JobController.facebookCreateJob()
 });
 
 var run_task = cron.schedule('0 55 10 * * *', () => {
   console.log('Running a job');
-  // JobController.run()
+  // await JobController.run()
+  //JobController.runFacebook()
 });
 
 

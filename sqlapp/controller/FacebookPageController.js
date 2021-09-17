@@ -19,7 +19,7 @@ FacebookPageController.post = async (req, res) => {
 FacebookPageController.delete = async (req, res) => {
     let id = req.body.id;
     // console.log(id);
-    let facebook_page = await Facebook_page_model.destroy({where:{id:id}});
+    await Facebook_page_model.destroy({where:{id:id}});
     // console.log(facebook_page);
     res.json("del succ")
 }
