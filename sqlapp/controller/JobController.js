@@ -301,17 +301,16 @@ JobController.facebook = async (req, res) => { //this funcc for read facebook in
 JobController.runFacebook = async (req, res) => {
   try {
     while(true){
-    let job_facebook = await Job_FaceBook_model.findOne({
+    let job = await Job_FaceBook_model.findOne({
       where: {
         status: "waiting"
       }
     })
-    
 
-    if(job_facebook){
+    if(job){
       job.service = 5
       let page_row = await Facebook_page_model.findAll({ where: { page_id: job.page_id } })
-      await queuing(job_facebook, page_row)
+      await queuing(job, page_row)
     }
     else{
       console.log("runing job success")
