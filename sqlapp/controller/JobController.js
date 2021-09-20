@@ -303,7 +303,7 @@ JobController.runFacebook = async (req, res) => {
     while(true){
     let job_facebook = await Job_FaceBook_model.findOne({
       where: {
-        status: "in progress"
+        status: "waiting"
       }
     })
     
