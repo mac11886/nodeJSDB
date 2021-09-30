@@ -31,6 +31,7 @@ router.post("/job/inside", (req, res) => JobController.getInside(req, res)); //g
 router.post("/job/create/facebook", (req, res) => JobController.facebookCreateJob(req, res)); //create faccebook job
 router.get("/job/facebook", (req, res) => JobController.getFacebookJob(req, res)); //get facebook job
 router.post("/job/run/facebook", (req, res) => JobController.runFacebook(req, res)); //run facebook job
+router.get("/job/facebook/progress", (req, res) => JobController.progressFacebookJobs(req, res));
 
 
 

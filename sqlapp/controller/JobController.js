@@ -682,4 +682,12 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
 
 }
 
+JobController.progressFacebookJobs = async (req, res) => {
+  let count_facebook_jobs = await Job_FaceBook_model.count()
+  let count_success_facebook_jobs = await Job_FaceBook_model.count({ where: { status: "success" } })
+  let current_progress_facebook_jobs = { count_facebook_jobs: count_facebook_jobs, count_success_facebook_jobs: count_success_facebook_jobs }
+
+  res.json({ current_progress_facebook_jobs })
+}
+
 module.exports = JobController;
