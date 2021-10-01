@@ -396,7 +396,9 @@ JobController.run = async (req, res) => {
 JobController.create = async (req, res) => {
   try {
     console.log("creating")
-    let all_keyword = await Keyword_model.findAll()
+    let all_keyword = await Keyword_model.findAll({where:{
+      isShow : 1
+    }})
     // let all_facebook_page = await (Facebook_page_model.findAll())
     const services = await Service_model.findAll({
       where: {
@@ -527,6 +529,7 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
       fs.writeFile(process.env.INPUT_FILE_TXT, search_word, (err) => {
         if (err) throw err;
       })
+
 
       let utfKeyword = encodeURI(search_word);
       python = spawn(process.env.PYTHON_PATH, [

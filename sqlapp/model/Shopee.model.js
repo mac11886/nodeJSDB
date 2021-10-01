@@ -16,7 +16,7 @@ Shopee.init({
     price: DataTypes.CHAR,
     type: DataTypes.CHAR,
     star: DataTypes.FLOAT,
-    sold: DataTypes.CHAR,
+    sold: DataTypes.INTEGER,
     send_from: DataTypes.CHAR,
     img_src: DataTypes.TEXT,
     url: DataTypes.TEXT,

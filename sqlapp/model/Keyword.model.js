@@ -16,6 +16,7 @@ Keyword.init({
     isHealth : DataTypes.NUMBER,
     isBeauty : DataTypes.NUMBER,
     bioType : DataTypes.NUMBER,
+    isShow : DataTypes.NUMBER
 }, { sequelize, modelName: 'keyword', tableName: 'keyword', timestamps: false });
 
 module.exports = Keyword
