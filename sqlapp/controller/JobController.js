@@ -605,7 +605,6 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
         result = await csv(raw, { headers: header });
         // products
         for await (const value of result) {
-      
           delete value["num"];
           if (i >= 1) { //not read header
             if (service != 7) { //for service ecom
@@ -673,9 +672,10 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
             }
           }
           i++;
-        }
+      }
         resolve()
       });
+      
     } catch (err) {
       console.log("get data", err)
       reject("error")

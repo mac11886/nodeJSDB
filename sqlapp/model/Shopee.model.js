@@ -22,7 +22,10 @@ Shopee.init({
     url: DataTypes.TEXT,
     brand: DataTypes.CHAR,
     rating: DataTypes.CHAR,
-    description: DataTypes.TEXT
+    description: DataTypes.TEXT,
+    cat1: DataTypes.CHAR,
+    cat2: DataTypes.CHAR,
+    cat3:DataTypes.CHAR
 }, { sequelize, modelName: 'shopee', tableName: 'shopee', timestamps: false });
 
 // Shopee.hasMany(Main_model,{
