@@ -462,7 +462,9 @@ function FacebookPageMatchingWithFacebook(all_facebook_page, created_time) {
     }
     catch (error) {
       console.log(error)
+      reject()
     }
+    resolve()
   })
 }
 
