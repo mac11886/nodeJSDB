@@ -23,9 +23,9 @@ Shopee.init({
     brand: DataTypes.CHAR,
     rating: DataTypes.CHAR,
     description: DataTypes.TEXT,
-    cat1: DataTypes.CHAR,
-    cat2: DataTypes.CHAR,
-    cat3:DataTypes.CHAR
+    cat_1: DataTypes.CHAR,
+    cat_2: DataTypes.CHAR,
+    cat_3:DataTypes.CHAR
 }, { sequelize, modelName: 'shopee', tableName: 'shopee', timestamps: false });
 
 // Shopee.hasMany(Main_model,{
