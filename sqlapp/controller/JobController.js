@@ -147,7 +147,7 @@ async function getDetail(service) {
       python.stdin.write(input_num);
       python.stdin.end();
 
-      python.on("exit", async () => {
+      python.on("exit", async () => {   
         console.log('on exit')
         const raw = fs.readFileSync(process.env.FILE, "utf8");
         const header = raw.split(/\r?\n/)[0].split(",");
@@ -609,17 +609,23 @@ async function getData(service, search_word, page, job_id, all_keywords = [], la
         for await (const value of result) {
           delete value["num"];
           if (i >= 1) { //not read header
-            if (service != 7) { //for service ecom
+            if (service != 7 && service != 8) { //for service ecom
               console.log("checking")
               const start = window.performance.now()
               check = await obj_model.findOne({ where: { [pk_id]: value[pk_id] } })
               const stop = window.performance.now()
               console.log(`Time to checking = ${(stop - start) / 1000} seconds`);
             }
-            else { //when service is sci direct
+            
+            if (service == 7) { //when service is sci direct
               console.log("checking")
               // console.log(keyword_row.id)
               check = await obj_model.findOne({ where: { [pk_id]: keyword_row.id, year: value["year"] } })
+            }
+
+            if(service == 8){
+              console.log("checking for thaijo")
+              check = await obj_model.findOne({ where: { [pk_id]: value['issue_id'], thaijo_id: value["thaijo_id"] } })
             }
 
             if (!check) { //for saving

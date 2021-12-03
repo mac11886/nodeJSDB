@@ -10,6 +10,7 @@ const sequelize = getSequelize()
 
 Thaijo.init({
     issue_id : DataTypes.NUMBER,
+    thaijo_id : DataTypes.NUMBER,
     job_id : DataTypes.NUMBER,
     abstract_clean : DataTypes.TEXT,
     title : DataTypes.TEXT,
@@ -21,7 +22,7 @@ Thaijo.init({
     created_at : DataTypes.DATE,
     updated_at : DataTypes.DATE,
 
-}, { sequelize, modelName: 'thaijo', tableName: 'thaijo', timestamps: false });
+}, { sequelize, modelName: 'thaijo', tableName: 'thaijo_new', timestamps: false });
 
 // Shopee.hasMany(Main_model,{
 //     foreignKey:'e_id'
